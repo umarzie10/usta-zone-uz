@@ -1,0 +1,253 @@
+export interface DemoMaster {
+  id: string;
+  name: string;
+  avatar: string;
+  city: string;
+  region: string;
+  phone: string;
+  category: string;
+  categoryIcon: string;
+  rating: number;
+  reviewsCount: number;
+  jobsCompleted: number;
+  bio: string;
+  experience: number;
+  pricePerHour: number;
+  isVerified: boolean;
+  isTopMaster: boolean;
+  skills: string[];
+  balance: number;
+  withdrawable: number;
+}
+
+export const demoMasters: DemoMaster[] = [
+  {
+    id: "m1",
+    name: "Jasur Toshmatov",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop",
+    city: "Toshkent",
+    region: "Toshkent shahri",
+    phone: "+998901234567",
+    category: "Santexnika",
+    categoryIcon: "droplets",
+    rating: 4.9,
+    reviewsCount: 127,
+    jobsCompleted: 312,
+    bio: "10 yillik tajribaga ega santexnik. Har qanday muammoni tez va sifatli hal qilaman. Kafolat beriladi.",
+    experience: 10,
+    pricePerHour: 50000,
+    isVerified: true,
+    isTopMaster: true,
+    skills: ["Quvur almashtirish", "Kran ta'mirlash", "Suv qizitgich o'rnatish", "Hammom ta'mirlash"],
+    balance: 2500000,
+    withdrawable: 1800000,
+  },
+  {
+    id: "m2",
+    name: "Mirzo Abdullayev",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop",
+    city: "Samarqand",
+    region: "Samarqand viloyati",
+    phone: "+998902345678",
+    category: "Elektrik",
+    categoryIcon: "zap",
+    rating: 4.8,
+    reviewsCount: 89,
+    jobsCompleted: 201,
+    bio: "Elektr ishlari bo'yicha mutaxassis. Provodka, rozetka, o'chirgich va boshqa elektr jihozlarini o'rnatish.",
+    experience: 7,
+    pricePerHour: 45000,
+    isVerified: true,
+    isTopMaster: true,
+    skills: ["Provodka", "Rozetka o'rnatish", "Panel ta'mirlash", "LED yoritish"],
+    balance: 1800000,
+    withdrawable: 1200000,
+  },
+  {
+    id: "m3",
+    name: "Nilufar Yusupova",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop",
+    city: "Toshkent",
+    region: "Toshkent shahri",
+    phone: "+998903456789",
+    category: "Tozalash",
+    categoryIcon: "sparkles",
+    rating: 4.95,
+    reviewsCount: 203,
+    jobsCompleted: 445,
+    bio: "Professional tozalash xizmatlari. Uy, ofis va kvartiralar uchun chuqur tozalash. Ekologik tozalash vositalari.",
+    experience: 5,
+    pricePerHour: 35000,
+    isVerified: true,
+    isTopMaster: true,
+    skills: ["Chuqur tozalash", "Ofis tozalash", "Oyna tozalash", "Gilamlarni tozalash"],
+    balance: 3200000,
+    withdrawable: 2100000,
+  },
+  {
+    id: "m4",
+    name: "Bobur Rahimov",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop",
+    city: "Buxoro",
+    region: "Buxoro viloyati",
+    phone: "+998904567890",
+    category: "Mebelchilik",
+    categoryIcon: "sofa",
+    rating: 4.7,
+    reviewsCount: 56,
+    jobsCompleted: 134,
+    bio: "Mebel yig'ish va ta'mirlash bo'yicha usta. IKEA va boshqa kompaniyalarning mebellarini tez yig'aman.",
+    experience: 8,
+    pricePerHour: 60000,
+    isVerified: true,
+    isTopMaster: false,
+    skills: ["Mebel yig'ish", "Shkaf montaj", "Stol ta'mirlash", "Zamonaviy dizayn"],
+    balance: 950000,
+    withdrawable: 600000,
+  },
+  {
+    id: "m5",
+    name: "Sherzod Karimov",
+    avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&h=200&fit=crop",
+    city: "Namangan",
+    region: "Namangan viloyati",
+    phone: "+998905678901",
+    category: "Ta'mirlash",
+    categoryIcon: "hammer",
+    rating: 4.85,
+    reviewsCount: 167,
+    jobsCompleted: 289,
+    bio: "Kvartira va uylarni ta'mirlash. Kosmetik va kapital ta'mirlash. Sifat kafolati - 2 yil.",
+    experience: 12,
+    pricePerHour: 80000,
+    isVerified: true,
+    isTopMaster: true,
+    skills: ["Gipsokartong", "Plitka yotqizish", "Devor bo'yash", "Pol yotqizish"],
+    balance: 5600000,
+    withdrawable: 3900000,
+  },
+  {
+    id: "m6",
+    name: "Malika Ergasheva",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b43f2b6c?w=200&h=200&fit=crop",
+    city: "Andijon",
+    region: "Andijon viloyati",
+    phone: "+998906789012",
+    category: "Muallim",
+    categoryIcon: "graduation-cap",
+    rating: 5.0,
+    reviewsCount: 94,
+    jobsCompleted: 178,
+    bio: "Matematika va fizika fanlari bo'yicha repetitor. Universitetga tayyorlash va maktab o'quvchilari uchun.",
+    experience: 6,
+    pricePerHour: 40000,
+    isVerified: true,
+    isTopMaster: false,
+    skills: ["Matematika", "Fizika", "DTM tayyorlash", "Ingliz tili"],
+    balance: 1100000,
+    withdrawable: 780000,
+  },
+  {
+    id: "m7",
+    name: "Ulugbek Nazarov",
+    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop",
+    city: "Toshkent",
+    region: "Toshkent shahri",
+    phone: "+998907890123",
+    category: "Haydovchi",
+    categoryIcon: "car",
+    rating: 4.75,
+    reviewsCount: 312,
+    jobsCompleted: 892,
+    bio: "Shaxsiy haydovchi xizmatlari. Shahar ichida va shaharlararo safar. Keng avtopark.",
+    experience: 9,
+    pricePerHour: 30000,
+    isVerified: true,
+    isTopMaster: false,
+    skills: ["Shahar ichi", "Shaharlararo", "Aeroportga kutib olish", "VIP xizmat"],
+    balance: 4200000,
+    withdrawable: 3100000,
+  },
+  {
+    id: "m8",
+    name: "Zulfiya Mirzayeva",
+    avatar: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=200&h=200&fit=crop",
+    city: "Farg'ona",
+    region: "Farg'ona viloyati",
+    phone: "+998908901234",
+    category: "IT xizmatlari",
+    categoryIcon: "laptop",
+    rating: 4.9,
+    reviewsCount: 78,
+    jobsCompleted: 156,
+    bio: "Web developer va dizayner. React, Next.js, UI/UX dizayn. Sayt va ilovalar yaratish.",
+    experience: 4,
+    pricePerHour: 120000,
+    isVerified: true,
+    isTopMaster: true,
+    skills: ["React", "Next.js", "UI/UX", "Node.js"],
+    balance: 8900000,
+    withdrawable: 6200000,
+  },
+];
+
+export const demoCategories = [
+  { id: "c1", nameUz: "Santexnika", nameRu: "Сантехника", nameEn: "Plumbing", icon: "Droplets", color: "#3b82f6", count: 234 },
+  { id: "c2", nameUz: "Elektrik", nameRu: "Электрика", nameEn: "Electrical", icon: "Zap", color: "#f59e0b", count: 189 },
+  { id: "c3", nameUz: "Tozalash", nameRu: "Уборка", nameEn: "Cleaning", icon: "Sparkles", color: "#10b981", count: 312 },
+  { id: "c4", nameUz: "Mebelchilik", nameRu: "Мебель", nameEn: "Furniture", icon: "Sofa", color: "#8b5cf6", count: 145 },
+  { id: "c5", nameUz: "Ta'mirlash", nameRu: "Ремонт", nameEn: "Repair", icon: "Hammer", color: "#ef4444", count: 278 },
+  { id: "c6", nameUz: "Bog'dorchilik", nameRu: "Озеленение", nameEn: "Gardening", icon: "Leaf", color: "#22c55e", count: 98 },
+  { id: "c7", nameUz: "Haydovchi", nameRu: "Водитель", nameEn: "Driver", icon: "Car", color: "#06b6d4", count: 421 },
+  { id: "c8", nameUz: "Muallim", nameRu: "Репетитор", nameEn: "Tutor", icon: "GraduationCap", color: "#ec4899", count: 167 },
+  { id: "c9", nameUz: "Ovqatlanish", nameRu: "Приготовление", nameEn: "Cooking", icon: "Utensils", color: "#f97316", count: 88 },
+  { id: "c10", nameUz: "Bezatish", nameRu: "Дизайн", nameEn: "Design", icon: "Palette", color: "#7c3aed", count: 134 },
+  { id: "c11", nameUz: "Sog'liq", nameRu: "Медицина", nameEn: "Healthcare", icon: "HeartPulse", color: "#dc2626", count: 201 },
+  { id: "c12", nameUz: "IT xizmatlari", nameRu: "IT услуги", nameEn: "IT Services", icon: "Laptop", color: "#0ea5e9", count: 176 },
+];
+
+export const uzbekCities = [
+  "Toshkent", "Samarqand", "Buxoro", "Namangan", "Andijon",
+  "Farg'ona", "Qo'qon", "Nukus", "Qarshi", "Termiz",
+  "Jizzax", "Guliston", "Navoiy", "Urganch", "Chirchiq"
+];
+
+export const uzbekRegions = [
+  "Toshkent shahri", "Toshkent viloyati", "Samarqand viloyati", "Buxoro viloyati",
+  "Namangan viloyati", "Andijon viloyati", "Farg'ona viloyati", "Qashqadaryo viloyati",
+  "Surxondaryo viloyati", "Sirdaryo viloyati", "Jizzax viloyati", "Navoiy viloyati",
+  "Xorazm viloyati", "Qoraqalpog'iston Respublikasi"
+];
+
+export const demoOrders = [
+  {
+    id: "o1",
+    title: "Oshxona jo'mragini almashtirish",
+    category: "Santexnika",
+    master: "Jasur Toshmatov",
+    status: "completed",
+    amount: 150000,
+    date: "2024-01-15",
+    paymentMethod: "cash",
+  },
+  {
+    id: "o2",
+    title: "Rozetka o'rnatish - 3 ta",
+    category: "Elektrik",
+    master: "Mirzo Abdullayev",
+    status: "in_progress",
+    amount: 90000,
+    date: "2024-01-20",
+    paymentMethod: "online",
+  },
+  {
+    id: "o3",
+    title: "Kvartira chuqur tozalash",
+    category: "Tozalash",
+    master: "Nilufar Yusupova",
+    status: "pending",
+    amount: 200000,
+    date: "2024-01-22",
+    paymentMethod: "cash",
+  },
+];
