@@ -10,7 +10,7 @@ import { demoMasters, demoCategories, uzbekCities, uzbekRegions } from '@/lib/de
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 
 export default function FindMasterPage() {
-  const { t } = useApp();
+  const { t, lang } = useApp();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
@@ -18,6 +18,12 @@ export default function FindMasterPage() {
   const [region, setRegion] = useState('all');
   const [sortBy, setSortBy] = useState('rating');
   const [showFilters, setShowFilters] = useState(false);
+
+  const getCatName = (cat: typeof demoCategories[0]) => {
+    if (lang === 'ru') return cat.nameRu;
+    if (lang === 'en') return cat.nameEn;
+    return cat.nameUz;
+  };
 
   const filtered = demoMasters
     .filter(m => {
@@ -54,7 +60,7 @@ export default function FindMasterPage() {
         <div className="max-w-4xl mx-auto text-center text-white">
           <h1 className="text-3xl sm:text-4xl font-black mb-3 animate-fade-in-up">{t('findMaster')}</h1>
           <p className="text-white/80 text-lg mb-8 animate-fade-in-up delay-100">
-            10,000+ malakali ustalar orasidan eng yaxshisini toping
+            {t('findMasterDesc')}
           </p>
           <div className="flex gap-2 animate-fade-in-up delay-200">
             <div className="relative flex-1">
@@ -85,22 +91,22 @@ export default function FindMasterPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger className="rounded-xl">
-                  <SelectValue placeholder="Kategoriya" />
+                  <SelectValue placeholder={t('categoryLabel')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('all')} kategoriyalar</SelectItem>
+                  <SelectItem value="all">{t('all')} {t('allCategories2')}</SelectItem>
                   {demoCategories.map(c => (
-                    <SelectItem key={c.id} value={c.nameUz}>{c.nameUz}</SelectItem>
+                    <SelectItem key={c.id} value={c.nameUz}>{getCatName(c)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
               <Select value={region} onValueChange={setRegion}>
                 <SelectTrigger className="rounded-xl">
-                  <SelectValue placeholder="Viloyat" />
+                  <SelectValue placeholder={t('region')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('all')} viloyatlar</SelectItem>
+                  <SelectItem value="all">{t('all')} {t('allRegions')}</SelectItem>
                   {uzbekRegions.map(r => (
                     <SelectItem key={r} value={r}>{r}</SelectItem>
                   ))}
@@ -109,10 +115,10 @@ export default function FindMasterPage() {
 
               <Select value={city} onValueChange={setCity}>
                 <SelectTrigger className="rounded-xl">
-                  <SelectValue placeholder="Shahar" />
+                  <SelectValue placeholder={t('city')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('all')} shaharlar</SelectItem>
+                  <SelectItem value="all">{t('all')} {t('allCities')}</SelectItem>
                   {uzbekCities.map(c => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
@@ -121,13 +127,13 @@ export default function FindMasterPage() {
 
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="rounded-xl">
-                  <SelectValue placeholder="Saralash" />
+                  <SelectValue placeholder={t('sortBy')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="rating">Reyting bo'yicha</SelectItem>
-                  <SelectItem value="jobs">Ishlar bo'yicha</SelectItem>
-                  <SelectItem value="price_asc">Narx (pastdan)</SelectItem>
-                  <SelectItem value="price_desc">Narx (yuqoridan)</SelectItem>
+                  <SelectItem value="rating">{t('sortByRating')}</SelectItem>
+                  <SelectItem value="jobs">{t('sortByJobs')}</SelectItem>
+                  <SelectItem value="price_asc">{t('sortByPriceAsc')}</SelectItem>
+                  <SelectItem value="price_desc">{t('sortByPriceDesc')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -137,12 +143,12 @@ export default function FindMasterPage() {
         {/* Results header */}
         <div className="flex items-center justify-between mb-6">
           <p className="text-muted-foreground text-sm">
-            <span className="font-semibold text-foreground">{filtered.length}</span> ta usta topildi
+            <span className="font-semibold text-foreground">{filtered.length}</span> {t('mastersFound')}
           </p>
           {hasFilters && (
             <Button variant="ghost" size="sm" className="gap-1.5 text-destructive hover:text-destructive rounded-xl" onClick={clearFilters}>
               <X className="h-3.5 w-3.5" />
-              Filtrni tozalash
+              {t('clearFilters')}
             </Button>
           )}
         </div>
@@ -159,9 +165,9 @@ export default function FindMasterPage() {
         ) : (
           <div className="text-center py-16">
             <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold mb-2">Usta topilmadi</h3>
-            <p className="text-muted-foreground mb-4">Qidiruv shartlarini o'zgartiring</p>
-            <Button onClick={clearFilters} className="rounded-xl">Filtrni tozalash</Button>
+            <h3 className="text-xl font-semibold mb-2">{t('noMasterFound')}</h3>
+            <p className="text-muted-foreground mb-4">{t('changeSearchTerms')}</p>
+            <Button onClick={clearFilters} className="rounded-xl">{t('clearFilters')}</Button>
           </div>
         )}
       </div>

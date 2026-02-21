@@ -19,7 +19,7 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-              O'zbekistondagi №1 usta va xizmat ko'rsatuvchilar platformasi.
+              {t('footerDesc')}
             </p>
             <div className="flex gap-3">
               {[Facebook, Instagram, Send].map((Icon, i) => (
@@ -32,7 +32,7 @@ export default function Footer() {
 
           {/* Navigation */}
           <div>
-            <h4 className="font-semibold mb-4">Sayt bo'limlari</h4>
+            <h4 className="font-semibold mb-4">{t('siteLinks')}</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {[
                 { href: '/', label: t('home') },
@@ -51,12 +51,12 @@ export default function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="font-semibold mb-4">Huquqiy</h4>
+            <h4 className="font-semibold mb-4">{t('legal')}</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {[
                 { href: '/terms', label: t('terms') },
                 { href: '/privacy', label: t('privacy') },
-                { href: '/about', label: 'Biz haqimizda' },
+                { href: '/about', label: t('aboutUs') },
                 { href: '/contact', label: t('contact') },
               ].map(link => (
                 <li key={link.href}>
@@ -89,8 +89,8 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-border mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-sm text-muted-foreground">
-          <p>© 2024 UstaZone. Barcha huquqlar himoyalangan.</p>
-          <p>Komissiya: 10% | O'zbekiston bo'ylab xizmat</p>
+          <p>© 2024 UstaZone. {t('allRightsReserved')}</p>
+          <p>{t('commissionInfo')}</p>
         </div>
       </div>
     </footer>

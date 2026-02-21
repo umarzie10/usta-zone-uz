@@ -35,7 +35,7 @@ export default function Index() {
         </div>
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 text-center text-white">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm text-sm font-medium mb-6 animate-fade-in">
-            <span className="text-amber-300">★</span> O'zbekiston №1 xizmat marketplace
+            <span className="text-amber-300">★</span> {t('platformBadge')}
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight mb-5 animate-fade-in-up">
             {t('heroTitle')}
@@ -80,9 +80,9 @@ export default function Index() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid grid-cols-3 gap-4 text-center">
             {[
-              { icon: Shield, label: "Tasdiqlangan ustalar", sub: "Har bir usta tekshirilgan" },
-              { icon: Star, label: "4.8+ o'rtacha reyting", sub: "Haqiqiy sharhlar" },
-              { icon: Clock, label: "Tez javob", sub: "O'rtacha 30 daqiqada" },
+              { icon: Shield, label: t('verifiedMasters'), sub: t('verifiedMastersDesc') },
+              { icon: Star, label: t('avgRating'), sub: t('avgRatingDesc') },
+              { icon: Clock, label: t('fastResponse'), sub: t('fastResponseDesc') },
             ].map(b => (
               <div key={b.label} className="flex flex-col items-center gap-1.5 p-3">
                 <b.icon className="h-6 w-6 text-primary" />
@@ -99,7 +99,7 @@ export default function Index() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-3xl font-black">{t('popularCategories')}</h2>
-            <p className="text-muted-foreground mt-1">Kerakli xizmatni tanlang</p>
+            <p className="text-muted-foreground mt-1">{t('selectService')}</p>
           </div>
           <Button variant="ghost" className="gap-1 rounded-xl text-primary" onClick={() => navigate('/categories')}>
             {t('viewAll')} <ChevronRight className="h-4 w-4" />
@@ -129,7 +129,7 @@ export default function Index() {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-3xl font-black">{t('topMasters')}</h2>
-              <p className="text-muted-foreground mt-1">Eng yaxshi baholangan ustalar</p>
+              <p className="text-muted-foreground mt-1">{t('bestRatedMasters')}</p>
             </div>
             <Button variant="ghost" className="gap-1 rounded-xl text-primary" onClick={() => navigate('/find-master')}>
               {t('viewAll')} <ChevronRight className="h-4 w-4" />
@@ -153,17 +153,17 @@ export default function Index() {
             <div className="absolute -bottom-16 -left-16 w-64 h-64 rounded-full bg-white/5" />
           </div>
           <div className="relative">
-            <h2 className="text-3xl sm:text-4xl font-black mb-4">Usta bo'lish istaysizmi?</h2>
+            <h2 className="text-3xl sm:text-4xl font-black mb-4">{t('becomeMaster')}</h2>
             <p className="text-white/80 text-lg max-w-xl mx-auto mb-8">
-              UstaZone'ga qo'shiling va minglab mijozlarga xizmat ko'rsating. Hech qanday to'lov yo'q!
+              {t('becomeMasterDesc')}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button className="btn-accent h-12 px-8 rounded-xl text-base" onClick={() => navigate('/register')}>
-                Usta sifatida ro'yxatdan o'tish
+                {t('registerAsMaster')}
               </Button>
               <Button variant="outline" className="h-12 px-8 rounded-xl text-base border-white/30 text-white hover:bg-white/10"
                 onClick={() => navigate('/about')}>
-                Ko'proq ma'lumot
+                {t('moreInfo')}
               </Button>
             </div>
           </div>

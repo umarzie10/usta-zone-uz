@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { demoMasters, demoOrders } from '@/lib/demoData';
 import {
   Users, ShoppingBag, Wallet, AlertTriangle, CheckCircle,
-  XCircle, Shield, Settings, BarChart3, Search
+  XCircle, Shield, Settings, Search
 } from 'lucide-react';
 
 export default function AdminPanel() {
@@ -25,9 +25,9 @@ export default function AdminPanel() {
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <Shield className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <p className="text-xl font-semibold mb-2">Ruxsat yo'q</p>
-            <p className="text-muted-foreground mb-4">Bu sahifa faqat adminlar uchun</p>
-            <Button onClick={() => navigate('/login')} className="rounded-xl btn-hero">Kirish</Button>
+            <p className="text-xl font-semibold mb-2">{t('noAccess')}</p>
+            <p className="text-muted-foreground mb-4">{t('adminOnly')}</p>
+            <Button onClick={() => navigate('/login')} className="rounded-xl btn-hero">{t('loginBtn')}</Button>
           </div>
         </div>
       </Layout>
@@ -39,7 +39,7 @@ export default function AdminPanel() {
     { id: 'orders', label: t('allOrders'), icon: ShoppingBag },
     { id: 'withdrawals', label: t('withdrawRequests'), icon: Wallet },
     { id: 'disputes', label: t('disputes'), icon: AlertTriangle },
-    { id: 'settings', label: 'Sozlamalar', icon: Settings },
+    { id: 'settings', label: t('settings'), icon: Settings },
   ];
 
   const filteredMasters = demoMasters.filter(m =>
@@ -55,17 +55,17 @@ export default function AdminPanel() {
           </div>
           <div>
             <h1 className="text-3xl font-black">{t('adminPanel')}</h1>
-            <p className="text-muted-foreground text-sm">UstaZone boshqaruv paneli</p>
+            <p className="text-muted-foreground text-sm">{t('managementPanel')}</p>
           </div>
         </div>
 
-        {/* Admin stats */}
+        {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {[
-            { label: 'Jami ustalar', value: demoMasters.length, icon: Users, color: 'text-primary' },
-            { label: 'Jami buyurtmalar', value: demoOrders.length, icon: ShoppingBag, color: 'text-success' },
-            { label: 'Munozaralar', value: 0, icon: AlertTriangle, color: 'text-amber-500' },
-            { label: "Komissiya (so'm)", value: '45.2K', icon: Wallet, color: 'text-purple-500' },
+            { label: t('totalMastersLabel'), value: demoMasters.length, icon: Users, color: 'text-primary' },
+            { label: t('totalOrdersLabel'), value: demoOrders.length, icon: ShoppingBag, color: 'text-success' },
+            { label: t('disputesLabel'), value: 0, icon: AlertTriangle, color: 'text-amber-500' },
+            { label: t('commissionLabel'), value: '45.2K', icon: Wallet, color: 'text-purple-500' },
           ].map(s => (
             <div key={s.label} className="card-premium p-4">
               <s.icon className={`h-6 w-6 ${s.color} mb-2`} />
@@ -92,14 +92,14 @@ export default function AdminPanel() {
           <div>
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input className="pl-10 rounded-xl h-11" placeholder="Usta qidirish..." value={search} onChange={e => setSearch(e.target.value)} />
+              <Input className="pl-10 rounded-xl h-11" placeholder={t('searchMaster')} value={search} onChange={e => setSearch(e.target.value)} />
             </div>
             <div className="card-premium overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="border-b border-border bg-muted/50">
                     <tr>
-                      {['Usta', 'Kategoriya', 'Shahar', 'Reyting', 'Ishlar', 'Balans', 'Amallar'].map(h => (
+                      {[t('masterCol'), t('categoryCol'), t('cityCol'), t('ratingCol'), t('jobsCol'), t('balanceCol'), t('actionsCol')].map(h => (
                         <th key={h} className="text-left px-4 py-3 font-semibold text-muted-foreground">{h}</th>
                       ))}
                     </tr>
@@ -118,9 +118,7 @@ export default function AdminPanel() {
                         </td>
                         <td className="px-4 py-3 text-muted-foreground">{m.category}</td>
                         <td className="px-4 py-3 text-muted-foreground">{m.city}</td>
-                        <td className="px-4 py-3">
-                          <span className="text-amber-500 font-semibold">★ {m.rating}</span>
-                        </td>
+                        <td className="px-4 py-3"><span className="text-amber-500 font-semibold">★ {m.rating}</span></td>
                         <td className="px-4 py-3">{m.jobsCompleted}</td>
                         <td className="px-4 py-3 text-success font-medium">{(m.balance / 1000).toFixed(0)}K</td>
                         <td className="px-4 py-3">
@@ -129,7 +127,7 @@ export default function AdminPanel() {
                               <CheckCircle className="h-3 w-3 text-success" /> OK
                             </Button>
                             <Button size="sm" variant="outline" className="rounded-lg h-7 px-2 text-xs gap-1 text-destructive hover:text-destructive">
-                              <XCircle className="h-3 w-3" /> Blok
+                              <XCircle className="h-3 w-3" /> {t('block')}
                             </Button>
                           </div>
                         </td>
@@ -148,7 +146,7 @@ export default function AdminPanel() {
               <table className="w-full text-sm">
                 <thead className="border-b border-border bg-muted/50">
                   <tr>
-                    {['Buyurtma', 'Mijoz', 'To\'lov', 'Summa', 'Status', 'Amallar'].map(h => (
+                    {[t('orderCol'), t('clientCol'), t('paymentCol'), t('amountCol'), t('statusCol'), t('actionsCol')].map(h => (
                       <th key={h} className="text-left px-4 py-3 font-semibold text-muted-foreground">{h}</th>
                     ))}
                   </tr>
@@ -157,18 +155,18 @@ export default function AdminPanel() {
                   {demoOrders.map(o => (
                     <tr key={o.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-3 font-medium">{o.title}</td>
-                      <td className="px-4 py-3 text-muted-foreground">Demo mijoz</td>
-                      <td className="px-4 py-3">{o.paymentMethod === 'cash' ? 'Naqd' : 'Onlayn'}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{t('demoClient')}</td>
+                      <td className="px-4 py-3">{o.paymentMethod === 'cash' ? t('cashLabel') : t('onlineLabel')}</td>
                       <td className="px-4 py-3 font-semibold text-primary">{o.amount.toLocaleString()}</td>
                       <td className="px-4 py-3">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                           o.status === 'completed' ? 'bg-green-100 text-green-700' :
                           o.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
                           'bg-amber-100 text-amber-700'
-                        }`}>{o.status}</span>
+                        }`}>{t(o.status === 'in_progress' ? 'inProgress' : o.status as any)}</span>
                       </td>
                       <td className="px-4 py-3">
-                        <Button size="sm" variant="outline" className="rounded-lg h-7 px-2 text-xs">Ko'rish</Button>
+                        <Button size="sm" variant="outline" className="rounded-lg h-7 px-2 text-xs">{t('viewBtn')}</Button>
                       </td>
                     </tr>
                   ))}
@@ -181,33 +179,33 @@ export default function AdminPanel() {
         {activeTab === 'withdrawals' && (
           <div className="card-premium p-8 text-center">
             <Wallet className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-            <p className="font-semibold">Yechib olish so'rovlari</p>
-            <p className="text-sm text-muted-foreground mt-1">Hozircha so'rovlar yo'q</p>
+            <p className="font-semibold">{t('withdrawRequests')}</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('noWithdrawals')}</p>
           </div>
         )}
 
         {activeTab === 'disputes' && (
           <div className="card-premium p-8 text-center">
             <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-            <p className="font-semibold">Munozaralar</p>
-            <p className="text-sm text-muted-foreground mt-1">Hozircha munozaralar yo'q</p>
+            <p className="font-semibold">{t('disputes')}</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('noDisputes')}</p>
           </div>
         )}
 
         {activeTab === 'settings' && (
           <div className="card-premium p-6 max-w-md">
-            <h3 className="font-bold mb-5">Platforma sozlamalari</h3>
+            <h3 className="font-bold mb-5">{t('platformSettings')}</h3>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium">Komissiya foizi (%)</label>
+                <label className="text-sm font-medium">{t('commissionPercentage')}</label>
                 <div className="flex gap-2 mt-1.5">
                   <Input className="rounded-xl h-11" type="number" value={commission}
                     onChange={e => setCommission(e.target.value)} />
-                  <Button className="rounded-xl h-11 px-5" onClick={() => showNotification('success', 'Komissiya yangilandi!')}>
-                    Saqlash
+                  <Button className="rounded-xl h-11 px-5" onClick={() => showNotification('success', t('commissionUpdated'))}>
+                    {t('save')}
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">Hozirgi: {commission}% har bir buyurtmadan</p>
+                <p className="text-xs text-muted-foreground mt-1">{t('currentCommission')}: {commission}% {t('perOrder')}</p>
               </div>
             </div>
           </div>
