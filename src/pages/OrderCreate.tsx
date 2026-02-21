@@ -13,13 +13,19 @@ import { demoMasters, demoCategories, uzbekCities } from '@/lib/demoData';
 import { ArrowLeft, MapPin, Banknote, CreditCard, Loader2 } from 'lucide-react';
 
 export default function OrderCreatePage() {
-  const { t, showNotification } = useApp();
+  const { t, lang, showNotification } = useApp();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const masterId = searchParams.get('master') || '';
 
   const preselectedMaster = demoMasters.find(m => m.id === masterId);
+
+  const getCatName = (cat: typeof demoCategories[0]) => {
+    if (lang === 'ru') return cat.nameRu;
+    if (lang === 'en') return cat.nameEn;
+    return cat.nameUz;
+  };
 
   const [form, setForm] = useState({
     title: '',
@@ -59,7 +65,7 @@ export default function OrderCreatePage() {
       showNotification('success', t('orderCreated'));
       navigate('/dashboard/client');
     } catch (err: any) {
-      showNotification('error', err.message || 'Xatolik yuz berdi');
+      showNotification('error', err.message || t('paymentError'));
     } finally {
       setLoading(false);
     }
@@ -74,9 +80,8 @@ export default function OrderCreatePage() {
 
         <div className="card-premium p-6 sm:p-8">
           <h1 className="text-2xl font-black mb-1">{t('createOrder')}</h1>
-          <p className="text-muted-foreground mb-8">Buyurtma ma'lumotlarini to'ldiring</p>
+          <p className="text-muted-foreground mb-8">{t('fillOrderDetails')}</p>
 
-          {/* Preselected master */}
           {preselectedMaster && (
             <div className="flex items-center gap-3 p-4 rounded-xl bg-primary/5 border border-primary/20 mb-6">
               <img src={preselectedMaster.avatar} alt={preselectedMaster.name}
@@ -93,7 +98,7 @@ export default function OrderCreatePage() {
               <Label className="text-sm font-medium">{t('orderTitle')}</Label>
               <Input
                 className="mt-1.5 rounded-xl h-11"
-                placeholder="Masalan: Oshxona jo'mragini almashtirish"
+                placeholder={lang === 'en' ? "e.g. Replace kitchen faucet" : lang === 'ru' ? "напр. Замена кухонного крана" : "Masalan: Oshxona jo'mragini almashtirish"}
                 value={form.title}
                 onChange={e => setForm({ ...form, title: e.target.value })}
                 required
@@ -101,14 +106,14 @@ export default function OrderCreatePage() {
             </div>
 
             <div>
-              <Label className="text-sm font-medium">Kategoriya</Label>
+              <Label className="text-sm font-medium">{t('categoryLabel')}</Label>
               <Select value={form.categoryId} onValueChange={v => setForm({ ...form, categoryId: v })}>
                 <SelectTrigger className="mt-1.5 rounded-xl h-11">
-                  <SelectValue placeholder="Kategoriya tanlang" />
+                  <SelectValue placeholder={t('selectCategory')} />
                 </SelectTrigger>
                 <SelectContent>
                   {demoCategories.map(c => (
-                    <SelectItem key={c.id} value={c.id}>{c.nameUz}</SelectItem>
+                    <SelectItem key={c.id} value={c.id}>{getCatName(c)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -119,7 +124,7 @@ export default function OrderCreatePage() {
               <Textarea
                 className="mt-1.5 rounded-xl resize-none"
                 rows={4}
-                placeholder="Ish haqida batafsil ma'lumot bering..."
+                placeholder={t('orderDescPlaceholder')}
                 value={form.description}
                 onChange={e => setForm({ ...form, description: e.target.value })}
               />
@@ -127,7 +132,7 @@ export default function OrderCreatePage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-sm font-medium">Shahar</Label>
+                <Label className="text-sm font-medium">{t('city')}</Label>
                 <Select value={form.city} onValueChange={v => setForm({ ...form, city: v })}>
                   <SelectTrigger className="mt-1.5 rounded-xl h-11">
                     <SelectValue />
@@ -157,7 +162,7 @@ export default function OrderCreatePage() {
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   className="pl-10 rounded-xl h-11"
-                  placeholder="Ko'cha, uy raqami"
+                  placeholder={t('addressPlaceholder')}
                   value={form.address}
                   onChange={e => setForm({ ...form, address: e.target.value })}
                 />
@@ -169,8 +174,8 @@ export default function OrderCreatePage() {
               <Label className="text-sm font-medium">{t('paymentMethod')}</Label>
               <div className="grid grid-cols-2 gap-3 mt-2">
                 {[
-                  { id: 'cash', label: t('cash'), icon: Banknote, desc: "Usta kelganida to'lash" },
-                  { id: 'online', label: t('online'), icon: CreditCard, desc: "Click / Payme orqali" },
+                  { id: 'cash', label: t('cash'), icon: Banknote, desc: t('cashDesc') },
+                  { id: 'online', label: t('online'), icon: CreditCard, desc: t('onlineDesc') },
                 ].map(pm => (
                   <button
                     key={pm.id}
@@ -194,15 +199,15 @@ export default function OrderCreatePage() {
             {form.amount && (
               <div className="p-4 rounded-xl bg-muted text-sm space-y-1.5">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Jami summa</span>
+                  <span className="text-muted-foreground">{t('totalAmount')}</span>
                   <span className="font-medium">{parseFloat(form.amount || '0').toLocaleString()} so'm</span>
                 </div>
                 <div className="flex justify-between text-destructive">
-                  <span>Platforma komissiyasi (10%)</span>
+                  <span>{t('platformCommission')}</span>
                   <span>-{(parseFloat(form.amount || '0') * 0.1).toLocaleString()} so'm</span>
                 </div>
                 <div className="flex justify-between font-semibold text-success border-t border-border pt-1.5 mt-1.5">
-                  <span>Usta oladi</span>
+                  <span>{t('masterReceives')}</span>
                   <span>{(parseFloat(form.amount || '0') * 0.9).toLocaleString()} so'm</span>
                 </div>
               </div>

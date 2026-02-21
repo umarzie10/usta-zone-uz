@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
+import ChatDialog from '@/components/ChatDialog';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { demoMasters } from '@/lib/demoData';
@@ -16,6 +18,7 @@ export default function MasterProfilePage() {
   const { t } = useApp();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [chatOpen, setChatOpen] = useState(false);
 
   const master = demoMasters.find(m => m.id === id) || demoMasters[0];
 
@@ -35,7 +38,6 @@ export default function MasterProfilePage() {
   return (
     <Layout>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back button */}
         <Button variant="ghost" className="mb-6 rounded-xl gap-2" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4" /> {t('back')}
         </Button>
@@ -43,7 +45,6 @@ export default function MasterProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left - Main info */}
           <div className="lg:col-span-2 space-y-5">
-            {/* Profile card */}
             <div className="card-premium p-6">
               <div className="flex gap-5">
                 <div className="relative shrink-0">
@@ -71,7 +72,7 @@ export default function MasterProfilePage() {
                     <span className="text-muted-foreground text-sm">({master.reviewsCount} {t('reviews')})</span>
                     {master.isVerified && (
                       <span className="badge-verified ml-1">
-                        <CheckCircle className="h-3 w-3" /> Tasdiqlangan
+                        <CheckCircle className="h-3 w-3" /> {t('verified')}
                       </span>
                     )}
                   </div>
@@ -81,7 +82,7 @@ export default function MasterProfilePage() {
                       <MapPin className="h-4 w-4" /> {master.city}, {master.region}
                     </div>
                     <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" /> {master.experience} yil tajriba
+                      <Clock className="h-4 w-4" /> {master.experience} {t('yearsExperience')}
                     </div>
                   </div>
                 </div>
@@ -91,9 +92,9 @@ export default function MasterProfilePage() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-4">
               {[
-                { icon: Briefcase, label: "Bajarilgan ishlar", value: master.jobsCompleted },
-                { icon: Star, label: "O'rtacha reyting", value: master.rating },
-                { icon: Clock, label: "Tajriba (yil)", value: master.experience },
+                { icon: Briefcase, label: t('completedJobs'), value: master.jobsCompleted },
+                { icon: Star, label: t('averageRating'), value: master.rating },
+                { icon: Clock, label: t('experienceYears'), value: master.experience },
               ].map(s => (
                 <div key={s.label} className="card-premium p-4 text-center">
                   <s.icon className="h-6 w-6 text-primary mx-auto mb-2" />
@@ -105,13 +106,13 @@ export default function MasterProfilePage() {
 
             {/* Bio */}
             <div className="card-premium p-6">
-              <h3 className="font-bold text-lg mb-3">Usta haqida</h3>
+              <h3 className="font-bold text-lg mb-3">{t('aboutMaster')}</h3>
               <p className="text-muted-foreground leading-relaxed">{master.bio}</p>
             </div>
 
             {/* Skills */}
             <div className="card-premium p-6">
-              <h3 className="font-bold text-lg mb-4">Ko'nikmalar</h3>
+              <h3 className="font-bold text-lg mb-4">{t('skills')}</h3>
               <div className="flex flex-wrap gap-2">
                 {master.skills.map(skill => (
                   <Badge key={skill} variant="secondary" className="px-3 py-1.5 rounded-xl text-sm">
@@ -123,7 +124,7 @@ export default function MasterProfilePage() {
 
             {/* Reviews */}
             <div className="card-premium p-6">
-              <h3 className="font-bold text-lg mb-4">Sharhlar ({master.reviewsCount})</h3>
+              <h3 className="font-bold text-lg mb-4">{t('reviewsTitle')} ({master.reviewsCount})</h3>
               <div className="space-y-4">
                 {demoReviews.map((review, i) => (
                   <div key={i}>
@@ -146,15 +147,15 @@ export default function MasterProfilePage() {
             </div>
           </div>
 
-          {/* Right - Contact & action card */}
+          {/* Right - Contact */}
           <div className="space-y-4">
             <div className="card-premium p-6 sticky top-20">
               <div className="text-center mb-5">
-                <p className="text-muted-foreground text-sm mb-1">Soatlik narx</p>
+                <p className="text-muted-foreground text-sm mb-1">{t('hourlyRate')}</p>
                 <p className="text-3xl font-black text-primary">
                   {master.pricePerHour.toLocaleString()} so'm
                 </p>
-                <p className="text-xs text-muted-foreground">/soat</p>
+                <p className="text-xs text-muted-foreground">{t('perHourLabel')}</p>
               </div>
 
               <div className="space-y-3">
@@ -176,7 +177,10 @@ export default function MasterProfilePage() {
                 <Button
                   variant="outline"
                   className="w-full h-11 rounded-xl gap-2 font-semibold"
-                  onClick={() => navigate(`/messages?master=${master.id}`)}
+                  onClick={() => {
+                    if (!user) { navigate('/login'); return; }
+                    setChatOpen(true);
+                  }}
                 >
                   <MessageCircle className="h-4 w-4" />
                   {t('message')}
@@ -184,7 +188,7 @@ export default function MasterProfilePage() {
 
                 <Button variant="ghost" className="w-full h-10 rounded-xl gap-2 text-sm">
                   <Share2 className="h-4 w-4" />
-                  Ulashish
+                  {t('share')}
                 </Button>
               </div>
 
@@ -192,26 +196,33 @@ export default function MasterProfilePage() {
 
               <div className="space-y-2.5 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Telefon</span>
+                  <span className="text-muted-foreground">{t('phoneLabel')}</span>
                   <span className="font-medium">{master.phone}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Shahar</span>
+                  <span className="text-muted-foreground">{t('cityLabel')}</span>
                   <span className="font-medium">{master.city}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Tajriba</span>
-                  <span className="font-medium">{master.experience} yil</span>
+                  <span className="text-muted-foreground">{t('experienceLabel')}</span>
+                  <span className="font-medium">{master.experience} {t('yearsExperience')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Holat</span>
-                  <span className="text-success font-medium">Aktiv</span>
+                  <span className="text-muted-foreground">{t('statusLabel')}</span>
+                  <span className="text-success font-medium">{t('activeStatus')}</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <ChatDialog
+        receiverId={master.id}
+        receiverName={master.name}
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+      />
     </Layout>
   );
 }

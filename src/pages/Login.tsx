@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
-import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Phone, Loader2 } from 'lucide-react';
 
 type Mode = 'login' | 'register';
 type Step = 'form' | 'verify';
@@ -84,19 +84,19 @@ export default function LoginPage() {
   return (
     <Layout noFooter>
       <div className="min-h-[calc(100vh-4rem)] flex">
-        {/* Left side - illustration */}
+        {/* Left side */}
         <div className="hidden lg:flex lg:w-1/2 hero-bg relative overflow-hidden items-center justify-center p-12">
           <div className="relative z-10 text-white text-center">
             <div className="text-7xl mb-6">🏗️</div>
             <h2 className="text-4xl font-black mb-4">UstaZone</h2>
             <p className="text-white/80 text-lg max-w-sm">
-              O'zbekistondagi eng ishonchli usta va xizmat ko'rsatuvchilar platformasi
+              {t('platformDesc')}
             </p>
             <div className="mt-8 grid grid-cols-3 gap-4">
               {[
-                { n: '10K+', l: "Ustalar" },
-                { n: '50K+', l: "Buyurtmalar" },
-                { n: '4.8★', l: "O'rtacha reyting" },
+                { n: '10K+', l: t('masters') },
+                { n: '50K+', l: t('orders') },
+                { n: '4.8★', l: t('rating') },
               ].map(s => (
                 <div key={s.l} className="glass rounded-xl p-4">
                   <p className="text-2xl font-black">{s.n}</p>
@@ -105,7 +105,6 @@ export default function LoginPage() {
               ))}
             </div>
           </div>
-          {/* Decorative circles */}
           <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/2" />
           <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-white/5 translate-y-1/2 -translate-x-1/2" />
         </div>
@@ -115,7 +114,6 @@ export default function LoginPage() {
           <div className="w-full max-w-md">
             {step === 'form' ? (
               <>
-                {/* Mode toggle */}
                 <div className="mb-8">
                   <h1 className="text-3xl font-black mb-2">
                     {mode === 'login' ? t('login') : t('register')}
@@ -131,7 +129,6 @@ export default function LoginPage() {
                   </p>
                 </div>
 
-                {/* Role selector (register only) */}
                 {mode === 'register' && (
                   <div className="grid grid-cols-2 gap-3 mb-6">
                     {(['client', 'master'] as Role[]).map(r => (
@@ -158,27 +155,16 @@ export default function LoginPage() {
                         <Label htmlFor="fullName" className="text-sm font-medium">{t('fullName')}</Label>
                         <div className="relative mt-1.5">
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            id="fullName"
-                            placeholder="Jasur Toshmatov"
-                            className="pl-10 rounded-xl h-11"
-                            value={form.fullName}
-                            onChange={e => setForm({ ...form, fullName: e.target.value })}
-                            required
-                          />
+                          <Input id="fullName" placeholder="Jasur Toshmatov" className="pl-10 rounded-xl h-11"
+                            value={form.fullName} onChange={e => setForm({ ...form, fullName: e.target.value })} required />
                         </div>
                       </div>
                       <div>
                         <Label htmlFor="phone" className="text-sm font-medium">{t('phone')}</Label>
                         <div className="relative mt-1.5">
                           <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            id="phone"
-                            placeholder="+998 90 000 00 00"
-                            className="pl-10 rounded-xl h-11"
-                            value={form.phone}
-                            onChange={e => setForm({ ...form, phone: e.target.value })}
-                          />
+                          <Input id="phone" placeholder="+998 90 000 00 00" className="pl-10 rounded-xl h-11"
+                            value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
                         </div>
                       </div>
                     </>
@@ -188,15 +174,8 @@ export default function LoginPage() {
                     <Label htmlFor="email" className="text-sm font-medium">{t('emailLabel')}</Label>
                     <div className="relative mt-1.5">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="jasur@example.com"
-                        className="pl-10 rounded-xl h-11"
-                        value={form.email}
-                        onChange={e => setForm({ ...form, email: e.target.value })}
-                        required
-                      />
+                      <Input id="email" type="email" placeholder="jasur@example.com" className="pl-10 rounded-xl h-11"
+                        value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
                     </div>
                   </div>
 
@@ -204,71 +183,41 @@ export default function LoginPage() {
                     <Label htmlFor="password" className="text-sm font-medium">{t('passwordLabel')}</Label>
                     <div className="relative mt-1.5">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="password"
-                        type={showPass ? 'text' : 'password'}
-                        placeholder="••••••••"
+                      <Input id="password" type={showPass ? 'text' : 'password'} placeholder="••••••••"
                         className="pl-10 pr-10 rounded-xl h-11"
-                        value={form.password}
-                        onChange={e => setForm({ ...form, password: e.target.value })}
-                        required
-                        minLength={6}
-                      />
-                      <button
-                        type="button"
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                        onClick={() => setShowPass(!showPass)}
-                      >
+                        value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required minLength={6} />
+                      <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        onClick={() => setShowPass(!showPass)}>
                         {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
                   </div>
 
-                  <Button
-                    type="submit"
-                    className="w-full h-12 rounded-xl btn-hero text-base font-semibold mt-2"
-                    disabled={loading}
-                  >
+                  <Button type="submit" className="w-full h-12 rounded-xl btn-hero text-base font-semibold mt-2" disabled={loading}>
                     {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (mode === 'login' ? t('login') : t('register'))}
                   </Button>
                 </form>
 
-                {/* Admin hint */}
                 <p className="text-center text-xs text-muted-foreground mt-6">
-                  Admin kirish: admin@ustazone.uz
+                  {t('adminHint')}
                 </p>
               </>
             ) : (
-              /* Verify step */
               <div className="text-center">
                 <div className="text-6xl mb-4">📧</div>
                 <h2 className="text-2xl font-black mb-2">{t('verificationCode')}</h2>
                 <p className="text-muted-foreground mb-8">
-                  <span className="font-semibold text-foreground">{pendingEmail}</span> manziliga kod yuborildi
+                  {t('codeSentTo')} <span className="font-semibold text-foreground">{pendingEmail}</span>
                 </p>
                 <div className="mb-4">
-                  <Input
-                    placeholder="000000"
-                    value={verifyCode}
-                    onChange={e => setVerifyCode(e.target.value)}
-                    className="text-center text-2xl tracking-widest h-14 rounded-xl"
-                    maxLength={6}
-                  />
-                  {verifyError && (
-                    <p className="text-destructive text-sm mt-2 font-medium">{verifyError}</p>
-                  )}
+                  <Input placeholder="000000" value={verifyCode} onChange={e => setVerifyCode(e.target.value)}
+                    className="text-center text-2xl tracking-widest h-14 rounded-xl" maxLength={6} />
+                  {verifyError && <p className="text-destructive text-sm mt-2 font-medium">{verifyError}</p>}
                 </div>
-                <Button
-                  className="w-full h-12 rounded-xl btn-hero"
-                  onClick={handleVerify}
-                  disabled={loading || verifyCode.length < 6}
-                >
+                <Button className="w-full h-12 rounded-xl btn-hero" onClick={handleVerify} disabled={loading || verifyCode.length < 6}>
                   {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : t('confirmCode')}
                 </Button>
-                <button
-                  className="mt-4 text-sm text-muted-foreground hover:text-foreground"
-                  onClick={() => setStep('form')}
-                >
+                <button className="mt-4 text-sm text-muted-foreground hover:text-foreground" onClick={() => setStep('form')}>
                   ← {t('back')}
                 </button>
               </div>

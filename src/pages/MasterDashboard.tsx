@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
+import ChatDialog from '@/components/ChatDialog';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ export default function MasterDashboard() {
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [withdrawing, setWithdrawing] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
 
   const master = demoMasters[0];
 
@@ -26,8 +28,8 @@ export default function MasterDashboard() {
       <Layout>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <p className="text-xl font-semibold mb-4">Tizimga kiring</p>
-            <Button onClick={() => navigate('/login')} className="rounded-xl btn-hero">Kirish</Button>
+            <p className="text-xl font-semibold mb-4">{t('loginRequired')}</p>
+            <Button onClick={() => navigate('/login')} className="rounded-xl btn-hero">{t('loginBtn')}</Button>
           </div>
         </div>
       </Layout>
@@ -55,11 +57,11 @@ export default function MasterDashboard() {
   };
 
   const tabs = [
-    { id: 'overview', label: 'Umumiy', icon: TrendingUp },
+    { id: 'overview', label: t('overview'), icon: TrendingUp },
     { id: 'balance', label: t('myBalance'), icon: Wallet },
     { id: 'messages', label: t('messages'), icon: MessageCircle },
-    { id: 'reviews', label: 'Sharhlar', icon: Star },
-    { id: 'history', label: 'Tarix', icon: History },
+    { id: 'reviews', label: t('reviewsTab'), icon: Star },
+    { id: 'history', label: t('history'), icon: History },
   ];
 
   return (
@@ -67,22 +69,22 @@ export default function MasterDashboard() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-start justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-black">Usta kabineti</h1>
+            <h1 className="text-3xl font-black">{t('masterDashboard')}</h1>
             <p className="text-muted-foreground mt-1">{profile?.full_name || master.name}</p>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-sm font-semibold">
             <span className="w-2 h-2 rounded-full bg-success animate-pulse"></span>
-            Aktiv
+            {t('activeStatus')}
           </div>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {[
-            { label: 'Bajarilgan ishlar', value: master.jobsCompleted, icon: Briefcase, color: 'text-primary' },
-            { label: 'Reyting', value: master.rating, icon: Star, color: 'text-amber-500' },
-            { label: 'Balans (so\'m)', value: `${(master.balance / 1000000).toFixed(1)}M`, icon: Wallet, color: 'text-success' },
-            { label: 'Yechib olish', value: `${(master.withdrawable / 1000000).toFixed(1)}M`, icon: ArrowDownToLine, color: 'text-purple-500' },
+            { label: t('completedJobs'), value: master.jobsCompleted, icon: Briefcase, color: 'text-primary' },
+            { label: t('rating'), value: master.rating, icon: Star, color: 'text-amber-500' },
+            { label: `${t('balanceLabel')} (so'm)`, value: `${(master.balance / 1000000).toFixed(1)}M`, icon: Wallet, color: 'text-success' },
+            { label: t('withdraw'), value: `${(master.withdrawable / 1000000).toFixed(1)}M`, icon: ArrowDownToLine, color: 'text-purple-500' },
           ].map(s => (
             <div key={s.label} className="card-premium p-4">
               <s.icon className={`h-6 w-6 ${s.color} mb-2`} />
@@ -108,12 +110,12 @@ export default function MasterDashboard() {
         {activeTab === 'overview' && (
           <div className="space-y-4">
             <div className="card-premium p-6">
-              <h3 className="font-bold mb-4">So'nggi faoliyat</h3>
+              <h3 className="font-bold mb-4">{t('recentActivity')}</h3>
               <div className="space-y-3">
                 {[
-                  { text: "Yangi buyurtma: Santexnik xizmat", time: "2 soat oldin", type: "new" },
-                  { text: "To'lov qabul qilindi: 135,000 so'm", time: "1 kun oldin", type: "payment" },
-                  { text: "Yangi sharh: ⭐⭐⭐⭐⭐", time: "2 kun oldin", type: "review" },
+                  { text: t('newOrderNotif'), time: `2 ${t('hoursAgo')}`, type: "new" },
+                  { text: t('paymentReceived'), time: `1 ${t('dayAgo')}`, type: "payment" },
+                  { text: t('newReviewNotif'), time: `2 ${t('daysAgo')}`, type: "review" },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center justify-between py-2.5 border-b border-border last:border-0">
                     <span className="text-sm">{item.text}</span>
@@ -129,23 +131,23 @@ export default function MasterDashboard() {
           <div className="space-y-5">
             <div className="card-premium p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-lg">Balans</h3>
+                <h3 className="font-bold text-lg">{t('balanceLabel')}</h3>
                 <span className="text-3xl font-black text-primary">{master.balance.toLocaleString()} so'm</span>
               </div>
               <div className="flex justify-between text-sm text-muted-foreground mb-6">
-                <span>Yechib olish mumkin</span>
+                <span>{t('withdrawableLabel')}</span>
                 <span className="font-semibold text-success">{master.withdrawable.toLocaleString()} so'm</span>
               </div>
 
               <div className="space-y-4 border-t border-border pt-5">
-                <h4 className="font-semibold">Yechib olish</h4>
+                <h4 className="font-semibold">{t('withdraw')}</h4>
                 <div>
-                  <Label className="text-sm">Summa (so'm)</Label>
+                  <Label className="text-sm">{t('amountLabel')}</Label>
                   <Input className="mt-1.5 rounded-xl h-11" type="number" placeholder="500000"
                     value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)} />
                 </div>
                 <div>
-                  <Label className="text-sm">Karta raqami</Label>
+                  <Label className="text-sm">{t('cardNumber')}</Label>
                   <Input className="mt-1.5 rounded-xl h-11" placeholder="8600 0000 0000 0000"
                     value={cardNumber} onChange={e => setCardNumber(e.target.value)} />
                 </div>
@@ -161,8 +163,8 @@ export default function MasterDashboard() {
         {activeTab === 'messages' && (
           <div className="card-premium p-8 text-center">
             <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-            <p className="font-semibold">Xabarlar bo'limi</p>
-            <p className="text-sm text-muted-foreground mt-1">Mijozlardan xabarlar bu yerda ko'rinadi</p>
+            <p className="font-semibold">{t('messagesSection')}</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('masterMessagesDesc')}</p>
           </div>
         )}
 
@@ -190,20 +192,20 @@ export default function MasterDashboard() {
 
         {activeTab === 'history' && (
           <div className="card-premium p-6">
-            <h3 className="font-bold mb-4">Tranzaksiyalar tarixi</h3>
+            <h3 className="font-bold mb-4">{t('transactionHistory')}</h3>
             <div className="space-y-3">
               {[
                 { desc: "Buyurtma #1023 - to'lov", amount: +135000, date: "2024-01-15" },
-                { desc: "Komissiya (10%)", amount: -15000, date: "2024-01-15" },
-                { desc: "Yechib olish", amount: -500000, date: "2024-01-10" },
-              ].map((t, i) => (
+                { desc: `${t('commission')} (10%)`, amount: -15000, date: "2024-01-15" },
+                { desc: t('withdraw'), amount: -500000, date: "2024-01-10" },
+              ].map((tx, i) => (
                 <div key={i} className="flex justify-between items-center py-3 border-b border-border last:border-0">
                   <div>
-                    <p className="text-sm font-medium">{t.desc}</p>
-                    <p className="text-xs text-muted-foreground">{t.date}</p>
+                    <p className="text-sm font-medium">{tx.desc}</p>
+                    <p className="text-xs text-muted-foreground">{tx.date}</p>
                   </div>
-                  <span className={`font-bold ${t.amount > 0 ? 'text-success' : 'text-destructive'}`}>
-                    {t.amount > 0 ? '+' : ''}{t.amount.toLocaleString()} so'm
+                  <span className={`font-bold ${tx.amount > 0 ? 'text-success' : 'text-destructive'}`}>
+                    {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()} so'm
                   </span>
                 </div>
               ))}
@@ -211,6 +213,13 @@ export default function MasterDashboard() {
           </div>
         )}
       </div>
+
+      <ChatDialog
+        receiverId="demo-client"
+        receiverName="Demo Client"
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+      />
     </Layout>
   );
 }

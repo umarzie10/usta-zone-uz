@@ -25,15 +25,13 @@ export default function CategoriesPage() {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 section-padding">
-        {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-black mb-4 animate-fade-in-up">{t('allCategories')}</h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto animate-fade-in-up delay-100">
-            Kerakli xizmat turini tanlang va eng yaqin mutaxassisni toping
+            {t('categoriesDesc')}
           </p>
         </div>
 
-        {/* Categories grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {demoCategories.map((cat, i) => {
             const Icon = iconMap[cat.icon] || Hammer;
@@ -52,7 +50,7 @@ export default function CategoriesPage() {
                 </div>
                 <div>
                   <p className="font-semibold text-sm leading-tight mb-1">{getName(cat)}</p>
-                  <p className="text-xs text-muted-foreground">{cat.count} usta</p>
+                  <p className="text-xs text-muted-foreground">{cat.count} {t('masterCountSuffix')}</p>
                 </div>
               </button>
             );
@@ -61,14 +59,14 @@ export default function CategoriesPage() {
 
         {/* Stats section */}
         <div className="mt-16 hero-bg rounded-3xl p-10 text-white text-center">
-          <h2 className="text-3xl font-black mb-3">UstaZone platformasi</h2>
-          <p className="text-white/80 mb-8">O'zbekiston bo'ylab eng ishonchli xizmat marketplace</p>
+          <h2 className="text-3xl font-black mb-3">{t('platformName')}</h2>
+          <p className="text-white/80 mb-8">{t('platformFullDesc')}</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             {[
-              { n: '12', l: "Kategoriya" },
-              { n: '10K+', l: "Aktiv ustalar" },
-              { n: '50K+', l: "Bajarilgan ishlar" },
-              { n: '14', l: "Viloyat" },
+              { n: '12', l: t('categoryCount') },
+              { n: '10K+', l: t('activeMasters') },
+              { n: '50K+', l: t('completedJobsLabel') },
+              { n: '14', l: t('regionsCount') },
             ].map(s => (
               <div key={s.l} className="glass rounded-2xl p-5">
                 <p className="text-3xl font-black mb-1">{s.n}</p>
