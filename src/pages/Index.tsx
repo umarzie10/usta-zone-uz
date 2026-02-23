@@ -1,15 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import MasterCard from '@/components/MasterCard';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { demoMasters, demoCategories } from '@/lib/demoData';
-import { Search, Star, Shield, Clock, ChevronRight, Droplets, Zap, Sparkles, Sofa, Hammer, Leaf, Car, GraduationCap, Utensils, Palette, HeartPulse, Laptop } from 'lucide-react';
+import { demoCategories } from '@/lib/demoData';
+import { Search, Star, Shield, Clock, ChevronRight, Droplets, Zap, Sparkles, Sofa, Hammer, Palette, Wind, Cog, Thermometer, DoorOpen, Square, Flame, Layers, LayoutGrid, RectangleHorizontal, Wifi, Camera, SprayCan, Waves } from 'lucide-react';
 
 const iconMap: Record<string, React.ElementType> = {
-  Droplets, Zap, Sparkles, Sofa, Hammer, Leaf, Car, GraduationCap, Utensils, Palette, HeartPulse, Laptop,
+  Droplets, Zap, Sparkles, Sofa, Hammer, Palette, Wind, Cog, Thermometer, DoorOpen, Square, Flame, Layers, LayoutGrid, RectangleHorizontal, Wifi, Camera, SprayCan, Waves,
 };
 
 export default function Index() {
@@ -23,7 +22,7 @@ export default function Index() {
     return cat.nameUz;
   };
 
-  const topMasters = demoMasters.filter(m => m.isTopMaster).slice(0, 4);
+  const topCategories = demoCategories.slice(0, 12);
 
   return (
     <Layout>
@@ -123,25 +122,14 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Top masters */}
+      {/* Top masters CTA */}
       <section className="section-padding bg-muted/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-black">{t('topMasters')}</h2>
-              <p className="text-muted-foreground mt-1">{t('bestRatedMasters')}</p>
-            </div>
-            <Button variant="ghost" className="gap-1 rounded-xl text-primary" onClick={() => navigate('/find-master')}>
-              {t('viewAll')} <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {topMasters.map((master, i) => (
-              <div key={master.id} className="animate-fade-in-up" style={{ animationDelay: `${i * 80}ms` }}>
-                <MasterCard master={master} />
-              </div>
-            ))}
-          </div>
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-3xl font-black mb-3">{t('topMasters')}</h2>
+          <p className="text-muted-foreground mb-6">{t('bestRatedMasters')}</p>
+          <Button className="rounded-xl gap-2" onClick={() => navigate('/find-master')}>
+            {t('findMaster')} <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       </section>
 

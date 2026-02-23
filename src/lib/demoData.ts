@@ -192,18 +192,26 @@ export const demoMasters: DemoMaster[] = [
 ];
 
 export const demoCategories = [
-  { id: "c1", nameUz: "Santexnika", nameRu: "Сантехника", nameEn: "Plumbing", icon: "Droplets", color: "#3b82f6", count: 234 },
-  { id: "c2", nameUz: "Elektrik", nameRu: "Электрика", nameEn: "Electrical", icon: "Zap", color: "#f59e0b", count: 189 },
-  { id: "c3", nameUz: "Tozalash", nameRu: "Уборка", nameEn: "Cleaning", icon: "Sparkles", color: "#10b981", count: 312 },
-  { id: "c4", nameUz: "Mebelchilik", nameRu: "Мебель", nameEn: "Furniture", icon: "Sofa", color: "#8b5cf6", count: 145 },
-  { id: "c5", nameUz: "Ta'mirlash", nameRu: "Ремонт", nameEn: "Repair", icon: "Hammer", color: "#ef4444", count: 278 },
-  { id: "c6", nameUz: "Bog'dorchilik", nameRu: "Озеленение", nameEn: "Gardening", icon: "Leaf", color: "#22c55e", count: 98 },
-  { id: "c7", nameUz: "Haydovchi", nameRu: "Водитель", nameEn: "Driver", icon: "Car", color: "#06b6d4", count: 421 },
-  { id: "c8", nameUz: "Muallim", nameRu: "Репетитор", nameEn: "Tutor", icon: "GraduationCap", color: "#ec4899", count: 167 },
-  { id: "c9", nameUz: "Ovqatlanish", nameRu: "Приготовление", nameEn: "Cooking", icon: "Utensils", color: "#f97316", count: 88 },
-  { id: "c10", nameUz: "Bezatish", nameRu: "Дизайн", nameEn: "Design", icon: "Palette", color: "#7c3aed", count: 134 },
-  { id: "c11", nameUz: "Sog'liq", nameRu: "Медицина", nameEn: "Healthcare", icon: "HeartPulse", color: "#dc2626", count: 201 },
-  { id: "c12", nameUz: "IT xizmatlari", nameRu: "IT услуги", nameEn: "IT Services", icon: "Laptop", color: "#0ea5e9", count: 176 },
+  { id: "c1", nameUz: "Santexnik chaqirish", nameRu: "Вызов сантехника", nameEn: "Call Plumber", icon: "Droplets", color: "#3b82f6", count: 234 },
+  { id: "c2", nameUz: "Elektrik chaqirish", nameRu: "Вызов электрика", nameEn: "Call Electrician", icon: "Zap", color: "#f59e0b", count: 189 },
+  { id: "c3", nameUz: "Konditsioner o'rnatish", nameRu: "Установка кондиционера", nameEn: "AC Installation", icon: "Wind", color: "#06b6d4", count: 156 },
+  { id: "c4", nameUz: "Konditsioner tozalash", nameRu: "Чистка кондиционера", nameEn: "AC Cleaning", icon: "Sparkles", color: "#10b981", count: 134 },
+  { id: "c5", nameUz: "Kir yuvish mashinasi ta'miri", nameRu: "Ремонт стиральной машины", nameEn: "Washing Machine Repair", icon: "Cog", color: "#8b5cf6", count: 98 },
+  { id: "c6", nameUz: "Sovutgich ta'miri", nameRu: "Ремонт холодильника", nameEn: "Fridge Repair", icon: "Thermometer", color: "#0ea5e9", count: 87 },
+  { id: "c7", nameUz: "Mebel yig'ish", nameRu: "Сборка мебели", nameEn: "Furniture Assembly", icon: "Sofa", color: "#a855f7", count: 145 },
+  { id: "c8", nameUz: "Eshik o'rnatish", nameRu: "Установка дверей", nameEn: "Door Installation", icon: "DoorOpen", color: "#ef4444", count: 112 },
+  { id: "c9", nameUz: "Deraza sozlash", nameRu: "Регулировка окон", nameEn: "Window Adjustment", icon: "Square", color: "#14b8a6", count: 76 },
+  { id: "c10", nameUz: "Payvandlash ishlari", nameRu: "Сварочные работы", nameEn: "Welding", icon: "Flame", color: "#f97316", count: 93 },
+  { id: "c11", nameUz: "Uy remonti", nameRu: "Ремонт дома", nameEn: "Home Renovation", icon: "Hammer", color: "#dc2626", count: 278 },
+  { id: "c12", nameUz: "Bo'yash ishlari", nameRu: "Покрасочные работы", nameEn: "Painting", icon: "Palette", color: "#7c3aed", count: 134 },
+  { id: "c13", nameUz: "Oboi yopishtirish", nameRu: "Поклейка обоев", nameEn: "Wallpapering", icon: "Layers", color: "#ec4899", count: 88 },
+  { id: "c14", nameUz: "Gipsokarton ishlari", nameRu: "Гипсокартонные работы", nameEn: "Drywall Work", icon: "LayoutGrid", color: "#64748b", count: 102 },
+  { id: "c15", nameUz: "Laminat yotqizish", nameRu: "Укладка ламината", nameEn: "Laminate Flooring", icon: "RectangleHorizontal", color: "#b45309", count: 95 },
+  { id: "c16", nameUz: "Gaz plita ta'miri", nameRu: "Ремонт газовой плиты", nameEn: "Gas Stove Repair", icon: "Flame", color: "#ea580c", count: 67 },
+  { id: "c17", nameUz: "Wi-Fi o'rnatish", nameRu: "Установка Wi-Fi", nameEn: "Wi-Fi Setup", icon: "Wifi", color: "#2563eb", count: 143 },
+  { id: "c18", nameUz: "Videokamera o'rnatish", nameRu: "Установка видеокамер", nameEn: "CCTV Installation", icon: "Camera", color: "#4f46e5", count: 121 },
+  { id: "c19", nameUz: "Uy tozalash", nameRu: "Уборка дома", nameEn: "House Cleaning", icon: "SprayCan", color: "#22c55e", count: 312 },
+  { id: "c20", nameUz: "Gilam yuvish", nameRu: "Стирка ковров", nameEn: "Carpet Washing", icon: "Waves", color: "#0d9488", count: 156 },
 ];
 
 export const uzbekCities = [
@@ -215,8 +223,7 @@ export const uzbekCities = [
 export const uzbekRegions = [
   "Toshkent shahri", "Toshkent viloyati", "Samarqand viloyati", "Buxoro viloyati",
   "Namangan viloyati", "Andijon viloyati", "Farg'ona viloyati", "Qashqadaryo viloyati",
-  "Surxondaryo viloyati", "Sirdaryo viloyati", "Jizzax viloyati", "Navoiy viloyati",
-  "Xorazm viloyati", "Qoraqalpog'iston Respublikasi"
+  "Surxondaryo viloyati", "Sirdaryo viloyati", "Jizzax viloyati", "Navoiy viloyati"
 ];
 
 export const demoOrders = [
