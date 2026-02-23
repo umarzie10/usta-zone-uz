@@ -198,9 +198,6 @@ export default function LoginPage() {
                   </Button>
                 </form>
 
-                <p className="text-center text-xs text-muted-foreground mt-6">
-                  {t('adminHint')}
-                </p>
               </>
             ) : (
               <div className="text-center">
