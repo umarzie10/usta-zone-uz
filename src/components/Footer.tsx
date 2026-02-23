@@ -78,18 +78,18 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-primary shrink-0" />
-                +998 71 000 00 00
+                +998 97 706 62 45
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-primary shrink-0" />
-                info@ustazone.uz
+                umareshqurbonov52@gmail.com
               </li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-border mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-sm text-muted-foreground">
-          <p>© 2024 UstaZone. {t('allRightsReserved')}</p>
+          <p>© 2026 UstaZone. {t('allRightsReserved')}</p>
           <p>{t('commissionInfo')}</p>
         </div>
       </div>

@@ -3,13 +3,15 @@ import Layout from '@/components/Layout';
 import { useApp } from '@/contexts/AppContext';
 import { demoCategories } from '@/lib/demoData';
 import {
-  Droplets, Zap, Sparkles, Sofa, Hammer, Leaf, Car,
-  GraduationCap, Utensils, Palette, HeartPulse, Laptop
+  Droplets, Zap, Sparkles, Sofa, Hammer, Palette, Wind, Cog,
+  Thermometer, DoorOpen, Square, Flame, Layers, LayoutGrid,
+  RectangleHorizontal, Wifi, Camera, SprayCan, Waves
 } from 'lucide-react';
 
 const iconMap: Record<string, React.ElementType> = {
-  Droplets, Zap, Sparkles, Sofa, Hammer, Leaf, Car,
-  GraduationCap, Utensils, Palette, HeartPulse, Laptop,
+  Droplets, Zap, Sparkles, Sofa, Hammer, Palette, Wind, Cog,
+  Thermometer, DoorOpen, Square, Flame, Layers, LayoutGrid,
+  RectangleHorizontal, Wifi, Camera, SprayCan, Waves,
 };
 
 export default function CategoriesPage() {
@@ -63,10 +65,10 @@ export default function CategoriesPage() {
           <p className="text-white/80 mb-8">{t('platformFullDesc')}</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             {[
-              { n: '12', l: t('categoryCount') },
+              { n: '20', l: t('categoryCount') },
               { n: '10K+', l: t('activeMasters') },
               { n: '50K+', l: t('completedJobsLabel') },
-              { n: '14', l: t('regionsCount') },
+              { n: '12', l: t('regionsCount') },
             ].map(s => (
               <div key={s.l} className="glass rounded-2xl p-5">
                 <p className="text-3xl font-black mb-1">{s.n}</p>
