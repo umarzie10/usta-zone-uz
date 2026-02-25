@@ -155,6 +155,18 @@ export default function AdminPanel() {
     fetchUsers();
   };
 
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (!confirm(`"${userName}" foydalanuvchisini va barcha ma'lumotlarini o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi!`)) return;
+    try {
+      const { error } = await supabase.rpc('admin_delete_user', { target_user_id: userId });
+      if (error) throw error;
+      showNotification('success', `"${userName}" muvaffaqiyatli o'chirildi!`);
+      fetchAllData();
+    } catch (err: any) {
+      showNotification('error', `Xatolik: ${err.message}`);
+    }
+  };
+
   const handleWithdrawalAction = async (id: string, status: string) => {
     await supabase.from('withdraw_requests').update({ status }).eq('id', id);
     showNotification('success', `So'rov ${status === 'approved' ? 'tasdiqlandi' : 'rad etildi'}!`);
@@ -440,11 +452,18 @@ export default function AdminPanel() {
                               <td className="px-4 py-3 text-muted-foreground text-xs">{formatDate(u.created_at)}</td>
                               <td className="px-4 py-3">
                                 {u.role !== 'admin' && (
-                                  <Button size="sm" variant="outline"
-                                    className={`rounded-lg h-7 px-2 text-xs gap-1 ${u.is_blocked ? '' : 'text-destructive hover:text-destructive'}`}
-                                    onClick={() => handleBlockUser(u.user_id, !u.is_blocked)}>
-                                    {u.is_blocked ? <><CheckCircle className="h-3 w-3 text-green-500" /> Blokdan chiqarish</> : <><XCircle className="h-3 w-3" /> Bloklash</>}
-                                  </Button>
+                                  <div className="flex gap-1.5">
+                                    <Button size="sm" variant="outline"
+                                      className={`rounded-lg h-7 px-2 text-xs gap-1 ${u.is_blocked ? '' : 'text-destructive hover:text-destructive'}`}
+                                      onClick={() => handleBlockUser(u.user_id, !u.is_blocked)}>
+                                      {u.is_blocked ? <><CheckCircle className="h-3 w-3 text-green-500" /> Blokdan chiqarish</> : <><XCircle className="h-3 w-3" /> Bloklash</>}
+                                    </Button>
+                                    <Button size="sm" variant="outline"
+                                      className="rounded-lg h-7 px-2 text-xs gap-1 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                      onClick={() => handleDeleteUser(u.user_id, u.full_name)}>
+                                      <XCircle className="h-3 w-3" /> O'chirish
+                                    </Button>
+                                  </div>
                                 )}
                               </td>
                             </tr>
