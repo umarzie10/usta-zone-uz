@@ -11,7 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Star, MapPin, CheckCircle, Phone, MessageCircle, Calendar,
-  Briefcase, Clock, ArrowLeft, Share2, Heart
+  Briefcase, Clock, ArrowLeft, Share2, Heart, Image, X
 } from 'lucide-react';
 
 interface MasterData {
@@ -23,6 +23,7 @@ interface MasterData {
   experience_years: number;
   bio: string | null;
   skills: string[];
+  portfolio_urls: string[];
   full_name: string;
   avatar_url: string | null;
   city: string | null;
@@ -39,6 +40,14 @@ interface Review {
   client_name: string;
 }
 
+interface Availability {
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+}
+
+const DAY_NAMES = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
+
 export default function MasterProfilePage() {
   const { id } = useParams();
   const { t } = useApp();
@@ -47,7 +56,9 @@ export default function MasterProfilePage() {
   const [chatOpen, setChatOpen] = useState(false);
   const [master, setMaster] = useState<MasterData | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [availability, setAvailability] = useState<Availability[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) fetchMaster();
@@ -78,6 +89,7 @@ export default function MasterProfilePage() {
         experience_years: mp.experience_years || 0,
         bio: mp.bio,
         skills: mp.skills || [],
+        portfolio_urls: mp.portfolio_urls || [],
         full_name: profile?.full_name || 'Unknown',
         avatar_url: profile?.avatar_url,
         city: profile?.city,
@@ -85,6 +97,15 @@ export default function MasterProfilePage() {
         phone: profile?.phone,
         is_verified: profile?.is_verified || false,
       });
+
+      // Fetch availability
+      const { data: avail } = await supabase
+        .from('master_availability')
+        .select('day_of_week, start_time, end_time')
+        .eq('master_id', mp.id)
+        .eq('is_active', true)
+        .order('day_of_week');
+      setAvailability(avail || []);
 
       // Fetch reviews
       const { data: reviewsData } = await supabase
@@ -254,6 +275,42 @@ export default function MasterProfilePage() {
               </div>
             )}
 
+            {/* Availability / Working Hours */}
+            {availability.length > 0 && (
+              <div className="card-premium p-6">
+                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-primary" /> Ishlash vaqti
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {availability.map((a, i) => (
+                    <div key={i} className="flex items-center justify-between bg-muted/50 rounded-xl px-4 py-2.5">
+                      <span className="font-medium text-sm">{DAY_NAMES[a.day_of_week]}</span>
+                      <span className="text-sm text-primary font-semibold">
+                        {a.start_time.slice(0, 5)} – {a.end_time.slice(0, 5)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Portfolio Gallery */}
+            {master.portfolio_urls.length > 0 && (
+              <div className="card-premium p-6">
+                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                  <Image className="h-5 w-5 text-primary" /> Portfolio
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {master.portfolio_urls.map((url, i) => (
+                    <button key={i} onClick={() => setLightboxImg(url)}
+                      className="aspect-square rounded-xl overflow-hidden border border-border hover:opacity-80 transition-opacity">
+                      <img src={url} alt={`Portfolio ${i + 1}`} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Reviews */}
             <div className="card-premium p-6">
               <h3 className="font-bold text-lg mb-4">{t('reviewsTitle')} ({master.reviews_count})</h3>
@@ -352,6 +409,16 @@ export default function MasterProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Lightbox */}
+      {lightboxImg && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setLightboxImg(null)}>
+          <button className="absolute top-4 right-4 text-white" onClick={() => setLightboxImg(null)}>
+            <X className="h-8 w-8" />
+          </button>
+          <img src={lightboxImg} alt="Portfolio" className="max-w-full max-h-[90vh] rounded-xl object-contain" onClick={e => e.stopPropagation()} />
+        </div>
+      )}
 
       <ChatDialog
         receiverId={master.user_id}
