@@ -27,6 +27,7 @@ export default function Navbar() {
 
   const navLinks = [
     { href: '/', label: t('home') },
+    { href: '/masters', label: t('allMastersPage') },
     { href: '/find-master', label: t('findMaster') },
     { href: '/categories', label: t('categories') },
   ];

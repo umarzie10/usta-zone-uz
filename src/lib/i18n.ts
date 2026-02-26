@@ -296,6 +296,42 @@ export const translations = {
     paymentSuccess: "To'lov muvaffaqiyatli amalga oshirildi!",
     paymentError: "To'lovda xatolik yuz berdi",
     clickPayme: "Click / Payme",
+
+    // Availability
+    workSchedule: "Ish jadvali",
+    workScheduleDesc: "Ish kunlari va vaqtlaringizni belgilang",
+    monday: "Dushanba",
+    tuesday: "Seshanba",
+    wednesday: "Chorshanba",
+    thursday: "Payshanba",
+    friday: "Juma",
+    saturday: "Shanba",
+    sunday: "Yakshanba",
+    startTime: "Boshlanish",
+    endTime: "Tugash",
+    addSchedule: "Jadval qo'shish",
+    scheduleSaved: "Jadval saqlandi!",
+    removeSchedule: "O'chirish",
+
+    // Review
+    writeReview: "Sharh yozish",
+    yourRating: "Bahoingiz",
+    yourComment: "Sharhingiz",
+    submitReview: "Sharh yuborish",
+    reviewSubmitted: "Sharh yuborildi!",
+    rateThisMaster: "Bu ustani baholang",
+
+    // Masters page
+    allMastersPage: "Barcha ustalar",
+    allMastersDesc: "Ro'yxatdan o'tgan barcha ustalar",
+
+    // Avatar
+    changeAvatar: "Rasm o'zgartirish",
+    avatarUpdated: "Rasm yangilandi!",
+
+    // Profile
+    editProfile: "Profilni tahrirlash",
+    profileUpdated: "Profil yangilandi!",
   },
 
   ru: {
@@ -581,6 +617,33 @@ export const translations = {
     paymentSuccess: "Оплата прошла успешно!",
     paymentError: "Ошибка оплаты",
     clickPayme: "Click / Payme",
+
+    workSchedule: "График работы",
+    workScheduleDesc: "Укажите рабочие дни и время",
+    monday: "Понедельник",
+    tuesday: "Вторник",
+    wednesday: "Среда",
+    thursday: "Четверг",
+    friday: "Пятница",
+    saturday: "Суббота",
+    sunday: "Воскресенье",
+    startTime: "Начало",
+    endTime: "Конец",
+    addSchedule: "Добавить график",
+    scheduleSaved: "График сохранён!",
+    removeSchedule: "Удалить",
+    writeReview: "Написать отзыв",
+    yourRating: "Ваша оценка",
+    yourComment: "Ваш комментарий",
+    submitReview: "Отправить отзыв",
+    reviewSubmitted: "Отзыв отправлен!",
+    rateThisMaster: "Оцените этого мастера",
+    allMastersPage: "Все мастера",
+    allMastersDesc: "Все зарегистрированные мастера",
+    changeAvatar: "Изменить фото",
+    avatarUpdated: "Фото обновлено!",
+    editProfile: "Редактировать профиль",
+    profileUpdated: "Профиль обновлён!",
   },
 
   en: {
@@ -866,6 +929,33 @@ export const translations = {
     paymentSuccess: "Payment successful!",
     paymentError: "Payment error",
     clickPayme: "Click / Payme",
+
+    workSchedule: "Work Schedule",
+    workScheduleDesc: "Set your working days and hours",
+    monday: "Monday",
+    tuesday: "Tuesday",
+    wednesday: "Wednesday",
+    thursday: "Thursday",
+    friday: "Friday",
+    saturday: "Saturday",
+    sunday: "Sunday",
+    startTime: "Start",
+    endTime: "End",
+    addSchedule: "Add Schedule",
+    scheduleSaved: "Schedule saved!",
+    removeSchedule: "Remove",
+    writeReview: "Write Review",
+    yourRating: "Your Rating",
+    yourComment: "Your Comment",
+    submitReview: "Submit Review",
+    reviewSubmitted: "Review submitted!",
+    rateThisMaster: "Rate this master",
+    allMastersPage: "All Masters",
+    allMastersDesc: "All registered masters",
+    changeAvatar: "Change Photo",
+    avatarUpdated: "Photo updated!",
+    editProfile: "Edit Profile",
+    profileUpdated: "Profile updated!",
   }
 };
 
