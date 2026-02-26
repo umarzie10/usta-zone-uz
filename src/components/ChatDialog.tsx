@@ -120,7 +120,34 @@ export default function ChatDialog({ receiverId, receiverName, orderId, open, on
         order_id: orderId || null,
       });
       if (!error) {
+        const msgText = newMessage.trim();
         setNewMessage('');
+        
+        // Send SMS notification to receiver
+        try {
+          const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+          if (projectId) {
+            // Get receiver's phone
+            const { data: receiverProfile } = await supabase
+              .from('profiles')
+              .select('phone, full_name')
+              .eq('user_id', receiverId)
+              .single();
+            
+            if (receiverProfile?.phone) {
+              const senderName = (await supabase.from('profiles').select('full_name').eq('user_id', user.id).single()).data?.full_name || 'Foydalanuvchi';
+              await supabase.functions.invoke('send-sms', {
+                body: {
+                  phone: receiverProfile.phone,
+                  message: `UstaZone: ${senderName} sizga xabar yubordi: "${msgText.substring(0, 100)}"`,
+                  type: 'new_message',
+                },
+              });
+            }
+          }
+        } catch (smsErr) {
+          console.log('SMS notification skipped:', smsErr);
+        }
       }
     } finally {
       setSending(false);

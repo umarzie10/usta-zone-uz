@@ -13,6 +13,7 @@ import MasterProfilePage from "./pages/MasterProfile";
 import OrderCreatePage from "./pages/OrderCreate";
 import ClientDashboard from "./pages/ClientDashboard";
 import MasterDashboard from "./pages/MasterDashboard";
+import MastersPage from "./pages/Masters";
 import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/order/create" element={<OrderCreatePage />} />
               <Route path="/dashboard/client" element={<ClientDashboard />} />
               <Route path="/dashboard/master" element={<MasterDashboard />} />
+              <Route path="/masters" element={<MastersPage />} />
               <Route path="/admin" element={<AdminPanel />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
