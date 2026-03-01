@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import ChatDialog from '@/components/ChatDialog';
 import AvailabilityForm from '@/components/AvailabilityForm';
+import PortfolioUpload from '@/components/PortfolioUpload';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User } from 'lucide-react';
 
 export default function MasterDashboard() {
   const { t, showNotification } = useApp();
@@ -26,6 +28,9 @@ export default function MasterDashboard() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({ bio: '', skills: '' });
+  const [savingProfile, setSavingProfile] = useState(false);
 
   useEffect(() => {
     if (user) fetchData();
@@ -33,15 +38,15 @@ export default function MasterDashboard() {
 
   const fetchData = async () => {
     setLoading(true);
-    // Master profile
     const { data: mp } = await supabase.from('master_profiles').select('*').eq('user_id', user!.id).single();
     setMasterProfile(mp);
+    if (mp) {
+      setProfileForm({ bio: mp.bio || '', skills: (mp.skills || []).join(', ') });
+    }
 
-    // Orders
     const { data: ords } = await supabase.from('orders').select('*').eq('master_id', user!.id).order('created_at', { ascending: false }).limit(20);
     setOrders(ords || []);
 
-    // Reviews
     const { data: revs } = await supabase.from('reviews').select('*').eq('master_id', user!.id).order('created_at', { ascending: false }).limit(10);
     if (revs && revs.length > 0) {
       const clientIds = revs.map(r => r.client_id);
@@ -52,10 +57,8 @@ export default function MasterDashboard() {
       setReviews([]);
     }
 
-    // Transactions
     const { data: txs } = await supabase.from('transactions').select('*').eq('user_id', user!.id).order('created_at', { ascending: false }).limit(20);
     setTransactions(txs || []);
-
     setLoading(false);
   };
 
@@ -76,6 +79,25 @@ export default function MasterDashboard() {
       showNotification('error', err.message);
     } finally {
       setUploadingAvatar(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!user || !masterProfile) return;
+    setSavingProfile(true);
+    try {
+      const skills = profileForm.skills.split(',').map(s => s.trim()).filter(Boolean);
+      await supabase.from('master_profiles').update({
+        bio: profileForm.bio || null,
+        skills,
+      }).eq('user_id', user.id);
+      showNotification('success', t('profileUpdated'));
+      setEditingProfile(false);
+      fetchData();
+    } catch (err: any) {
+      showNotification('error', err.message);
+    } finally {
+      setSavingProfile(false);
     }
   };
 
@@ -120,6 +142,8 @@ export default function MasterDashboard() {
 
   const tabs = [
     { id: 'overview', label: t('overview'), icon: TrendingUp },
+    { id: 'profile', label: t('editProfile'), icon: User },
+    { id: 'portfolio', label: 'Portfolio', icon: Image },
     { id: 'schedule', label: t('workSchedule'), icon: Clock },
     { id: 'balance', label: t('myBalance'), icon: Wallet },
     { id: 'reviews', label: t('reviewsTab'), icon: Star },
@@ -131,7 +155,6 @@ export default function MasterDashboard() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-start justify-between mb-8">
           <div className="flex items-center gap-4">
-            {/* Avatar with upload */}
             <div className="relative group">
               <img src={avatarUrl} alt="" className="w-16 h-16 rounded-2xl object-cover" />
               <label className="absolute inset-0 rounded-2xl bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
@@ -199,6 +222,48 @@ export default function MasterDashboard() {
                 <p className="text-sm text-muted-foreground text-center py-4">{t('noData')}</p>
               )}
             </div>
+          </div>
+        )}
+
+        {activeTab === 'profile' && masterProfile && (
+          <div className="card-premium p-6 space-y-5">
+            <h3 className="font-bold text-lg flex items-center gap-2">
+              <User className="h-5 w-5 text-primary" />
+              {t('editProfile')}
+            </h3>
+            <div>
+              <Label className="text-sm font-medium">{t('aboutMaster')}</Label>
+              <Textarea
+                value={profileForm.bio}
+                onChange={e => setProfileForm({ ...profileForm, bio: e.target.value })}
+                placeholder="O'zingiz haqingizda yozing..."
+                className="mt-1.5 rounded-xl resize-none"
+                rows={4}
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-medium">{t('skills')}</Label>
+              <Input
+                value={profileForm.skills}
+                onChange={e => setProfileForm({ ...profileForm, skills: e.target.value })}
+                placeholder="Santexnik, Elektrik, Konditsioner..."
+                className="mt-1.5 rounded-xl h-11"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Vergul bilan ajrating</p>
+            </div>
+            <Button className="w-full rounded-xl btn-hero" onClick={handleSaveProfile} disabled={savingProfile}>
+              {savingProfile ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {t('save')}
+            </Button>
+          </div>
+        )}
+
+        {activeTab === 'portfolio' && masterProfile && (
+          <div className="card-premium p-6">
+            <PortfolioUpload
+              portfolioUrls={masterProfile.portfolio_urls || []}
+              onUpdated={fetchData}
+            />
           </div>
         )}
 

@@ -332,6 +332,13 @@ export const translations = {
     // Profile
     editProfile: "Profilni tahrirlash",
     profileUpdated: "Profil yangilandi!",
+
+    // Portfolio
+    addPhoto: "Rasm qo'shish",
+    portfolioUpdated: "Portfolio yangilandi!",
+    portfolioDesc: "O'z ishlaringiz rasmlarini yuklang",
+    noPortfolioYet: "Hali portfolio rasmlari yo'q",
+    experienceRequired: "Tajriba yillarini kiriting",
   },
 
   ru: {
@@ -644,6 +651,11 @@ export const translations = {
     avatarUpdated: "Фото обновлено!",
     editProfile: "Редактировать профиль",
     profileUpdated: "Профиль обновлён!",
+    addPhoto: "Добавить фото",
+    portfolioUpdated: "Портфолио обновлено!",
+    portfolioDesc: "Загрузите фото своих работ",
+    noPortfolioYet: "Пока нет фото портфолио",
+    experienceRequired: "Укажите стаж работы",
   },
 
   en: {
@@ -956,6 +968,11 @@ export const translations = {
     avatarUpdated: "Photo updated!",
     editProfile: "Edit Profile",
     profileUpdated: "Profile updated!",
+    addPhoto: "Add Photo",
+    portfolioUpdated: "Portfolio updated!",
+    portfolioDesc: "Upload photos of your work",
+    noPortfolioYet: "No portfolio photos yet",
+    experienceRequired: "Enter experience years",
   }
 };
 
