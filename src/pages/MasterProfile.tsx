@@ -24,12 +24,14 @@ interface MasterData {
   bio: string | null;
   skills: string[];
   portfolio_urls: string[];
+  category_ids: string[];
   full_name: string;
   avatar_url: string | null;
   city: string | null;
   region: string | null;
   phone: string | null;
   is_verified: boolean;
+  category_names: string[];
 }
 
 interface Review {
@@ -80,6 +82,14 @@ export default function MasterProfilePage() {
         .eq('user_id', mp.user_id)
         .single();
 
+      // Fetch category names
+      const catIds = mp.category_ids || [];
+      let categoryNames: string[] = [];
+      if (catIds.length > 0) {
+        const { data: cats } = await supabase.from('categories').select('name_uz').in('id', catIds);
+        categoryNames = cats?.map(c => c.name_uz) || [];
+      }
+
       setMaster({
         id: mp.id,
         user_id: mp.user_id,
@@ -90,6 +100,8 @@ export default function MasterProfilePage() {
         bio: mp.bio,
         skills: mp.skills || [],
         portfolio_urls: mp.portfolio_urls || [],
+        category_ids: catIds,
+        category_names: categoryNames,
         full_name: profile?.full_name || 'Unknown',
         avatar_url: profile?.avatar_url,
         city: profile?.city,
@@ -258,6 +270,22 @@ export default function MasterProfilePage() {
               <div className="card-premium p-6">
                 <h3 className="font-bold text-lg mb-3">{t('aboutMaster')}</h3>
                 <p className="text-muted-foreground leading-relaxed">{master.bio}</p>
+              </div>
+            )}
+
+            {/* Category */}
+            {master.category_names.length > 0 && (
+              <div className="card-premium p-6">
+                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                  <Briefcase className="h-5 w-5 text-primary" /> {t('categoryLabel')}
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {master.category_names.map(name => (
+                    <Badge key={name} className="px-3 py-1.5 rounded-xl text-sm">
+                      {name}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             )}
 
