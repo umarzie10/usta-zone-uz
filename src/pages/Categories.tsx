@@ -43,7 +43,7 @@ export default function CategoriesPage() {
       const { data: masters } = await supabase
         .from('master_profiles')
         .select('category_ids')
-        .eq('is_approved', true);
+        .eq('is_active', true);
 
       if (masters) {
         const counts: Record<string, number> = {};
