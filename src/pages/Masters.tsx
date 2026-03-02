@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import ReviewForm from '@/components/ReviewForm';
-import { Star, MapPin, CheckCircle, Phone, MessageCircle, Briefcase } from 'lucide-react';
+import { Star, MapPin, CheckCircle, Phone, MessageCircle, Briefcase, Filter } from 'lucide-react';
 
 interface MasterItem {
   id: string;
@@ -18,6 +18,7 @@ interface MasterItem {
   jobs_completed: number;
   experience_years: number;
   skills: string[];
+  category_ids: string[];
   full_name: string;
   avatar_url: string | null;
   city: string | null;
@@ -25,15 +26,38 @@ interface MasterItem {
   is_verified: boolean;
 }
 
+interface Category {
+  id: string;
+  name_uz: string;
+  name_ru: string;
+  name_en: string;
+}
+
 export default function MastersPage() {
-  const { t } = useApp();
+  const { t, lang } = useApp();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [masters, setMasters] = useState<MasterItem[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [loading, setLoading] = useState(true);
   const [reviewTarget, setReviewTarget] = useState<{ masterId: string; orderId: string } | null>(null);
 
-  useEffect(() => { fetchMasters(); }, []);
+  useEffect(() => {
+    fetchCategories();
+    fetchMasters();
+  }, []);
+
+  const fetchCategories = async () => {
+    const { data } = await supabase.from('categories').select('id, name_uz, name_ru, name_en').order('order_num');
+    setCategories(data || []);
+  };
+
+  const getCategoryName = (cat: Category) => {
+    if (lang === 'ru') return cat.name_ru;
+    if (lang === 'en') return cat.name_en;
+    return cat.name_uz;
+  };
 
   const fetchMasters = async () => {
     setLoading(true);
@@ -55,13 +79,17 @@ export default function MastersPage() {
         id: mp.id, user_id: mp.user_id,
         rating: mp.rating || 0, reviews_count: mp.reviews_count || 0,
         jobs_completed: mp.jobs_completed || 0, experience_years: mp.experience_years || 0,
-        skills: mp.skills || [],
+        skills: mp.skills || [], category_ids: mp.category_ids || [],
         full_name: p?.full_name || 'Unknown', avatar_url: p?.avatar_url,
         city: p?.city, phone: p?.phone, is_verified: p?.is_verified || false,
       };
     }));
     setLoading(false);
   };
+
+  const filteredMasters = selectedCategory === 'all'
+    ? masters
+    : masters.filter(m => m.category_ids.includes(selectedCategory));
 
   const renderStars = (rating: number) => (
     <div className="flex items-center gap-0.5">
@@ -81,8 +109,32 @@ export default function MastersPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Category filter */}
+        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
+          <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
+          <button
+            onClick={() => setSelectedCategory('all')}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+              selectedCategory === 'all' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {t('all')}
+          </button>
+          {categories.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                selectedCategory === cat.id ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {getCategoryName(cat)}
+            </button>
+          ))}
+        </div>
+
         <p className="text-muted-foreground text-sm mb-6">
-          <span className="font-semibold text-foreground">{loading ? '...' : masters.length}</span> {t('mastersFound')}
+          <span className="font-semibold text-foreground">{loading ? '...' : filteredMasters.length}</span> {t('mastersFound')}
         </p>
 
         {loading ? (
@@ -94,9 +146,15 @@ export default function MastersPage() {
               </div>
             ))}
           </div>
+        ) : filteredMasters.length === 0 ? (
+          <div className="card-premium p-12 text-center">
+            <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+            <p className="font-semibold">{t('noMasterFound')}</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('changeSearchTerms')}</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {masters.map((master, i) => (
+            {filteredMasters.map((master, i) => (
               <div key={master.id} className="card-premium p-5 hover-lift animate-fade-in-up" style={{ animationDelay: `${i * 60}ms` }}>
                 <div className="flex gap-3 mb-4">
                   <img
