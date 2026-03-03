@@ -44,11 +44,23 @@ export default function ReviewForm({ masterId, orderId, open, onClose, onSubmitt
         .eq('master_id', masterId);
       if (reviews && reviews.length > 0) {
         const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
-        await supabase
-          .from('master_profiles')
-          .update({ rating: parseFloat(avg.toFixed(2)), reviews_count: reviews.length })
-          .eq('user_id', masterId);
-      }
+          await supabase
+            .from('master_profiles')
+            .update({ rating: parseFloat(avg.toFixed(2)), reviews_count: reviews.length })
+            .eq('user_id', masterId);
+        }
+
+        // Send notification to master
+        try {
+          await supabase.from('notifications').insert({
+            user_id: masterId,
+            sender_id: user.id,
+            title: 'Yangi baho',
+            message: `${rating} yulduzli baho${comment.trim() ? `: "${comment.trim().substring(0, 100)}"` : ''}`,
+            type: 'new_review',
+            related_order_id: orderId,
+          });
+        } catch {} 
 
       showNotification('success', t('reviewSubmitted'));
       onSubmitted?.();

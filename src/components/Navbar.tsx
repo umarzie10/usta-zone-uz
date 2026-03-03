@@ -9,9 +9,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
   Sun, Moon, Globe, Menu, X, User, LogOut, LayoutDashboard,
-  ShieldCheck, Search, Bell
+  ShieldCheck, Search
 } from 'lucide-react';
 import { Language } from '@/lib/i18n';
+import NotificationBell from '@/components/NotificationBell';
 
 export default function Navbar() {
   const { lang, setLang, theme, toggleTheme, t } = useApp();
@@ -100,10 +101,7 @@ export default function Navbar() {
 
             {user ? (
               <>
-                <Button variant="ghost" size="icon" className="rounded-lg relative">
-                  <Bell className="h-4 w-4" />
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full"></span>
-                </Button>
+                <NotificationBell />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="rounded-xl gap-2 pl-2 pr-3">
