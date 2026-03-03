@@ -343,24 +343,34 @@ export default function MasterProfilePage() {
             <div className="card-premium p-6">
               <h3 className="font-bold text-lg mb-4">{t('reviewsTitle')} ({master.reviews_count})</h3>
               {reviews.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-5">
                   {reviews.map((review, i) => (
                     <div key={review.id}>
-                      {i > 0 && <Separator className="mb-4" />}
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <p className="font-semibold text-sm">{review.client_name}</p>
-                          <div className="flex items-center gap-1 mt-0.5">
-                            {Array.from({ length: 5 }, (_, j) => (
-                              <Star key={j} className={`h-3 w-3 ${j < review.rating ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/30'}`} />
-                            ))}
-                          </div>
+                      {i > 0 && <Separator className="mb-5" />}
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+                          {review.client_name.charAt(0).toUpperCase()}
                         </div>
-                        <span className="text-xs text-muted-foreground">
-                          {review.created_at ? new Date(review.created_at).toLocaleDateString() : ''}
-                        </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="font-semibold text-sm">{review.client_name}</p>
+                            <span className="text-xs text-muted-foreground">
+                              {review.created_at ? new Date(review.created_at).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 mb-2">
+                            {Array.from({ length: 5 }, (_, j) => (
+                              <Star key={j} className={`h-3.5 w-3.5 ${j < review.rating ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/30'}`} />
+                            ))}
+                            <span className="text-xs font-medium text-amber-500 ml-1">{review.rating}.0</span>
+                          </div>
+                          {review.comment && (
+                            <p className="text-sm text-muted-foreground leading-relaxed bg-muted/50 rounded-xl px-3 py-2">
+                              {review.comment}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      {review.comment && <p className="text-sm text-muted-foreground">{review.comment}</p>}
                     </div>
                   ))}
                 </div>

@@ -31,7 +31,7 @@ export default function ReviewForm({ masterId, orderId, open, onClose, onSubmitt
       const { error } = await supabase.from('reviews').insert({
         master_id: masterId,
         client_id: user.id,
-        order_id: orderId,
+        order_id: orderId || null,
         rating,
         comment: comment.trim() || null,
       });
