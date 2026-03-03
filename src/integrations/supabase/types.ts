@@ -318,7 +318,7 @@ export type Database = {
           created_at: string | null
           id: string
           master_id: string
-          order_id: string
+          order_id: string | null
           rating: number
         }
         Insert: {
@@ -327,7 +327,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           master_id: string
-          order_id: string
+          order_id?: string | null
           rating: number
         }
         Update: {
@@ -336,7 +336,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           master_id?: string
-          order_id?: string
+          order_id?: string | null
           rating?: number
         }
         Relationships: []

@@ -48,10 +48,12 @@ export default function OrderCreatePage() {
       const commission = amount * 0.1;
       const masterAmount = amount - commission;
 
-      const { error } = await supabase.from('orders').insert({
+      const { data: orderData, error } = await supabase.from('orders').insert({
         client_id: user.id,
+        master_id: form.masterId || null,
         title: form.title,
         description: form.description,
+        category_id: form.categoryId || null,
         payment_method: form.paymentMethod,
         amount,
         commission_amount: commission,
@@ -59,9 +61,32 @@ export default function OrderCreatePage() {
         city: form.city,
         address: form.address,
         status: 'pending',
-      });
+      }).select('id').single();
 
       if (error) throw error;
+
+      // Send notification to master if selected
+      if (form.masterId) {
+        try {
+          // Get master's user_id from master_profiles
+          const { data: mp } = await supabase
+            .from('master_profiles')
+            .select('user_id')
+            .eq('id', form.masterId)
+            .maybeSingle();
+          if (mp) {
+            await supabase.from('notifications').insert({
+              user_id: mp.user_id,
+              sender_id: user.id,
+              title: 'Yangi buyurtma',
+              message: `"${form.title}" - yangi buyurtma keldi`,
+              type: 'new_order',
+              related_order_id: orderData?.id || null,
+            });
+          }
+        } catch {}
+      }
+
       showNotification('success', t('orderCreated'));
       navigate('/dashboard/client');
     } catch (err: any) {
