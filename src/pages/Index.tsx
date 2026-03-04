@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
+import TopMasters from '@/components/TopMasters';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -122,16 +123,8 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Top masters CTA */}
-      <section className="section-padding bg-muted/50">
-        <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl font-black mb-3">{t('topMasters')}</h2>
-          <p className="text-muted-foreground mb-6">{t('bestRatedMasters')}</p>
-          <Button className="rounded-xl gap-2" onClick={() => navigate('/find-master')}>
-            {t('findMaster')} <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </section>
+      {/* Top 3 Masters */}
+      <TopMasters />
 
       {/* CTA */}
       <section className="section-padding max-w-7xl mx-auto">

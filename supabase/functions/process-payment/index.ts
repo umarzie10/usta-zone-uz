@@ -6,6 +6,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+// ==========================================
+// MERCHANT ID LARNI SHU YERGA YOZING
+// ==========================================
+const CLICK_MERCHANT_ID = ''; // Click merchant ID
+const CLICK_SERVICE_ID = ''; // Click service ID
+const CLICK_SECRET_KEY = ''; // Click secret key
+const PAYME_MERCHANT_ID = ''; // Payme merchant ID
+const PAYME_MERCHANT_KEY = ''; // Payme merchant key
+// ==========================================
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -56,14 +66,31 @@ serve(async (req) => {
     const commission = amount * 0.1;
     const masterAmount = amount - commission;
 
-    // MOCK: Simulate payment processing
-    // In production, replace with actual Click/Payme API calls:
-    // Click: POST https://api.click.uz/v2/merchant/...
-    // Payme: POST https://checkout.paycom.uz/api/...
-    const mockPaymentId = `${provider}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    
-    // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    let paymentUrl = '';
+    let paymentId = '';
+
+    if (provider === 'click') {
+      // Click UZ integration
+      if (CLICK_MERCHANT_ID && CLICK_SERVICE_ID) {
+        paymentUrl = `https://my.click.uz/services/pay?service_id=${CLICK_SERVICE_ID}&merchant_id=${CLICK_MERCHANT_ID}&amount=${amount}&transaction_param=${orderId}`;
+        paymentId = `click_${Date.now()}`;
+      } else {
+        paymentId = `click_demo_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      }
+    } else if (provider === 'payme') {
+      // Payme integration
+      if (PAYME_MERCHANT_ID) {
+        const encodedParams = btoa(JSON.stringify({
+          m: PAYME_MERCHANT_ID,
+          ac: { order_id: orderId },
+          a: amount * 100, // Payme uses tiyin (1 so'm = 100 tiyin)
+        }));
+        paymentUrl = `https://checkout.paycom.uz/${encodedParams}`;
+        paymentId = `payme_${Date.now()}`;
+      } else {
+        paymentId = `payme_demo_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      }
+    }
 
     // Update order with payment info
     const { error: updateError } = await supabase
@@ -81,7 +108,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Failed to update order' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    // Log transaction
+    // Log transactions
     const serviceClient = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -92,37 +119,37 @@ serve(async (req) => {
       order_id: orderId,
       amount: amount,
       type: 'payment',
-      description: `Online payment via ${provider} - Order ${orderId.slice(0, 8)}`,
+      description: `Online to'lov ${provider} orqali - Buyurtma ${orderId.slice(0, 8)}`,
     });
 
-    // Log commission
     await serviceClient.from('transactions').insert({
       user_id: userId,
       order_id: orderId,
       amount: -commission,
       type: 'commission',
-      description: `Platform commission (10%) - Order ${orderId.slice(0, 8)}`,
+      description: `Platforma komissiyasi (10%) - Buyurtma ${orderId.slice(0, 8)}`,
     });
 
-    // If master is assigned, credit master balance
+    // Credit master if assigned
     if (order.master_id) {
       await serviceClient.from('transactions').insert({
         user_id: order.master_id,
         order_id: orderId,
         amount: masterAmount,
         type: 'earning',
-        description: `Earning from order ${orderId.slice(0, 8)} (after 10% commission)`,
+        description: `Buyurtma daromadi ${orderId.slice(0, 8)} (10% komissiyadan keyin)`,
       });
     }
 
     return new Response(JSON.stringify({
       success: true,
-      paymentId: mockPaymentId,
+      paymentId,
+      paymentUrl: paymentUrl || null,
       provider,
       amount,
       commission,
       masterAmount,
-      message: `Payment processed via ${provider} (demo mode)`,
+      message: paymentUrl ? `${provider} to'lov sahifasiga yo'naltiring` : `To'lov ${provider} orqali amalga oshirildi (demo rejim)`,
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch (error: unknown) {
