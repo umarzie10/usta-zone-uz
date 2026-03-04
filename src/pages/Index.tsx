@@ -33,19 +33,19 @@ export default function Index() {
           <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5 blur-3xl" />
           <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-white/5 blur-3xl" />
         </div>
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 text-center text-white">
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-28 text-center text-white">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm text-sm font-medium mb-6 animate-fade-in">
             <span className="text-amber-300">★</span> {t('platformBadge')}
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight mb-5 animate-fade-in-up">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black leading-tight mb-5 animate-fade-in-up">
             {t('heroTitle')}
           </h1>
-          <p className="text-white/80 text-lg sm:text-xl max-w-2xl mx-auto mb-10 animate-fade-in-up delay-100">
+          <p className="text-white/80 text-base sm:text-xl max-w-2xl mx-auto mb-8 sm:mb-10 animate-fade-in-up delay-100">
             {t('heroSubtitle')}
           </p>
 
           {/* Search bar */}
-          <div className="flex gap-2 max-w-2xl mx-auto animate-fade-in-up delay-200">
+          <div className="flex flex-col sm:flex-row gap-2 max-w-2xl mx-auto animate-fade-in-up delay-200">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
@@ -53,11 +53,11 @@ export default function Index() {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && navigate(`/find-master?q=${search}`)}
-                className="pl-12 h-14 rounded-2xl bg-background text-foreground text-base"
+                className="pl-12 h-12 sm:h-14 rounded-2xl bg-background text-foreground text-base"
               />
             </div>
             <Button
-              className="h-14 px-8 rounded-2xl btn-hero text-base shrink-0"
+              className="h-12 sm:h-14 px-8 rounded-2xl btn-hero text-base shrink-0"
               onClick={() => navigate(`/find-master?q=${search}`)}
             >
               {t('searchBtn')}
@@ -96,16 +96,16 @@ export default function Index() {
 
       {/* Categories */}
       <section className="section-padding max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-black">{t('popularCategories')}</h2>
-            <p className="text-muted-foreground mt-1">{t('selectService')}</p>
+        <div className="flex items-center justify-between mb-6 sm:mb-8 gap-2">
+          <div className="min-w-0">
+            <h2 className="text-2xl sm:text-3xl font-black">{t('popularCategories')}</h2>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base">{t('selectService')}</p>
           </div>
-          <Button variant="ghost" className="gap-1 rounded-xl text-primary" onClick={() => navigate('/categories')}>
+          <Button variant="ghost" className="gap-1 rounded-xl text-primary shrink-0 text-sm" onClick={() => navigate('/categories')}>
             {t('viewAll')} <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 sm:gap-3">
           {demoCategories.slice(0, 12).map((cat, i) => {
             const Icon = iconMap[cat.icon] || Hammer;
             return (
@@ -128,21 +128,21 @@ export default function Index() {
 
       {/* CTA */}
       <section className="section-padding max-w-7xl mx-auto">
-        <div className="hero-bg rounded-3xl p-10 sm:p-14 text-white text-center relative overflow-hidden">
+        <div className="hero-bg rounded-2xl sm:rounded-3xl p-6 sm:p-14 text-white text-center relative overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/5" />
             <div className="absolute -bottom-16 -left-16 w-64 h-64 rounded-full bg-white/5" />
           </div>
           <div className="relative">
-            <h2 className="text-3xl sm:text-4xl font-black mb-4">{t('becomeMaster')}</h2>
-            <p className="text-white/80 text-lg max-w-xl mx-auto mb-8">
+            <h2 className="text-2xl sm:text-4xl font-black mb-3 sm:mb-4">{t('becomeMaster')}</h2>
+            <p className="text-white/80 text-sm sm:text-lg max-w-xl mx-auto mb-6 sm:mb-8">
               {t('becomeMasterDesc')}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button className="btn-accent h-12 px-8 rounded-xl text-base" onClick={() => navigate('/register')}>
+              <Button className="btn-accent h-11 sm:h-12 px-6 sm:px-8 rounded-xl text-sm sm:text-base" onClick={() => navigate('/register')}>
                 {t('registerAsMaster')}
               </Button>
-              <Button variant="outline" className="h-12 px-8 rounded-xl text-base border-white/30 text-white hover:bg-white/10"
+              <Button variant="outline" className="h-11 sm:h-12 px-6 sm:px-8 rounded-xl text-sm sm:text-base border-white/30 text-white hover:bg-white/10"
                 onClick={() => navigate('/about')}>
                 {t('moreInfo')}
               </Button>

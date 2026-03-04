@@ -152,22 +152,22 @@ export default function MasterDashboard() {
 
   return (
     <Layout>
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-start justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <div className="relative group">
-              <img src={avatarUrl} alt="" className="w-16 h-16 rounded-2xl object-cover" />
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 sm:mb-8">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="relative group shrink-0">
+              <img src={avatarUrl} alt="" className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover" />
               <label className="absolute inset-0 rounded-2xl bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
                 {uploadingAvatar ? <Loader2 className="h-5 w-5 text-white animate-spin" /> : <Camera className="h-5 w-5 text-white" />}
                 <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
               </label>
             </div>
-            <div>
-              <h1 className="text-3xl font-black">{t('masterDashboard')}</h1>
-              <p className="text-muted-foreground mt-1">{profile?.full_name}</p>
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-3xl font-black truncate">{t('masterDashboard')}</h1>
+              <p className="text-muted-foreground text-sm mt-0.5 truncate">{profile?.full_name}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-sm font-semibold">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-xs sm:text-sm font-semibold self-start shrink-0">
             <span className="w-2 h-2 rounded-full bg-success animate-pulse"></span>
             {t('activeStatus')}
           </div>

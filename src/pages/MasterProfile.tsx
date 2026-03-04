@@ -211,21 +211,21 @@ export default function MasterProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left - Main info */}
           <div className="lg:col-span-2 space-y-5">
-            <div className="card-premium p-6">
-              <div className="flex gap-5">
-                <div className="relative shrink-0">
+            <div className="card-premium p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
+                <div className="relative shrink-0 self-center sm:self-start">
                   <img src={avatarUrl} alt={master.full_name}
-                    className="w-28 h-28 rounded-2xl object-cover shadow-md" />
+                    className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl object-cover shadow-md" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <h1 className="text-2xl font-black">{master.full_name}</h1>
-                    <Button variant="ghost" size="icon" className="rounded-xl shrink-0">
+                <div className="flex-1 min-w-0 text-center sm:text-left">
+                  <div className="flex items-start justify-center sm:justify-between gap-3 mb-2">
+                    <h1 className="text-xl sm:text-2xl font-black truncate">{master.full_name}</h1>
+                    <Button variant="ghost" size="icon" className="rounded-xl shrink-0 hidden sm:flex">
                       <Heart className="h-5 w-5" />
                     </Button>
                   </div>
 
-                  <div className="flex items-center gap-2 mb-3">
+                  <div className="flex items-center justify-center sm:justify-start gap-2 mb-3 flex-wrap">
                     <div className="flex items-center gap-1">{renderStars(master.rating, 'lg')}</div>
                     <span className="font-bold text-amber-500">{master.rating.toFixed(1)}</span>
                     <span className="text-muted-foreground text-sm">({master.reviews_count} {t('reviews')})</span>
@@ -236,7 +236,7 @@ export default function MasterProfilePage() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center justify-center sm:justify-start gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground flex-wrap">
                     {master.city && (
                       <div className="flex items-center gap-1">
                         <MapPin className="h-4 w-4" /> {master.city}{master.region ? `, ${master.region}` : ''}

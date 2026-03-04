@@ -9,9 +9,9 @@ interface LayoutProps {
 
 export default function Layout({ children, noFooter = false }: LayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background overflow-x-hidden w-full max-w-full">
       <Navbar />
-      <main className="flex-1">
+      <main className="flex-1 w-full max-w-full overflow-x-hidden">
         {children}
       </main>
       {!noFooter && <Footer />}
