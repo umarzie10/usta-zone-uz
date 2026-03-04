@@ -10,8 +10,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Users, ShoppingBag, Wallet, AlertTriangle, CheckCircle,
   XCircle, Shield, Settings, Search, BarChart3, UserCheck,
-  TrendingUp, Filter
+  TrendingUp, Filter, ArrowDownToLine, Loader2
 } from 'lucide-react';
+import { Label } from '@/components/ui/label';
 
 interface MasterRow {
   id: string;
@@ -70,6 +71,9 @@ export default function AdminPanel() {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalMasters: 0, totalOrders: 0, totalUsers: 0, totalCommission: 0, disputes: 0 });
+  const [adminWithdrawAmount, setAdminWithdrawAmount] = useState('');
+  const [adminCardNumber, setAdminCardNumber] = useState('');
+  const [adminWithdrawing, setAdminWithdrawing] = useState(false);
 
   useEffect(() => {
     if (user && isAdmin) fetchAllData();
@@ -171,6 +175,27 @@ export default function AdminPanel() {
     await supabase.from('withdraw_requests').update({ status }).eq('id', id);
     showNotification('success', `So'rov ${status === 'approved' ? 'tasdiqlandi' : 'rad etildi'}!`);
     fetchWithdrawals();
+  };
+
+  const handleAdminWithdraw = async () => {
+    if (!adminWithdrawAmount || parseFloat(adminWithdrawAmount) <= 0) return;
+    setAdminWithdrawing(true);
+    try {
+      await supabase.from('withdraw_requests').insert({
+        master_id: user!.id,
+        amount: parseFloat(adminWithdrawAmount),
+        card_number: adminCardNumber,
+        status: 'approved',
+      });
+      showNotification('success', 'Komissiya yechib olish so\'rovi yuborildi!');
+      setAdminWithdrawAmount('');
+      setAdminCardNumber('');
+      fetchWithdrawals();
+    } catch (err: any) {
+      showNotification('error', err.message);
+    } finally {
+      setAdminWithdrawing(false);
+    }
   };
 
   if (!user || !isAdmin) {
@@ -601,6 +626,36 @@ export default function AdminPanel() {
                         </div>
                       );
                     })}
+                  </div>
+                </div>
+
+                {/* Admin Commission Withdrawal */}
+                <div className="card-premium p-6 md:col-span-2">
+                  <h3 className="font-bold mb-4 flex items-center gap-2">
+                    <Wallet className="h-5 w-5 text-purple-500" /> Komissiya daromadini yechib olish
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Jami komissiya daromadi</p>
+                      <p className="text-3xl font-black text-purple-500">{stats.totalCommission.toLocaleString()} so'm</p>
+                      <p className="text-xs text-muted-foreground mt-1">Barcha buyurtmalardan 10% komissiya</p>
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="text-sm">Summa (so'm)</Label>
+                        <Input className="mt-1 rounded-xl h-10" type="number" placeholder="1000000"
+                          value={adminWithdrawAmount} onChange={e => setAdminWithdrawAmount(e.target.value)} />
+                      </div>
+                      <div>
+                        <Label className="text-sm">Karta raqami</Label>
+                        <Input className="mt-1 rounded-xl h-10" placeholder="8600 0000 0000 0000"
+                          value={adminCardNumber} onChange={e => setAdminCardNumber(e.target.value)} />
+                      </div>
+                      <Button className="w-full rounded-xl h-10 gap-2" onClick={handleAdminWithdraw} disabled={adminWithdrawing || !adminWithdrawAmount}>
+                        {adminWithdrawing ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowDownToLine className="h-4 w-4" />}
+                        Yechib olish
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
