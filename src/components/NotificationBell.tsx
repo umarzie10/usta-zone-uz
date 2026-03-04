@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,7 +37,6 @@ export default function NotificationBell() {
         .order('created_at', { ascending: false })
         .limit(20);
       if (data) {
-        // Fetch sender names
         const senderIds = [...new Set(data.filter(n => n.sender_id).map(n => n.sender_id!))];
         let nameMap = new Map<string, string>();
         if (senderIds.length > 0) {
@@ -69,13 +69,15 @@ export default function NotificationBell() {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
+  // Close dropdown when clicking outside, but NOT when ChatDialog is open
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
+      if (chatTarget) return; // Don't close if chat is open
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
+  }, [chatTarget]);
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
@@ -85,12 +87,12 @@ export default function NotificationBell() {
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
   };
 
-  const handleReply = (n: Notification) => {
+  const handleReply = useCallback((n: Notification) => {
     if (n.sender_id) {
       setChatTarget({ id: n.sender_id, name: n.sender_name || 'Foydalanuvchi' });
       setOpen(false);
     }
-  };
+  }, []);
 
   const getIcon = (type: string) => {
     if (type === 'new_message') return <MessageCircle className="h-4 w-4 text-primary" />;
@@ -112,7 +114,7 @@ export default function NotificationBell() {
         </Button>
 
         {open && (
-          <div className="absolute right-0 top-full mt-2 w-80 bg-background border border-border rounded-xl shadow-2xl z-50 overflow-hidden">
+          <div className="absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-2rem)] bg-background border border-border rounded-xl shadow-2xl z-50 overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <h4 className="font-bold text-sm">Bildirishnomalar</h4>
               {unreadCount > 0 && (
@@ -131,7 +133,7 @@ export default function NotificationBell() {
                 notifications.map(n => (
                   <div key={n.id} className={`px-4 py-3 border-b border-border last:border-0 ${!n.is_read ? 'bg-primary/5' : ''}`}>
                     <div className="flex items-start gap-3">
-                      <div className="mt-0.5">{getIcon(n.type)}</div>
+                      <div className="mt-0.5 shrink-0">{getIcon(n.type)}</div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium">{n.title}</p>
                         <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.message}</p>
@@ -141,8 +143,8 @@ export default function NotificationBell() {
                           </p>
                           {n.sender_id && (
                             <button
-                              onClick={() => handleReply(n)}
-                              className="text-[10px] text-primary hover:underline flex items-center gap-0.5"
+                              onClick={(e) => { e.stopPropagation(); handleReply(n); }}
+                              className="text-[10px] text-primary hover:underline flex items-center gap-0.5 font-medium"
                             >
                               <Reply className="h-3 w-3" /> Javob
                             </button>
@@ -159,13 +161,14 @@ export default function NotificationBell() {
         )}
       </div>
 
-      {chatTarget && (
+      {chatTarget && createPortal(
         <ChatDialog
           receiverId={chatTarget.id}
           receiverName={chatTarget.name}
           open={true}
           onClose={() => setChatTarget(null)}
-        />
+        />,
+        document.body
       )}
     </>
   );

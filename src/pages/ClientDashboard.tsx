@@ -114,13 +114,13 @@ export default function ClientDashboard() {
 
   return (
     <Layout>
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-start justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-black">{t('clientDashboard')}</h1>
-            <p className="text-muted-foreground mt-1">{profile?.full_name || user.email}</p>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-6 sm:mb-8">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-3xl font-black truncate">{t('clientDashboard')}</h1>
+            <p className="text-muted-foreground text-sm mt-0.5 truncate">{profile?.full_name || user.email}</p>
           </div>
-          <Button className="rounded-xl btn-hero gap-2" onClick={() => navigate('/find-master')}>
+          <Button className="rounded-xl btn-hero gap-2 shrink-0 self-start text-sm sm:text-base" onClick={() => navigate('/find-master')}>
             <Plus className="h-4 w-4" />
             {t('placeOrder')}
           </Button>
@@ -165,25 +165,25 @@ export default function ClientDashboard() {
                   const status = statusConfig[order.status] || statusConfig.pending;
                   const StatusIcon = status.icon;
                   return (
-                    <div key={order.id} className="card-premium p-5">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-semibold">{order.title}</h3>
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${status.color}`}>
+                    <div key={order.id} className="card-premium p-4 sm:p-5">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <h3 className="font-semibold text-sm sm:text-base truncate">{order.title}</h3>
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium shrink-0 ${status.color}`}>
                               <StatusIcon className="h-3 w-3" />
                               {status.label}
                             </span>
                           </div>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>{order.master_name}</span>
+                          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
+                            <span className="truncate">{order.master_name}</span>
                             <span>•</span>
                             <span>{new Date(order.created_at).toLocaleDateString()}</span>
                           </div>
                         </div>
-                        <div className="text-right shrink-0">
-                          <p className="font-bold text-primary">{order.amount.toLocaleString()} so'm</p>
-                          <p className="text-xs text-muted-foreground mt-1">
+                        <div className="text-left sm:text-right shrink-0">
+                          <p className="font-bold text-primary text-sm sm:text-base">{order.amount.toLocaleString()} so'm</p>
+                          <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
                             {order.payment_method === 'cash' ? t('cashLabel') : t('onlineLabel')}
                           </p>
                         </div>
