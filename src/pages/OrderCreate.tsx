@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { useApp } from '@/contexts/AppContext';
@@ -9,8 +9,22 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
-import { demoMasters, demoCategories, uzbekCities } from '@/lib/demoData';
+import { uzbekCities } from '@/lib/demoData';
 import { ArrowLeft, MapPin, Banknote, CreditCard, Loader2 } from 'lucide-react';
+
+interface CategoryItem {
+  id: string;
+  name_uz: string;
+  name_ru: string;
+  name_en: string;
+}
+
+interface PreselectedMaster {
+  id: string;
+  full_name: string;
+  avatar_url: string | null;
+  category_name: string;
+}
 
 export default function OrderCreatePage() {
   const { t, lang, showNotification } = useApp();
@@ -19,13 +33,44 @@ export default function OrderCreatePage() {
   const [searchParams] = useSearchParams();
   const masterId = searchParams.get('master') || '';
 
-  const preselectedMaster = demoMasters.find(m => m.id === masterId);
+  const [preselectedMaster, setPreselectedMaster] = useState<PreselectedMaster | null>(null);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
 
-  const getCatName = (cat: typeof demoCategories[0]) => {
-    if (lang === 'ru') return cat.nameRu;
-    if (lang === 'en') return cat.nameEn;
-    return cat.nameUz;
+  const getCatName = (cat: CategoryItem) => {
+    if (lang === 'ru') return cat.name_ru;
+    if (lang === 'en') return cat.name_en;
+    return cat.name_uz;
   };
+
+  useEffect(() => {
+    // Fetch real categories from DB
+    supabase.from('categories').select('id, name_uz, name_ru, name_en').order('order_num').then(({ data }) => {
+      setCategories(data || []);
+    });
+
+    // Fetch preselected master from DB
+    if (masterId) {
+      (async () => {
+        const { data: mp } = await supabase.from('master_profiles').select('id, user_id, category_ids').eq('id', masterId).maybeSingle();
+        if (mp) {
+          const { data: profile } = await supabase.from('profiles').select('full_name, avatar_url').eq('user_id', mp.user_id).maybeSingle();
+          let catName = '';
+          if (mp.category_ids && mp.category_ids.length > 0) {
+            const { data: cats } = await supabase.from('categories').select('name_uz, name_ru, name_en').in('id', mp.category_ids).limit(1);
+            if (cats && cats[0]) {
+              catName = lang === 'ru' ? cats[0].name_ru : lang === 'en' ? cats[0].name_en : cats[0].name_uz;
+            }
+          }
+          setPreselectedMaster({
+            id: mp.id,
+            full_name: profile?.full_name || 'Usta',
+            avatar_url: profile?.avatar_url,
+            category_name: catName,
+          });
+        }
+      })();
+    }
+  }, [masterId, lang]);
 
   const [form, setForm] = useState({
     title: '',
@@ -68,7 +113,6 @@ export default function OrderCreatePage() {
       // Send notification to master if selected
       if (form.masterId) {
         try {
-          // Get master's user_id from master_profiles
           const { data: mp } = await supabase
             .from('master_profiles')
             .select('user_id')
@@ -109,11 +153,16 @@ export default function OrderCreatePage() {
 
           {preselectedMaster && (
             <div className="flex items-center gap-3 p-4 rounded-xl bg-primary/5 border border-primary/20 mb-6">
-              <img src={preselectedMaster.avatar} alt={preselectedMaster.name}
-                className="w-12 h-12 rounded-xl object-cover" />
+              <img
+                src={preselectedMaster.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(preselectedMaster.full_name)}&background=6366f1&color=fff&size=128`}
+                alt={preselectedMaster.full_name}
+                className="w-12 h-12 rounded-xl object-cover"
+              />
               <div>
-                <p className="font-semibold">{preselectedMaster.name}</p>
-                <p className="text-sm text-primary">{preselectedMaster.category}</p>
+                <p className="font-semibold">{preselectedMaster.full_name}</p>
+                {preselectedMaster.category_name && (
+                  <p className="text-sm text-primary">{preselectedMaster.category_name}</p>
+                )}
               </div>
             </div>
           )}
@@ -137,7 +186,7 @@ export default function OrderCreatePage() {
                   <SelectValue placeholder={t('selectCategory')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {demoCategories.map(c => (
+                  {categories.map(c => (
                     <SelectItem key={c.id} value={c.id}>{getCatName(c)}</SelectItem>
                   ))}
                 </SelectContent>
@@ -155,7 +204,7 @@ export default function OrderCreatePage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label className="text-sm font-medium">{t('city')}</Label>
                 <Select value={form.city} onValueChange={v => setForm({ ...form, city: v })}>
