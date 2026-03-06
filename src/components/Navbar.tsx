@@ -47,9 +47,8 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-lg"
-              style={{ background: 'var(--gradient-primary)' }}>U</div>
+          <Link to="/" className="flex items-center gap-2 group">
+            <img src={logoImg} alt="UstaZone" className="h-10 w-10 object-contain" />
             <span className="font-black text-xl tracking-tight">
               <span className="text-gradient">Usta</span>
               <span className="text-foreground">Zone</span>
