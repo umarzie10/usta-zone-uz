@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import TopMasters from '@/components/TopMasters';
+import QuickOrder from '@/components/QuickOrder';
+import NearestMasters from '@/components/NearestMasters';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
