@@ -125,6 +125,12 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Quick Order - 1 Click */}
+      <QuickOrder />
+
+      {/* Nearest Masters */}
+      <NearestMasters />
+
       {/* Top 3 Masters */}
       <TopMasters />
 
