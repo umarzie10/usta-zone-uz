@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Language } from '@/lib/i18n';
 import NotificationBell from '@/components/NotificationBell';
+import logoImg from '@/assets/logo.png';
 
 export default function Navbar() {
   const { lang, setLang, theme, toggleTheme, t } = useApp();
