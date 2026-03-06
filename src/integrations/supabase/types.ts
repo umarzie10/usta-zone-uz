@@ -275,6 +275,8 @@ export type Database = {
           id: string
           is_blocked: boolean | null
           is_verified: boolean | null
+          latitude: number | null
+          longitude: number | null
           phone: string | null
           region: string | null
           role: Database["public"]["Enums"]["app_role"]
@@ -289,6 +291,8 @@ export type Database = {
           id?: string
           is_blocked?: boolean | null
           is_verified?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           phone?: string | null
           region?: string | null
           role?: Database["public"]["Enums"]["app_role"]
@@ -303,6 +307,8 @@ export type Database = {
           id?: string
           is_blocked?: boolean | null
           is_verified?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           phone?: string | null
           region?: string | null
           role?: Database["public"]["Enums"]["app_role"]
