@@ -1,8 +1,8 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 interface SmsRequest {
@@ -39,7 +39,6 @@ async function getEskizToken(): Promise<string> {
 
 // Send SMS via Eskiz.uz
 async function sendSms(token: string, phone: string, message: string): Promise<boolean> {
-  // Clean phone number - remove + and spaces
   const cleanPhone = phone.replace(/[\s+\-()]/g, '');
 
   const formData = new FormData();
@@ -61,7 +60,7 @@ async function sendSms(token: string, phone: string, message: string): Promise<b
   return resp.ok;
 }
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
