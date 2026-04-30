@@ -180,11 +180,44 @@ export default function MasterDashboard() {
               <p className="text-muted-foreground text-sm mt-0.5 truncate">{profile?.full_name}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-xs sm:text-sm font-semibold self-start shrink-0">
-            <span className="w-2 h-2 rounded-full bg-success animate-pulse"></span>
-            {t('activeStatus')}
+          <div className="flex items-center gap-2 self-start shrink-0">
+            <button
+              onClick={() => navigate('/subscription')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-bold ${TIER_INFO[subscription?.tier || 'free'].color} hover:opacity-80 transition`}>
+              <Crown className="h-3.5 w-3.5" />
+              {TIER_INFO[subscription?.tier || 'free'].label}
+            </button>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-xs sm:text-sm font-semibold">
+              <span className="w-2 h-2 rounded-full bg-success animate-pulse"></span>
+              {t('activeStatus')}
+            </div>
           </div>
         </div>
+
+        {/* Today's quick stats */}
+        {(() => {
+          const today = new Date().toDateString();
+          const todayOrders = orders.filter(o => new Date(o.created_at).toDateString() === today);
+          const todayRevenue = todayOrders.filter(o => o.status === 'completed').reduce((s, o) => s + (o.amount || 0), 0);
+          const inProgress = orders.filter(o => o.status === 'in_progress' || o.status === 'accepted').length;
+          const newOrders = orders.filter(o => o.status === 'pending' || o.status === 'new').length;
+          return (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+              {[
+                { label: 'Bugungi orderlar', value: todayOrders.length, icon: Briefcase, color: 'text-primary' },
+                { label: 'Yangi', value: newOrders, icon: NavIcon, color: 'text-amber-500' },
+                { label: 'Jarayonda', value: inProgress, icon: Clock, color: 'text-blue-500' },
+                { label: "Bugungi daromad", value: `${(todayRevenue / 1000).toFixed(0)}k`, icon: DollarSign, color: 'text-success' },
+              ].map(s => (
+                <div key={s.label} className="card-premium p-3 sm:p-4">
+                  <s.icon className={`h-5 w-5 ${s.color} mb-1.5`} />
+                  <p className="text-lg sm:text-2xl font-black">{s.value}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
 
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
