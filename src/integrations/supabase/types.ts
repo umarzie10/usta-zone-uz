@@ -275,6 +275,7 @@ export type Database = {
           id: string
           is_blocked: boolean | null
           is_verified: boolean | null
+          last_seen_at: string | null
           latitude: number | null
           longitude: number | null
           phone: string | null
@@ -291,6 +292,7 @@ export type Database = {
           id?: string
           is_blocked?: boolean | null
           is_verified?: boolean | null
+          last_seen_at?: string | null
           latitude?: number | null
           longitude?: number | null
           phone?: string | null
@@ -307,6 +309,7 @@ export type Database = {
           id?: string
           is_blocked?: boolean | null
           is_verified?: boolean | null
+          last_seen_at?: string | null
           latitude?: number | null
           longitude?: number | null
           phone?: string | null

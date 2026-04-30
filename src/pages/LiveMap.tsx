@@ -1,13 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import Layout from '@/components/Layout';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
-import { Star, MapPin, Loader2, Navigation, Radio } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Star, MapPin, Loader2, Navigation, Radio, Clock, Briefcase, MessageCircle } from 'lucide-react';
+
+const ONLINE_THRESHOLD_MS = 90_000; // 90s
 
 interface MapMaster {
   master_id: string;
@@ -17,13 +20,15 @@ interface MapMaster {
   city: string | null;
   rating: number | null;
   jobs_completed: number | null;
+  bio?: string | null;
+  experience_years?: number | null;
   lat: number;
   lng: number;
-  is_online: boolean;
+  last_seen_at: string | null;
   category_names: string[];
+  approx_location: boolean;
 }
 
-// Approx city coords (Uzbekistan)
 const cityCoords: Record<string, [number, number]> = {
   "Toshkent": [41.2995, 69.2401],
   "Samarqand": [39.6542, 66.9597],
@@ -39,21 +44,22 @@ const cityCoords: Record<string, [number, number]> = {
   "Urganch": [41.5533, 60.6236],
 };
 
+const isOnline = (lastSeen: string | null) =>
+  !!lastSeen && Date.now() - new Date(lastSeen).getTime() < ONLINE_THRESHOLD_MS;
+
 function makeIcon(avatar: string, online: boolean) {
   return L.divIcon({
     className: '',
     html: `
-      <div style="position:relative;width:48px;height:48px;">
+      <div style="position:relative;width:48px;height:48px;cursor:pointer;">
         <div style="position:absolute;inset:0;border-radius:50%;border:3px solid ${online ? '#22c55e' : '#94a3b8'};box-shadow:0 4px 12px rgba(0,0,0,.25);overflow:hidden;background:#fff;">
           <img src="${avatar}" style="width:100%;height:100%;object-fit:cover;" />
         </div>
         <div style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:${online ? '#22c55e' : '#94a3b8'};border:2px solid #fff;"></div>
-        ${online ? `<div style="position:absolute;inset:-4px;border-radius:50%;border:2px solid #22c55e;opacity:.5;animation:pulse 1.8s ease-out infinite;"></div>` : ''}
-      </div>
-    `,
+        ${online ? `<div style="position:absolute;inset:-4px;border-radius:50%;border:2px solid #22c55e;opacity:.5;animation:lm-pulse 1.8s ease-out infinite;"></div>` : ''}
+      </div>`,
     iconSize: [48, 48],
     iconAnchor: [24, 24],
-    popupAnchor: [0, -24],
   });
 }
 
@@ -66,9 +72,9 @@ function userIcon() {
   });
 }
 
-function FlyTo({ pos }: { pos: [number, number] | null }) {
+function FlyTo({ pos, zoom = 12 }: { pos: [number, number] | null; zoom?: number }) {
   const map = useMap();
-  useEffect(() => { if (pos) map.flyTo(pos, 12, { duration: 1.2 }); }, [pos, map]);
+  useEffect(() => { if (pos) map.flyTo(pos, zoom, { duration: 1.2 }); }, [pos, zoom, map]);
   return null;
 }
 
@@ -80,6 +86,8 @@ function distanceKm(a: [number, number], b: [number, number]) {
   return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
 }
 
+type RadiusOpt = 0 | 1 | 3 | 5 | 10;
+
 export default function LiveMap() {
   const { lang } = useApp();
   const navigate = useNavigate();
@@ -88,95 +96,163 @@ export default function LiveMap() {
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
   const [flyTarget, setFlyTarget] = useState<[number, number] | null>(null);
   const [filter, setFilter] = useState<'all' | 'online'>('all');
+  const [radius, setRadius] = useState<RadiusOpt>(0);
+  const [selected, setSelected] = useState<MapMaster | null>(null);
+  const [routeInfo, setRouteInfo] = useState<{ km: number; min: number } | null>(null);
+  const [, setTick] = useState(0); // forces re-render every 30s for online status freshness
+  const reloadRef = useRef<() => void>();
 
-  // Load masters
+  const loadMasters = async () => {
+    try {
+      const { data: mp } = await supabase
+        .from('master_profiles')
+        .select('id, user_id, rating, jobs_completed, category_ids, bio, experience_years')
+        .eq('is_active', true)
+        .eq('is_approved', true)
+        .limit(150);
+      if (!mp || mp.length === 0) { setMasters([]); setLoading(false); return; }
+
+      const userIds = mp.map(m => m.user_id);
+      const { data: profs } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url, city, latitude, longitude, last_seen_at')
+        .in('user_id', userIds);
+
+      const allCatIds = [...new Set(mp.flatMap(m => m.category_ids || []))];
+      const { data: cats } = allCatIds.length ? await supabase
+        .from('categories').select('id, name_uz, name_ru, name_en')
+        .in('id', allCatIds) : { data: [] as any[] };
+      const catMap = new Map((cats || []).map((c: any) => [c.id, lang === 'ru' ? c.name_ru : lang === 'en' ? c.name_en : c.name_uz]));
+      const profMap = new Map((profs || []).map(p => [p.user_id, p]));
+
+      const result: MapMaster[] = mp.map(m => {
+        const p: any = profMap.get(m.user_id);
+        if (!p) return null;
+        let lat = p.latitude as number | null;
+        let lng = p.longitude as number | null;
+        let approx = false;
+        if (lat == null || lng == null) {
+          const c = cityCoords[p.city || 'Toshkent'] || cityCoords['Toshkent'];
+          const seed = m.id.charCodeAt(0) + m.id.charCodeAt(1);
+          lat = c[0] + ((seed % 100) - 50) / 1000;
+          lng = c[1] + (((seed * 7) % 100) - 50) / 1000;
+          approx = true;
+        }
+        return {
+          master_id: m.id,
+          user_id: m.user_id,
+          full_name: p.full_name,
+          avatar_url: p.avatar_url,
+          city: p.city,
+          rating: m.rating,
+          jobs_completed: m.jobs_completed,
+          bio: m.bio,
+          experience_years: m.experience_years,
+          lat: lat!,
+          lng: lng!,
+          last_seen_at: p.last_seen_at,
+          category_names: (m.category_ids || []).map((id: string) => catMap.get(id) || '').filter(Boolean),
+          approx_location: approx,
+        };
+      }).filter(Boolean) as MapMaster[];
+
+      setMasters(result);
+    } finally {
+      setLoading(false);
+    }
+  };
+  reloadRef.current = loadMasters;
+
+  // Initial load + react to language
+  useEffect(() => { loadMasters(); /* eslint-disable-next-line */ }, [lang]);
+
+  // Realtime subscription on profiles (last_seen_at, lat/lng)
   useEffect(() => {
-    (async () => {
-      try {
-        const { data: mp } = await supabase
-          .from('master_profiles')
-          .select('id, user_id, rating, jobs_completed, category_ids')
-          .eq('is_active', true)
-          .eq('is_approved', true)
-          .limit(100);
-        if (!mp || mp.length === 0) { setLoading(false); return; }
+    const channel = supabase
+      .channel('live-map-profiles')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles' }, (payload: any) => {
+        const u = payload.new;
+        setMasters(prev => prev.map(m => m.user_id === u.user_id ? {
+          ...m,
+          last_seen_at: u.last_seen_at ?? m.last_seen_at,
+          lat: u.latitude ?? m.lat,
+          lng: u.longitude ?? m.lng,
+        } : m));
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
-        const userIds = mp.map(m => m.user_id);
-        const { data: profs } = await supabase
-          .from('profiles')
-          .select('user_id, full_name, avatar_url, city, latitude, longitude')
-          .in('user_id', userIds);
-
-        const allCatIds = [...new Set(mp.flatMap(m => m.category_ids || []))];
-        const { data: cats } = await supabase
-          .from('categories').select('id, name_uz, name_ru, name_en')
-          .in('id', allCatIds.length ? allCatIds : ['00000000-0000-0000-0000-000000000000']);
-        const catMap = new Map(cats?.map(c => [c.id, lang === 'ru' ? c.name_ru : lang === 'en' ? c.name_en : c.name_uz]) || []);
-        const profMap = new Map(profs?.map(p => [p.user_id, p]) || []);
-
-        const result: MapMaster[] = mp.map(m => {
-          const p = profMap.get(m.user_id);
-          if (!p) return null;
-          let lat = p.latitude as number | null;
-          let lng = p.longitude as number | null;
-          if (lat == null || lng == null) {
-            const c = cityCoords[p.city || 'Toshkent'] || cityCoords['Toshkent'];
-            // jitter so multiple masters in same city don't overlap
-            const seed = m.id.charCodeAt(0) + m.id.charCodeAt(1);
-            lat = c[0] + ((seed % 100) - 50) / 1000;
-            lng = c[1] + (((seed * 7) % 100) - 50) / 1000;
-          }
-          // simple online derivation: hash-based but stable per session
-          const isOnline = (m.id.charCodeAt(0) + m.id.charCodeAt(2)) % 2 === 0;
-          return {
-            master_id: m.id,
-            user_id: m.user_id,
-            full_name: p.full_name,
-            avatar_url: p.avatar_url,
-            city: p.city,
-            rating: m.rating,
-            jobs_completed: m.jobs_completed,
-            lat: lat!,
-            lng: lng!,
-            is_online: isOnline,
-            category_names: (m.category_ids || []).map(id => catMap.get(id) || '').filter(Boolean),
-          };
-        }).filter(Boolean) as MapMaster[];
-
-        setMasters(result);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [lang]);
+  // Polling fallback (every 30s) + tick to refresh online state
+  useEffect(() => {
+    const t = setInterval(() => {
+      setTick(x => x + 1);
+      reloadRef.current?.();
+    }, 30_000);
+    return () => clearInterval(t);
+  }, []);
 
   const requestLocation = () => {
+    if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      pos => {
         const p: [number, number] = [pos.coords.latitude, pos.coords.longitude];
         setUserPos(p);
         setFlyTarget(p);
       },
       () => {},
-      { enableHighAccuracy: false, timeout: 8000 }
+      { enableHighAccuracy: true, timeout: 8000 }
     );
   };
 
-  const visible = useMemo(
-    () => filter === 'online' ? masters.filter(m => m.is_online) : masters,
-    [masters, filter]
-  );
+  // Fetch real OSRM route when a master is selected
+  useEffect(() => {
+    if (!selected || !userPos) { setRouteInfo(null); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${userPos[1]},${userPos[0]};${selected.lng},${selected.lat}?overview=false`;
+        const res = await fetch(url);
+        const j = await res.json();
+        if (!cancelled && j.routes?.[0]) {
+          setRouteInfo({
+            km: j.routes[0].distance / 1000,
+            min: j.routes[0].duration / 60,
+          });
+        }
+      } catch {
+        // fallback to straight-line
+        const km = distanceKm(userPos, [selected.lat, selected.lng]);
+        if (!cancelled) setRouteInfo({ km, min: km * 3 });
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [selected, userPos]);
 
-  const onlineCount = masters.filter(m => m.is_online).length;
+  const visible = useMemo(() => {
+    let list = masters;
+    if (filter === 'online') list = list.filter(m => isOnline(m.last_seen_at));
+    if (radius > 0 && userPos) {
+      list = list.filter(m => distanceKm(userPos, [m.lat, m.lng]) <= radius);
+    }
+    return list;
+  }, [masters, filter, radius, userPos]);
+
+  const onlineCount = masters.filter(m => isOnline(m.last_seen_at)).length;
   const center: [number, number] = userPos || [41.2995, 69.2401];
+
+  const radiusOptions: RadiusOpt[] = [0, 1, 3, 5, 10];
+  const radiusLabel = (r: RadiusOpt) => r === 0
+    ? (lang === 'ru' ? 'Все' : lang === 'en' ? 'All' : 'Hammasi')
+    : `${r} km`;
 
   return (
     <Layout>
-      <style>{`@keyframes pulse {0%{transform:scale(1);opacity:.6}100%{transform:scale(1.8);opacity:0}}`}</style>
+      <style>{`@keyframes lm-pulse {0%{transform:scale(1);opacity:.6}100%{transform:scale(1.8);opacity:0}}
+        .leaflet-container{font-family:inherit;}`}</style>
 
-      {/* Page header */}
       <section className="border-b border-border bg-gradient-to-br from-primary/5 via-background to-success/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-success/10 text-success text-xs font-semibold mb-2">
@@ -186,21 +262,19 @@ export default function LiveMap() {
                 {lang === 'ru' ? 'Карта мастеров' : lang === 'en' ? 'Masters Map' : 'Ustalar xaritasi'}
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                {lang === 'ru' ? `${onlineCount} мастеров онлайн сейчас` : lang === 'en' ? `${onlineCount} masters online now` : `${onlineCount} ta usta hozir onlayn`}
+                {lang === 'ru' ? `${onlineCount} мастеров онлайн` : lang === 'en' ? `${onlineCount} online now` : `${onlineCount} ta usta hozir onlayn`}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Button
                 variant={filter === 'all' ? 'default' : 'outline'}
-                size="sm" className="rounded-xl"
-                onClick={() => setFilter('all')}
+                size="sm" className="rounded-xl" onClick={() => setFilter('all')}
               >
                 {lang === 'ru' ? 'Все' : lang === 'en' ? 'All' : 'Hammasi'} ({masters.length})
               </Button>
               <Button
                 variant={filter === 'online' ? 'default' : 'outline'}
-                size="sm" className="rounded-xl gap-1.5"
-                onClick={() => setFilter('online')}
+                size="sm" className="rounded-xl gap-1.5" onClick={() => setFilter('online')}
               >
                 <span className="w-2 h-2 rounded-full bg-success"></span>
                 {lang === 'ru' ? 'Онлайн' : lang === 'en' ? 'Online' : 'Onlayn'} ({onlineCount})
@@ -211,10 +285,35 @@ export default function LiveMap() {
               </Button>
             </div>
           </div>
+
+          {/* Radius filter */}
+          <div className="mt-4 flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-semibold text-muted-foreground mr-1">
+              {lang === 'ru' ? 'Радиус:' : lang === 'en' ? 'Radius:' : 'Radius:'}
+            </span>
+            {radiusOptions.map(r => (
+              <button
+                key={r}
+                onClick={() => {
+                  if (r > 0 && !userPos) requestLocation();
+                  setRadius(r);
+                }}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-full border transition-all ${
+                  radius === r
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-background border-border hover:border-primary/40'
+                }`}
+              >
+                {radiusLabel(r)}
+              </button>
+            ))}
+            {radius > 0 && !userPos && (
+              <span className="text-xs text-amber-600">⚠ {lang === 'ru' ? 'Включите геолокацию' : lang === 'en' ? 'Enable location' : 'Joylashuvni yoqing'}</span>
+            )}
+          </div>
         </div>
       </section>
 
-      {/* Map */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="rounded-2xl overflow-hidden border border-border shadow-lg" style={{ height: '70vh', minHeight: 480 }}>
           {loading ? (
@@ -228,73 +327,128 @@ export default function LiveMap() {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               <FlyTo pos={flyTarget} />
+              {userPos && radius > 0 && (
+                <Circle center={userPos} radius={radius * 1000} pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.08, weight: 2 }} />
+              )}
               {userPos && (
-                <Marker position={userPos} icon={userIcon()}>
-                  <Popup>{lang === 'ru' ? 'Вы здесь' : lang === 'en' ? 'You are here' : 'Siz shu yerdasiz'}</Popup>
-                </Marker>
+                <Marker position={userPos} icon={userIcon()} />
               )}
               {visible.map(m => {
                 const avatar = m.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.full_name)}&background=6366f1&color=fff&size=128`;
-                const dist = userPos ? distanceKm(userPos, [m.lat, m.lng]) : null;
-                const eta = dist != null ? Math.max(5, Math.round(dist * 3)) : null; // ~3 min/km city
                 return (
-                  <Marker key={m.master_id} position={[m.lat, m.lng]} icon={makeIcon(avatar, m.is_online)}>
-                    <Popup>
-                      <div style={{ minWidth: 220 }}>
-                        <div className="flex items-center gap-3 mb-2">
-                          <img src={avatar} alt={m.full_name} style={{ width: 48, height: 48, borderRadius: 12, objectFit: 'cover' }} />
-                          <div>
-                            <div style={{ fontWeight: 700, fontSize: 14 }}>{m.full_name}</div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: '#64748b' }}>
-                              <Star className="h-3 w-3" style={{ color: '#f59e0b', fill: '#f59e0b' }} />
-                              {(m.rating || 0).toFixed(1)} · {m.jobs_completed || 0} ish
-                            </div>
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, marginBottom: 6 }}>
-                          <span style={{ width: 8, height: 8, borderRadius: '50%', background: m.is_online ? '#22c55e' : '#94a3b8', display: 'inline-block' }} />
-                          <span style={{ fontWeight: 600, color: m.is_online ? '#15803d' : '#64748b' }}>
-                            {m.is_online
-                              ? (lang === 'ru' ? 'Онлайн' : lang === 'en' ? 'Online' : 'Onlayn')
-                              : (lang === 'ru' ? 'Офлайн' : lang === 'en' ? 'Offline' : 'Oflayn')}
-                          </span>
-                          {eta != null && m.is_online && (
-                            <span style={{ marginLeft: 6, color: '#1e40af', fontWeight: 600 }}>· ~{eta} daq</span>
-                          )}
-                        </div>
-                        {m.city && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: '#64748b', marginBottom: 8 }}>
-                            <MapPin className="h-3 w-3" /> {m.city}{dist != null ? ` · ${dist < 1 ? '<1' : Math.round(dist)} km` : ''}
-                          </div>
-                        )}
-                        {m.category_names.length > 0 && (
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 10 }}>
-                            {m.category_names.slice(0, 3).map(c => (
-                              <span key={c} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: '#eef2ff', color: '#4338ca', fontWeight: 500 }}>{c}</span>
-                            ))}
-                          </div>
-                        )}
-                        <button
-                          onClick={() => navigate(`/master/${m.master_id}`)}
-                          style={{ width: '100%', padding: '8px 12px', borderRadius: 10, background: '#1a56db', color: '#fff', fontWeight: 600, fontSize: 13, border: 'none', cursor: 'pointer' }}
-                        >
-                          {lang === 'ru' ? 'Открыть профиль' : lang === 'en' ? 'View profile' : 'Profilni ochish'}
-                        </button>
-                      </div>
-                    </Popup>
-                  </Marker>
+                  <Marker
+                    key={m.master_id}
+                    position={[m.lat, m.lng]}
+                    icon={makeIcon(avatar, isOnline(m.last_seen_at))}
+                    eventHandlers={{ click: () => setSelected(m) }}
+                  />
                 );
               })}
             </MapContainer>
           )}
         </div>
 
-        {!loading && masters.length === 0 && (
-          <p className="text-center text-muted-foreground mt-6">
-            {lang === 'ru' ? 'Активных мастеров пока нет' : lang === 'en' ? 'No active masters yet' : 'Hozircha faol ustalar yo\'q'}
-          </p>
-        )}
+        <p className="text-center text-xs text-muted-foreground mt-3">
+          {lang === 'ru' ? `Показано ${visible.length} из ${masters.length}` : lang === 'en' ? `Showing ${visible.length} of ${masters.length}` : `${masters.length} dan ${visible.length} ta ko'rsatildi`}
+        </p>
       </section>
+
+      {/* Master Drawer */}
+      <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+          {selected && (() => {
+            const online = isOnline(selected.last_seen_at);
+            const avatar = selected.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selected.full_name)}&background=6366f1&color=fff&size=256`;
+            return (
+              <>
+                <SheetHeader>
+                  <SheetTitle className="text-left">
+                    {lang === 'ru' ? 'Профиль мастера' : lang === 'en' ? 'Master Profile' : 'Usta profili'}
+                  </SheetTitle>
+                </SheetHeader>
+
+                <div className="mt-5 space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <img src={avatar} alt={selected.full_name} className="w-20 h-20 rounded-2xl object-cover border-2 border-border" />
+                      <span className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-background ${online ? 'bg-success' : 'bg-muted-foreground'}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-lg truncate">{selected.full_name}</h3>
+                      <div className="flex items-center gap-1 text-sm">
+                        <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                        <span className="font-semibold">{(selected.rating || 0).toFixed(1)}</span>
+                        <span className="text-muted-foreground">· {selected.jobs_completed || 0} ish</span>
+                      </div>
+                      <span className={`inline-flex items-center gap-1 text-xs font-semibold mt-1 ${online ? 'text-success' : 'text-muted-foreground'}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${online ? 'bg-success' : 'bg-muted-foreground'}`} />
+                        {online
+                          ? (lang === 'ru' ? 'Онлайн сейчас' : lang === 'en' ? 'Online now' : 'Hozir onlayn')
+                          : (lang === 'ru' ? 'Не в сети' : lang === 'en' ? 'Offline' : 'Oflayn')}
+                      </span>
+                    </div>
+                  </div>
+
+                  {selected.category_names.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {selected.category_names.slice(0, 5).map(c => (
+                        <span key={c} className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium">{c}</span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* ETA card */}
+                  {userPos && (
+                    <div className="card-premium p-4 grid grid-cols-2 gap-3">
+                      <div>
+                        <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />{lang === 'ru' ? 'Расстояние' : lang === 'en' ? 'Distance' : 'Masofa'}
+                        </div>
+                        <div className="font-bold text-lg">
+                          {routeInfo ? `${routeInfo.km.toFixed(1)} km` : <Loader2 className="h-4 w-4 animate-spin" />}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                          <Clock className="h-3 w-3" />{lang === 'ru' ? 'Время в пути' : lang === 'en' ? 'ETA' : 'Yo\'l vaqti'}
+                        </div>
+                        <div className="font-bold text-lg text-primary">
+                          {routeInfo ? `~${Math.round(routeInfo.min)} daq` : <Loader2 className="h-4 w-4 animate-spin" />}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {selected.bio && (
+                    <p className="text-sm text-muted-foreground leading-relaxed">{selected.bio}</p>
+                  )}
+
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    {selected.city && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{selected.city}</span>}
+                    {selected.experience_years ? <span className="flex items-center gap-1"><Briefcase className="h-3.5 w-3.5" />{selected.experience_years} yil</span> : null}
+                  </div>
+
+                  {selected.approx_location && (
+                    <p className="text-xs text-amber-600">
+                      ⚠ {lang === 'ru' ? 'Точное местоположение не указано — показано приблизительно по городу.' : lang === 'en' ? 'Exact location not set — approximate by city.' : 'Aniq joylashuv kiritilmagan — shahar bo\'yicha taxminiy.'}
+                    </p>
+                  )}
+
+                  <div className="flex gap-2 pt-2">
+                    <Button className="flex-1 rounded-xl" onClick={() => navigate(`/master/${selected.master_id}`)}>
+                      {lang === 'ru' ? 'Открыть профиль' : lang === 'en' ? 'View profile' : 'Profilni ochish'}
+                    </Button>
+                    <Button variant="outline" className="rounded-xl gap-1.5" onClick={() => navigate(`/order/create?master=${selected.master_id}`)}>
+                      <MessageCircle className="h-4 w-4" />
+                      {lang === 'ru' ? 'Заказать' : lang === 'en' ? 'Order' : 'Buyurtma'}
+                    </Button>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+        </SheetContent>
+      </Sheet>
     </Layout>
   );
 }
