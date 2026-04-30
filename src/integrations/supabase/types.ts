@@ -347,6 +347,39 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          created_at: string
+          daily_orders_used: number
+          expires_at: string | null
+          id: string
+          last_reset_date: string
+          tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          daily_orders_used?: number
+          expires_at?: string | null
+          id?: string
+          last_reset_date?: string
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          daily_orders_used?: number
+          expires_at?: string | null
+          id?: string
+          last_reset_date?: string
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number
@@ -447,6 +480,7 @@ export type Database = {
     }
     Enums: {
       app_role: "client" | "master" | "admin"
+      subscription_tier: "free" | "standard" | "premium" | "vip"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -575,6 +609,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["client", "master", "admin"],
+      subscription_tier: ["free", "standard", "premium", "vip"],
     },
   },
 } as const

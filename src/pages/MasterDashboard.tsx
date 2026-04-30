@@ -11,7 +11,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User } from 'lucide-react';
+import LiveTracker from '@/components/LiveTracker';
+import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User, Crown, Navigation as NavIcon, DollarSign } from 'lucide-react';
+
+const TIER_INFO: Record<string, { label: string; color: string; limit: number }> = {
+  free: { label: 'Free', color: 'bg-muted text-muted-foreground', limit: 3 },
+  standard: { label: 'Standard', color: 'bg-primary/15 text-primary', limit: 15 },
+  premium: { label: 'Premium', color: 'bg-amber-500/15 text-amber-600', limit: 999 },
+  vip: { label: 'VIP', color: 'bg-purple-500/15 text-purple-600', limit: 999 },
+};
 
 export default function MasterDashboard() {
   const { t, showNotification } = useApp();
@@ -26,6 +34,7 @@ export default function MasterDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [subscription, setSubscription] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
@@ -59,6 +68,10 @@ export default function MasterDashboard() {
 
     const { data: txs } = await supabase.from('transactions').select('*').eq('user_id', user!.id).order('created_at', { ascending: false }).limit(20);
     setTransactions(txs || []);
+
+    const { data: sub } = await supabase.from('subscriptions').select('*').eq('user_id', user!.id).maybeSingle();
+    setSubscription(sub);
+
     setLoading(false);
   };
 
@@ -167,11 +180,44 @@ export default function MasterDashboard() {
               <p className="text-muted-foreground text-sm mt-0.5 truncate">{profile?.full_name}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-xs sm:text-sm font-semibold self-start shrink-0">
-            <span className="w-2 h-2 rounded-full bg-success animate-pulse"></span>
-            {t('activeStatus')}
+          <div className="flex items-center gap-2 self-start shrink-0">
+            <button
+              onClick={() => navigate('/subscription')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-bold ${TIER_INFO[subscription?.tier || 'free'].color} hover:opacity-80 transition`}>
+              <Crown className="h-3.5 w-3.5" />
+              {TIER_INFO[subscription?.tier || 'free'].label}
+            </button>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-xs sm:text-sm font-semibold">
+              <span className="w-2 h-2 rounded-full bg-success animate-pulse"></span>
+              {t('activeStatus')}
+            </div>
           </div>
         </div>
+
+        {/* Today's quick stats */}
+        {(() => {
+          const today = new Date().toDateString();
+          const todayOrders = orders.filter(o => new Date(o.created_at).toDateString() === today);
+          const todayRevenue = todayOrders.filter(o => o.status === 'completed').reduce((s, o) => s + (o.amount || 0), 0);
+          const inProgress = orders.filter(o => o.status === 'in_progress' || o.status === 'accepted').length;
+          const newOrders = orders.filter(o => o.status === 'pending' || o.status === 'new').length;
+          return (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+              {[
+                { label: 'Bugungi orderlar', value: todayOrders.length, icon: Briefcase, color: 'text-primary' },
+                { label: 'Yangi', value: newOrders, icon: NavIcon, color: 'text-amber-500' },
+                { label: 'Jarayonda', value: inProgress, icon: Clock, color: 'text-blue-500' },
+                { label: "Bugungi daromad", value: `${(todayRevenue / 1000).toFixed(0)}k`, icon: DollarSign, color: 'text-success' },
+              ].map(s => (
+                <div key={s.label} className="card-premium p-3 sm:p-4">
+                  <s.icon className={`h-5 w-5 ${s.color} mb-1.5`} />
+                  <p className="text-lg sm:text-2xl font-black">{s.value}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
 
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
@@ -204,6 +250,31 @@ export default function MasterDashboard() {
 
         {activeTab === 'overview' && (
           <div className="space-y-4">
+            {/* Quick actions */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <button onClick={() => setActiveTab('portfolio')} className="card-premium p-4 hover:border-primary/40 transition text-left">
+                <Image className="h-5 w-5 text-primary mb-2" />
+                <p className="text-xs sm:text-sm font-semibold">Portfolio qo'shish</p>
+              </button>
+              <button onClick={() => setActiveTab('schedule')} className="card-premium p-4 hover:border-primary/40 transition text-left">
+                <Clock className="h-5 w-5 text-blue-500 mb-2" />
+                <p className="text-xs sm:text-sm font-semibold">Ish jadvali</p>
+              </button>
+              <button onClick={() => navigate('/subscription')} className="card-premium p-4 hover:border-primary/40 transition text-left">
+                <Crown className="h-5 w-5 text-amber-500 mb-2" />
+                <p className="text-xs sm:text-sm font-semibold">Tarifni oshirish</p>
+              </button>
+              <button onClick={() => setActiveTab('balance')} className="card-premium p-4 hover:border-primary/40 transition text-left">
+                <ArrowDownToLine className="h-5 w-5 text-success mb-2" />
+                <p className="text-xs sm:text-sm font-semibold">Pul yechish</p>
+              </button>
+            </div>
+
+            {/* Active order tracker */}
+            {orders.find(o => o.status === 'in_progress' || o.status === 'accepted') && (
+              <LiveTracker masterName={profile?.full_name || 'Usta'} initialEtaMin={15} />
+            )}
+
             <div className="card-premium p-6">
               <h3 className="font-bold mb-4">{t('recentActivity')}</h3>
               {orders.length > 0 ? (
