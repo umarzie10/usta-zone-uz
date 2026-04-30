@@ -11,7 +11,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User } from 'lucide-react';
+import LiveTracker from '@/components/LiveTracker';
+import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User, Crown, Navigation as NavIcon, DollarSign } from 'lucide-react';
+
+const TIER_INFO: Record<string, { label: string; color: string; limit: number }> = {
+  free: { label: 'Free', color: 'bg-muted text-muted-foreground', limit: 3 },
+  standard: { label: 'Standard', color: 'bg-primary/15 text-primary', limit: 15 },
+  premium: { label: 'Premium', color: 'bg-amber-500/15 text-amber-600', limit: 999 },
+  vip: { label: 'VIP', color: 'bg-purple-500/15 text-purple-600', limit: 999 },
+};
 
 export default function MasterDashboard() {
   const { t, showNotification } = useApp();
@@ -26,6 +34,7 @@ export default function MasterDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [subscription, setSubscription] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
