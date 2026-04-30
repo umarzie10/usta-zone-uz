@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
   Sun, Moon, Globe, Menu, X, User, LogOut, LayoutDashboard,
-  ShieldCheck, Search
+  ShieldCheck, Search, Crown
 } from 'lucide-react';
 import { Language } from '@/lib/i18n';
 import NotificationBell from '@/components/NotificationBell';
@@ -120,6 +120,12 @@ export default function Navbar() {
                       {isAdmin ? <ShieldCheck className="mr-2 h-4 w-4" /> : <LayoutDashboard className="mr-2 h-4 w-4" />}
                       {isAdmin ? t('adminPanel') : t('dashboard')}
                     </DropdownMenuItem>
+                    {profile?.role === 'master' && (
+                      <DropdownMenuItem onClick={() => navigate('/subscription')}>
+                        <Crown className="mr-2 h-4 w-4 text-amber-500" />
+                        Obuna / Tarif
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                       <LogOut className="mr-2 h-4 w-4" />
