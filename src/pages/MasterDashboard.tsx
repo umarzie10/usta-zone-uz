@@ -68,6 +68,10 @@ export default function MasterDashboard() {
 
     const { data: txs } = await supabase.from('transactions').select('*').eq('user_id', user!.id).order('created_at', { ascending: false }).limit(20);
     setTransactions(txs || []);
+
+    const { data: sub } = await supabase.from('subscriptions').select('*').eq('user_id', user!.id).maybeSingle();
+    setSubscription(sub);
+
     setLoading(false);
   };
 
