@@ -29,6 +29,7 @@ export default function Navbar() {
 
   const navLinks = [
     { href: '/', label: t('home') },
+    { href: '/map', label: lang === 'ru' ? '🗺️ Карта' : lang === 'en' ? '🗺️ Map' : '🗺️ Xarita' },
     { href: '/masters', label: t('allMastersPage') },
     { href: '/find-master', label: t('findMaster') },
     { href: '/categories', label: t('categories') },
