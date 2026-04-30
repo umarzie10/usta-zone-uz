@@ -250,6 +250,31 @@ export default function MasterDashboard() {
 
         {activeTab === 'overview' && (
           <div className="space-y-4">
+            {/* Quick actions */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <button onClick={() => setActiveTab('portfolio')} className="card-premium p-4 hover:border-primary/40 transition text-left">
+                <Image className="h-5 w-5 text-primary mb-2" />
+                <p className="text-xs sm:text-sm font-semibold">Portfolio qo'shish</p>
+              </button>
+              <button onClick={() => setActiveTab('schedule')} className="card-premium p-4 hover:border-primary/40 transition text-left">
+                <Clock className="h-5 w-5 text-blue-500 mb-2" />
+                <p className="text-xs sm:text-sm font-semibold">Ish jadvali</p>
+              </button>
+              <button onClick={() => navigate('/subscription')} className="card-premium p-4 hover:border-primary/40 transition text-left">
+                <Crown className="h-5 w-5 text-amber-500 mb-2" />
+                <p className="text-xs sm:text-sm font-semibold">Tarifni oshirish</p>
+              </button>
+              <button onClick={() => setActiveTab('balance')} className="card-premium p-4 hover:border-primary/40 transition text-left">
+                <ArrowDownToLine className="h-5 w-5 text-success mb-2" />
+                <p className="text-xs sm:text-sm font-semibold">Pul yechish</p>
+              </button>
+            </div>
+
+            {/* Active order tracker */}
+            {orders.find(o => o.status === 'in_progress' || o.status === 'accepted') && (
+              <LiveTracker masterName={profile?.full_name || 'Usta'} initialEtaMin={15} />
+            )}
+
             <div className="card-premium p-6">
               <h3 className="font-bold mb-4">{t('recentActivity')}</h3>
               {orders.length > 0 ? (
