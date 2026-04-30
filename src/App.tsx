@@ -16,6 +16,7 @@ import MasterDashboard from "./pages/MasterDashboard";
 import MastersPage from "./pages/Masters";
 import AdminPanel from "./pages/AdminPanel";
 import Subscription from "./pages/Subscription";
+import LiveMap from "./pages/LiveMap";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="/masters" element={<MastersPage />} />
               <Route path="/admin" element={<AdminPanel />} />
               <Route path="/subscription" element={<Subscription />} />
+              <Route path="/map" element={<LiveMap />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
