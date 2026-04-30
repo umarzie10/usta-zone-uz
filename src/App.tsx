@@ -15,6 +15,7 @@ import ClientDashboard from "./pages/ClientDashboard";
 import MasterDashboard from "./pages/MasterDashboard";
 import MastersPage from "./pages/Masters";
 import AdminPanel from "./pages/AdminPanel";
+import Subscription from "./pages/Subscription";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
               <Route path="/dashboard/master" element={<MasterDashboard />} />
               <Route path="/masters" element={<MastersPage />} />
               <Route path="/admin" element={<AdminPanel />} />
+              <Route path="/subscription" element={<Subscription />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
