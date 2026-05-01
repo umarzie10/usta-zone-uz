@@ -6,11 +6,14 @@ import 'leaflet/dist/leaflet.css';
 import Layout from '@/components/Layout';
 import { supabase } from '@/integrations/supabase/client';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Star, MapPin, Loader2, Navigation, Radio, Clock, Briefcase, MessageCircle } from 'lucide-react';
-
-const ONLINE_THRESHOLD_MS = 90_000; // 90s
+import { Star, MapPin, Loader2, Navigation, Radio, Clock, MessageCircle, Send, ChevronLeft } from 'lucide-react';
+import { getEta, EtaResult } from '@/lib/etaCache';
+import { isUserOnline } from '@/hooks/useRealtimePresence';
 
 interface MapMaster {
   master_id: string;
@@ -22,10 +25,11 @@ interface MapMaster {
   jobs_completed: number | null;
   bio?: string | null;
   experience_years?: number | null;
+  category_ids: string[];
   lat: number;
   lng: number;
   last_seen_at: string | null;
-  category_names: string[];
+  category_names: { id: string; name: string }[];
   approx_location: boolean;
 }
 
@@ -44,31 +48,28 @@ const cityCoords: Record<string, [number, number]> = {
   "Urganch": [41.5533, 60.6236],
 };
 
-const isOnline = (lastSeen: string | null) =>
-  !!lastSeen && Date.now() - new Date(lastSeen).getTime() < ONLINE_THRESHOLD_MS;
-
 function makeIcon(avatar: string, online: boolean) {
   return L.divIcon({
     className: '',
     html: `
-      <div style="position:relative;width:48px;height:48px;cursor:pointer;">
-        <div style="position:absolute;inset:0;border-radius:50%;border:3px solid ${online ? '#22c55e' : '#94a3b8'};box-shadow:0 4px 12px rgba(0,0,0,.25);overflow:hidden;background:#fff;">
+      <div style="position:relative;width:38px;height:38px;cursor:pointer;">
+        <div style="position:absolute;inset:0;border-radius:50%;border:2.5px solid ${online ? '#22c55e' : '#94a3b8'};box-shadow:0 4px 10px rgba(0,0,0,.22);overflow:hidden;background:#fff;">
           <img src="${avatar}" style="width:100%;height:100%;object-fit:cover;" />
         </div>
-        <div style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:${online ? '#22c55e' : '#94a3b8'};border:2px solid #fff;"></div>
-        ${online ? `<div style="position:absolute;inset:-4px;border-radius:50%;border:2px solid #22c55e;opacity:.5;animation:lm-pulse 1.8s ease-out infinite;"></div>` : ''}
+        <div style="position:absolute;bottom:-1px;right:-1px;width:11px;height:11px;border-radius:50%;background:${online ? '#22c55e' : '#94a3b8'};border:2px solid #fff;"></div>
+        ${online ? `<div style="position:absolute;inset:-3px;border-radius:50%;border:2px solid #22c55e;opacity:.5;animation:lm-pulse 1.8s ease-out infinite;"></div>` : ''}
       </div>`,
-    iconSize: [48, 48],
-    iconAnchor: [24, 24],
+    iconSize: [38, 38],
+    iconAnchor: [19, 19],
   });
 }
 
 function userIcon() {
   return L.divIcon({
     className: '',
-    html: `<div style="width:20px;height:20px;border-radius:50%;background:#3b82f6;border:3px solid #fff;box-shadow:0 0 0 4px rgba(59,130,246,.3);"></div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
+    html: `<div style="width:18px;height:18px;border-radius:50%;background:#3b82f6;border:3px solid #fff;box-shadow:0 0 0 4px rgba(59,130,246,.3);"></div>`,
+    iconSize: [18, 18],
+    iconAnchor: [9, 9],
   });
 }
 
@@ -89,7 +90,8 @@ function distanceKm(a: [number, number], b: [number, number]) {
 type RadiusOpt = 0 | 1 | 3 | 5 | 10;
 
 export default function LiveMap() {
-  const { lang } = useApp();
+  const { lang, showNotification, t } = useApp();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [masters, setMasters] = useState<MapMaster[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,9 +100,16 @@ export default function LiveMap() {
   const [filter, setFilter] = useState<'all' | 'online'>('all');
   const [radius, setRadius] = useState<RadiusOpt>(0);
   const [selected, setSelected] = useState<MapMaster | null>(null);
-  const [routeInfo, setRouteInfo] = useState<{ km: number; min: number } | null>(null);
-  const [, setTick] = useState(0); // forces re-render every 30s for online status freshness
+  const [routeInfo, setRouteInfo] = useState<EtaResult | null>(null);
+  const [, setTick] = useState(0);
   const reloadRef = useRef<() => void>();
+
+  // Quick-order form state (inline in drawer)
+  const [orderMode, setOrderMode] = useState(false);
+  const [orderCategoryId, setOrderCategoryId] = useState<string>('');
+  const [orderDescription, setOrderDescription] = useState('');
+  const [orderAddress, setOrderAddress] = useState('');
+  const [submittingOrder, setSubmittingOrder] = useState(false);
 
   const loadMasters = async () => {
     try {
@@ -148,10 +157,11 @@ export default function LiveMap() {
           jobs_completed: m.jobs_completed,
           bio: m.bio,
           experience_years: m.experience_years,
+          category_ids: m.category_ids || [],
           lat: lat!,
           lng: lng!,
           last_seen_at: p.last_seen_at,
-          category_names: (m.category_ids || []).map((id: string) => catMap.get(id) || '').filter(Boolean),
+          category_names: (m.category_ids || []).map((id: string) => ({ id, name: catMap.get(id) || '' })).filter(c => c.name),
           approx_location: approx,
         };
       }).filter(Boolean) as MapMaster[];
@@ -163,10 +173,9 @@ export default function LiveMap() {
   };
   reloadRef.current = loadMasters;
 
-  // Initial load + react to language
   useEffect(() => { loadMasters(); /* eslint-disable-next-line */ }, [lang]);
 
-  // Realtime subscription on profiles (last_seen_at, lat/lng)
+  // Realtime: live profile updates (last_seen_at, lat/lng)
   useEffect(() => {
     const channel = supabase
       .channel('live-map-profiles')
@@ -183,7 +192,7 @@ export default function LiveMap() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  // Polling fallback (every 30s) + tick to refresh online state
+  // Tick + occasional reload
   useEffect(() => {
     const t = setInterval(() => {
       setTick(x => x + 1);
@@ -205,40 +214,82 @@ export default function LiveMap() {
     );
   };
 
-  // Fetch real OSRM route when a master is selected
+  // Fetch ETA via cache-aware helper
   useEffect(() => {
     if (!selected || !userPos) { setRouteInfo(null); return; }
     let cancelled = false;
-    (async () => {
-      try {
-        const url = `https://router.project-osrm.org/route/v1/driving/${userPos[1]},${userPos[0]};${selected.lng},${selected.lat}?overview=false`;
-        const res = await fetch(url);
-        const j = await res.json();
-        if (!cancelled && j.routes?.[0]) {
-          setRouteInfo({
-            km: j.routes[0].distance / 1000,
-            min: j.routes[0].duration / 60,
-          });
-        }
-      } catch {
-        // fallback to straight-line
-        const km = distanceKm(userPos, [selected.lat, selected.lng]);
-        if (!cancelled) setRouteInfo({ km, min: km * 3 });
-      }
-    })();
+    getEta(userPos, [selected.lat, selected.lng]).then(r => {
+      if (!cancelled) setRouteInfo(r);
+    });
     return () => { cancelled = true; };
   }, [selected, userPos]);
 
+  // Reset order form when drawer closes or master changes
+  useEffect(() => {
+    if (!selected) {
+      setOrderMode(false);
+      setOrderCategoryId('');
+      setOrderDescription('');
+      setOrderAddress('');
+    } else {
+      // pre-select first category
+      setOrderCategoryId(selected.category_names[0]?.id || '');
+    }
+  }, [selected]);
+
+  const handleQuickSubmit = async () => {
+    if (!user) { navigate('/login'); return; }
+    if (!selected || !orderCategoryId || !orderDescription.trim() || !orderAddress.trim()) return;
+    setSubmittingOrder(true);
+    try {
+      const cat = selected.category_names.find(c => c.id === orderCategoryId);
+      const title = `${cat?.name || 'Xizmat'} – ${selected.full_name}`;
+      const { data: orderData, error } = await supabase.from('orders').insert({
+        client_id: user.id,
+        master_id: selected.user_id,
+        title,
+        description: orderDescription.trim(),
+        category_id: orderCategoryId,
+        payment_method: 'cash',
+        amount: 0,
+        commission_amount: 0,
+        master_amount: 0,
+        city: selected.city || 'Toshkent',
+        address: orderAddress.trim(),
+        status: 'pending',
+      }).select('id').single();
+      if (error) throw error;
+
+      // Notify master
+      await supabase.from('notifications').insert({
+        user_id: selected.user_id,
+        sender_id: user.id,
+        title: lang === 'ru' ? 'Новый заказ через карту' : lang === 'en' ? 'New order via map' : 'Xaritadan yangi buyurtma',
+        message: `${title} — ${orderAddress.trim()}`,
+        type: 'order_new',
+        related_order_id: orderData?.id || null,
+      });
+
+      showNotification('success', t('orderCreated'));
+      setSelected(null);
+      navigate('/dashboard/client');
+    } catch (err: any) {
+      showNotification('error', err.message || 'Xatolik');
+    } finally {
+      setSubmittingOrder(false);
+    }
+  };
+
   const visible = useMemo(() => {
     let list = masters;
-    if (filter === 'online') list = list.filter(m => isOnline(m.last_seen_at));
+    if (filter === 'online') list = list.filter(m => isUserOnline(m.last_seen_at));
     if (radius > 0 && userPos) {
       list = list.filter(m => distanceKm(userPos, [m.lat, m.lng]) <= radius);
     }
     return list;
   }, [masters, filter, radius, userPos]);
 
-  const onlineCount = masters.filter(m => isOnline(m.last_seen_at)).length;
+  const onlineCount = masters.filter(m => isUserOnline(m.last_seen_at)).length;
   const center: [number, number] = userPos || [41.2995, 69.2401];
 
   const radiusOptions: RadiusOpt[] = [0, 1, 3, 5, 10];
@@ -266,16 +317,10 @@ export default function LiveMap() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant={filter === 'all' ? 'default' : 'outline'}
-                size="sm" className="rounded-xl" onClick={() => setFilter('all')}
-              >
+              <Button variant={filter === 'all' ? 'default' : 'outline'} size="sm" className="rounded-xl" onClick={() => setFilter('all')}>
                 {lang === 'ru' ? 'Все' : lang === 'en' ? 'All' : 'Hammasi'} ({masters.length})
               </Button>
-              <Button
-                variant={filter === 'online' ? 'default' : 'outline'}
-                size="sm" className="rounded-xl gap-1.5" onClick={() => setFilter('online')}
-              >
+              <Button variant={filter === 'online' ? 'default' : 'outline'} size="sm" className="rounded-xl gap-1.5" onClick={() => setFilter('online')}>
                 <span className="w-2 h-2 rounded-full bg-success"></span>
                 {lang === 'ru' ? 'Онлайн' : lang === 'en' ? 'Online' : 'Onlayn'} ({onlineCount})
               </Button>
@@ -286,7 +331,6 @@ export default function LiveMap() {
             </div>
           </div>
 
-          {/* Radius filter */}
           <div className="mt-4 flex items-center gap-2 flex-wrap">
             <span className="text-xs font-semibold text-muted-foreground mr-1">
               {lang === 'ru' ? 'Радиус:' : lang === 'en' ? 'Radius:' : 'Radius:'}
@@ -294,10 +338,7 @@ export default function LiveMap() {
             {radiusOptions.map(r => (
               <button
                 key={r}
-                onClick={() => {
-                  if (r > 0 && !userPos) requestLocation();
-                  setRadius(r);
-                }}
+                onClick={() => { if (r > 0 && !userPos) requestLocation(); setRadius(r); }}
                 className={`px-3 py-1.5 text-xs font-semibold rounded-full border transition-all ${
                   radius === r
                     ? 'bg-primary text-primary-foreground border-primary'
@@ -322,24 +363,19 @@ export default function LiveMap() {
             </div>
           ) : (
             <MapContainer center={center} zoom={userPos ? 12 : 6} style={{ height: '100%', width: '100%' }} scrollWheelZoom>
-              <TileLayer
-                attribution='&copy; OpenStreetMap'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
+              <TileLayer attribution='&copy; OpenStreetMap' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <FlyTo pos={flyTarget} />
               {userPos && radius > 0 && (
                 <Circle center={userPos} radius={radius * 1000} pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.08, weight: 2 }} />
               )}
-              {userPos && (
-                <Marker position={userPos} icon={userIcon()} />
-              )}
+              {userPos && <Marker position={userPos} icon={userIcon()} />}
               {visible.map(m => {
                 const avatar = m.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.full_name)}&background=6366f1&color=fff&size=128`;
                 return (
                   <Marker
                     key={m.master_id}
                     position={[m.lat, m.lng]}
-                    icon={makeIcon(avatar, isOnline(m.last_seen_at))}
+                    icon={makeIcon(avatar, isUserOnline(m.last_seen_at))}
                     eventHandlers={{ click: () => setSelected(m) }}
                   />
                 );
@@ -353,96 +389,170 @@ export default function LiveMap() {
         </p>
       </section>
 
-      {/* Master Drawer */}
+      {/* Compact Master Drawer */}
       <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+        <SheetContent side="right" className="w-full sm:max-w-sm p-0 overflow-hidden flex flex-col">
           {selected && (() => {
-            const online = isOnline(selected.last_seen_at);
-            const avatar = selected.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selected.full_name)}&background=6366f1&color=fff&size=256`;
+            const online = isUserOnline(selected.last_seen_at);
+            const avatar = selected.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selected.full_name)}&background=6366f1&color=fff&size=200`;
             return (
               <>
-                <SheetHeader>
-                  <SheetTitle className="text-left">
-                    {lang === 'ru' ? 'Профиль мастера' : lang === 'en' ? 'Master Profile' : 'Usta profili'}
+                <SheetHeader className="px-4 pt-4 pb-3 border-b border-border">
+                  <SheetTitle className="text-left text-base flex items-center gap-2">
+                    {orderMode && (
+                      <button onClick={() => setOrderMode(false)} className="p-1 -ml-1 rounded hover:bg-muted">
+                        <ChevronLeft className="h-4 w-4" />
+                      </button>
+                    )}
+                    {orderMode
+                      ? (lang === 'ru' ? 'Быстрый заказ' : lang === 'en' ? 'Quick order' : 'Tezkor buyurtma')
+                      : (lang === 'ru' ? 'Профиль' : lang === 'en' ? 'Profile' : 'Profil')}
                   </SheetTitle>
                 </SheetHeader>
 
-                <div className="mt-5 space-y-4">
-                  <div className="flex items-center gap-4">
-                    <div className="relative">
-                      <img src={avatar} alt={selected.full_name} className="w-20 h-20 rounded-2xl object-cover border-2 border-border" />
-                      <span className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-background ${online ? 'bg-success' : 'bg-muted-foreground'}`} />
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {/* Compact header card */}
+                  <div className="flex items-center gap-3">
+                    <div className="relative shrink-0">
+                      <img src={avatar} alt={selected.full_name} className="w-14 h-14 rounded-xl object-cover border border-border" />
+                      <span className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-background ${online ? 'bg-success' : 'bg-muted-foreground'}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-lg truncate">{selected.full_name}</h3>
-                      <div className="flex items-center gap-1 text-sm">
-                        <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                      <h3 className="font-bold text-sm truncate">{selected.full_name}</h3>
+                      <div className="flex items-center gap-1 text-xs">
+                        <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
                         <span className="font-semibold">{(selected.rating || 0).toFixed(1)}</span>
                         <span className="text-muted-foreground">· {selected.jobs_completed || 0} ish</span>
                       </div>
-                      <span className={`inline-flex items-center gap-1 text-xs font-semibold mt-1 ${online ? 'text-success' : 'text-muted-foreground'}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${online ? 'bg-success' : 'bg-muted-foreground'}`} />
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-semibold mt-0.5 ${online ? 'text-success' : 'text-muted-foreground'}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${online ? 'bg-success animate-pulse' : 'bg-muted-foreground'}`} />
                         {online
-                          ? (lang === 'ru' ? 'Онлайн сейчас' : lang === 'en' ? 'Online now' : 'Hozir onlayn')
-                          : (lang === 'ru' ? 'Не в сети' : lang === 'en' ? 'Offline' : 'Oflayn')}
+                          ? (lang === 'ru' ? 'Онлайн' : lang === 'en' ? 'Online' : 'Onlayn')
+                          : (lang === 'ru' ? 'Офлайн' : lang === 'en' ? 'Offline' : 'Oflayn')}
+                        {selected.city && ` · ${selected.city}`}
                       </span>
                     </div>
                   </div>
 
-                  {selected.category_names.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {selected.category_names.slice(0, 5).map(c => (
-                        <span key={c} className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium">{c}</span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* ETA card */}
-                  {userPos && (
-                    <div className="card-premium p-4 grid grid-cols-2 gap-3">
-                      <div>
-                        <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />{lang === 'ru' ? 'Расстояние' : lang === 'en' ? 'Distance' : 'Masofa'}
+                  {!orderMode ? (
+                    <>
+                      {/* Categories */}
+                      {selected.category_names.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {selected.category_names.slice(0, 4).map(c => (
+                            <span key={c.id} className="text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{c.name}</span>
+                          ))}
                         </div>
-                        <div className="font-bold text-lg">
-                          {routeInfo ? `${routeInfo.km.toFixed(1)} km` : <Loader2 className="h-4 w-4 animate-spin" />}
+                      )}
+
+                      {/* ETA */}
+                      {userPos && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="rounded-xl border border-border p-2.5">
+                            <div className="text-[10px] text-muted-foreground flex items-center gap-1 mb-0.5">
+                              <MapPin className="h-3 w-3" />{lang === 'ru' ? 'Расстояние' : lang === 'en' ? 'Distance' : 'Masofa'}
+                            </div>
+                            <div className="font-bold text-sm">
+                              {routeInfo ? `${routeInfo.km.toFixed(1)} km` : <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                            </div>
+                          </div>
+                          <div className="rounded-xl border border-border p-2.5">
+                            <div className="text-[10px] text-muted-foreground flex items-center gap-1 mb-0.5">
+                              <Clock className="h-3 w-3" />{lang === 'ru' ? 'В пути' : lang === 'en' ? 'ETA' : "Yo'l vaqti"}
+                            </div>
+                            <div className="font-bold text-sm text-primary">
+                              {routeInfo ? `~${Math.round(routeInfo.min)} daq` : <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {selected.bio && (
+                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{selected.bio}</p>
+                      )}
+
+                      {selected.approx_location && (
+                        <p className="text-[11px] text-amber-600">
+                          ⚠ {lang === 'ru' ? 'Местоположение приблизительное.' : lang === 'en' ? 'Approximate location.' : "Joylashuv taxminiy."}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    /* Inline Quick-Order Form */
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs font-semibold mb-1 block">
+                          {lang === 'ru' ? 'Услуга' : lang === 'en' ? 'Service' : 'Xizmat'}
+                        </label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {selected.category_names.map(c => (
+                            <button
+                              key={c.id}
+                              onClick={() => setOrderCategoryId(c.id)}
+                              className={`text-xs px-2.5 py-1.5 rounded-lg border transition-all ${
+                                orderCategoryId === c.id
+                                  ? 'bg-primary text-primary-foreground border-primary'
+                                  : 'border-border hover:border-primary/50'
+                              }`}
+                            >
+                              {c.name}
+                            </button>
+                          ))}
                         </div>
                       </div>
+
                       <div>
-                        <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                          <Clock className="h-3 w-3" />{lang === 'ru' ? 'Время в пути' : lang === 'en' ? 'ETA' : 'Yo\'l vaqti'}
-                        </div>
-                        <div className="font-bold text-lg text-primary">
-                          {routeInfo ? `~${Math.round(routeInfo.min)} daq` : <Loader2 className="h-4 w-4 animate-spin" />}
-                        </div>
+                        <label className="text-xs font-semibold mb-1 block">
+                          {lang === 'ru' ? 'Что нужно сделать?' : lang === 'en' ? 'What do you need?' : 'Nima kerak?'}
+                        </label>
+                        <Textarea
+                          rows={3}
+                          className="rounded-lg resize-none text-sm"
+                          placeholder={lang === 'ru' ? 'напр. Кран течёт' : lang === 'en' ? 'e.g. Leaky faucet' : 'masalan: Kran oqyapti'}
+                          value={orderDescription}
+                          onChange={e => setOrderDescription(e.target.value)}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-semibold mb-1 block">
+                          <MapPin className="h-3 w-3 inline mr-0.5" />
+                          {lang === 'ru' ? 'Адрес' : lang === 'en' ? 'Address' : 'Manzil'}
+                        </label>
+                        <Input
+                          className="rounded-lg h-10 text-sm"
+                          placeholder={lang === 'ru' ? 'Улица, дом' : lang === 'en' ? 'Street, building' : "Ko'cha, uy"}
+                          value={orderAddress}
+                          onChange={e => setOrderAddress(e.target.value)}
+                        />
                       </div>
                     </div>
                   )}
+                </div>
 
-                  {selected.bio && (
-                    <p className="text-sm text-muted-foreground leading-relaxed">{selected.bio}</p>
-                  )}
-
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                    {selected.city && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{selected.city}</span>}
-                    {selected.experience_years ? <span className="flex items-center gap-1"><Briefcase className="h-3.5 w-3.5" />{selected.experience_years} yil</span> : null}
-                  </div>
-
-                  {selected.approx_location && (
-                    <p className="text-xs text-amber-600">
-                      ⚠ {lang === 'ru' ? 'Точное местоположение не указано — показано приблизительно по городу.' : lang === 'en' ? 'Exact location not set — approximate by city.' : 'Aniq joylashuv kiritilmagan — shahar bo\'yicha taxminiy.'}
-                    </p>
-                  )}
-
-                  <div className="flex gap-2 pt-2">
-                    <Button className="flex-1 rounded-xl" onClick={() => navigate(`/master/${selected.master_id}`)}>
-                      {lang === 'ru' ? 'Открыть профиль' : lang === 'en' ? 'View profile' : 'Profilni ochish'}
+                {/* Sticky footer actions */}
+                <div className="border-t border-border p-3 bg-background">
+                  {!orderMode ? (
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" className="flex-1 rounded-lg" onClick={() => navigate(`/master/${selected.master_id}`)}>
+                        {lang === 'ru' ? 'Профиль' : lang === 'en' ? 'Profile' : 'Profil'}
+                      </Button>
+                      <Button size="sm" className="flex-1 rounded-lg gap-1.5" onClick={() => setOrderMode(true)}>
+                        <MessageCircle className="h-3.5 w-3.5" />
+                        {lang === 'ru' ? 'Заказать' : lang === 'en' ? 'Order' : 'Buyurtma'}
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="w-full rounded-lg gap-2 h-10"
+                      disabled={submittingOrder || !orderCategoryId || !orderDescription.trim() || !orderAddress.trim()}
+                      onClick={handleQuickSubmit}
+                    >
+                      {submittingOrder ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                      {lang === 'ru' ? 'Отправить заказ' : lang === 'en' ? 'Send order' : 'Buyurtmani yuborish'}
                     </Button>
-                    <Button variant="outline" className="rounded-xl gap-1.5" onClick={() => navigate(`/order/create?master=${selected.master_id}`)}>
-                      <MessageCircle className="h-4 w-4" />
-                      {lang === 'ru' ? 'Заказать' : lang === 'en' ? 'Order' : 'Buyurtma'}
-                    </Button>
-                  </div>
+                  )}
                 </div>
               </>
             );
