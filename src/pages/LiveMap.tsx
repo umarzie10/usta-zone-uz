@@ -79,6 +79,24 @@ function FlyTo({ pos, zoom = 12 }: { pos: [number, number] | null; zoom?: number
   return null;
 }
 
+/** Forces Leaflet to recalc tile sizes when surrounding layout changes
+ *  (drawer opens/closes, window resizes, etc.). Prevents tiles from
+ *  rendering outside the rounded container. */
+function InvalidateOnChange({ trigger }: { trigger: unknown }) {
+  const map = useMap();
+  useEffect(() => {
+    const t1 = setTimeout(() => map.invalidateSize(), 60);
+    const t2 = setTimeout(() => map.invalidateSize(), 350);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [trigger, map]);
+  useEffect(() => {
+    const onResize = () => map.invalidateSize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [map]);
+  return null;
+}
+
 function distanceKm(a: [number, number], b: [number, number]) {
   const R = 6371;
   const dLat = (b[0] - a[0]) * Math.PI / 180;
