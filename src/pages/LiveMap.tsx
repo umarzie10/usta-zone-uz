@@ -365,7 +365,7 @@ export default function LiveMap() {
       </section>
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="rounded-2xl overflow-hidden border border-border shadow-lg" style={{ height: '70vh', minHeight: 480 }}>
+        <div className="lm-map-wrap rounded-2xl overflow-hidden border border-border shadow-lg" style={{ height: '70vh', minHeight: 480 }}>
           {loading ? (
             <div className="h-full w-full flex items-center justify-center bg-muted">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -374,6 +374,7 @@ export default function LiveMap() {
             <MapContainer center={center} zoom={userPos ? 12 : 6} style={{ height: '100%', width: '100%' }} scrollWheelZoom>
               <TileLayer attribution='&copy; OpenStreetMap' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <FlyTo pos={flyTarget} />
+              <InvalidateOnChange trigger={!!selected} />
               {userPos && radius > 0 && (
                 <Circle center={userPos} radius={radius * 1000} pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.08, weight: 2 }} />
               )}
