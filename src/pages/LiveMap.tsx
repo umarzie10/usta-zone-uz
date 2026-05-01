@@ -79,6 +79,24 @@ function FlyTo({ pos, zoom = 12 }: { pos: [number, number] | null; zoom?: number
   return null;
 }
 
+/** Forces Leaflet to recalc tile sizes when surrounding layout changes
+ *  (drawer opens/closes, window resizes, etc.). Prevents tiles from
+ *  rendering outside the rounded container. */
+function InvalidateOnChange({ trigger }: { trigger: unknown }) {
+  const map = useMap();
+  useEffect(() => {
+    const t1 = setTimeout(() => map.invalidateSize(), 60);
+    const t2 = setTimeout(() => map.invalidateSize(), 350);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [trigger, map]);
+  useEffect(() => {
+    const onResize = () => map.invalidateSize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [map]);
+  return null;
+}
+
 function distanceKm(a: [number, number], b: [number, number]) {
   const R = 6371;
   const dLat = (b[0] - a[0]) * Math.PI / 180;
@@ -299,8 +317,17 @@ export default function LiveMap() {
 
   return (
     <Layout>
-      <style>{`@keyframes lm-pulse {0%{transform:scale(1);opacity:.6}100%{transform:scale(1.8);opacity:0}}
-        .leaflet-container{font-family:inherit;}`}</style>
+      <style>{`
+        @keyframes lm-pulse {0%{transform:scale(1);opacity:.6}100%{transform:scale(1.8);opacity:0}}
+        .leaflet-container{font-family:inherit;background:hsl(var(--muted));}
+        /* Keep all leaflet panes/controls below shadcn dialogs (z-50) and overlays */
+        .lm-map-wrap{position:relative;z-index:0;isolation:isolate;contain:layout paint;}
+        .lm-map-wrap .leaflet-pane,
+        .lm-map-wrap .leaflet-top,
+        .lm-map-wrap .leaflet-bottom,
+        .lm-map-wrap .leaflet-control{z-index:1 !important;}
+        .lm-map-wrap .leaflet-popup{z-index:2 !important;}
+      `}</style>
 
       <section className="border-b border-border bg-gradient-to-br from-primary/5 via-background to-success/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
@@ -356,7 +383,7 @@ export default function LiveMap() {
       </section>
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="rounded-2xl overflow-hidden border border-border shadow-lg" style={{ height: '70vh', minHeight: 480 }}>
+        <div className="lm-map-wrap rounded-2xl overflow-hidden border border-border shadow-lg" style={{ height: '70vh', minHeight: 480 }}>
           {loading ? (
             <div className="h-full w-full flex items-center justify-center bg-muted">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -365,6 +392,7 @@ export default function LiveMap() {
             <MapContainer center={center} zoom={userPos ? 12 : 6} style={{ height: '100%', width: '100%' }} scrollWheelZoom>
               <TileLayer attribution='&copy; OpenStreetMap' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <FlyTo pos={flyTarget} />
+              <InvalidateOnChange trigger={!!selected} />
               {userPos && radius > 0 && (
                 <Circle center={userPos} radius={radius * 1000} pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.08, weight: 2 }} />
               )}
