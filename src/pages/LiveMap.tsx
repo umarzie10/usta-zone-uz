@@ -299,8 +299,17 @@ export default function LiveMap() {
 
   return (
     <Layout>
-      <style>{`@keyframes lm-pulse {0%{transform:scale(1);opacity:.6}100%{transform:scale(1.8);opacity:0}}
-        .leaflet-container{font-family:inherit;}`}</style>
+      <style>{`
+        @keyframes lm-pulse {0%{transform:scale(1);opacity:.6}100%{transform:scale(1.8);opacity:0}}
+        .leaflet-container{font-family:inherit;background:hsl(var(--muted));}
+        /* Keep all leaflet panes/controls below shadcn dialogs (z-50) and overlays */
+        .lm-map-wrap{position:relative;z-index:0;isolation:isolate;contain:layout paint;}
+        .lm-map-wrap .leaflet-pane,
+        .lm-map-wrap .leaflet-top,
+        .lm-map-wrap .leaflet-bottom,
+        .lm-map-wrap .leaflet-control{z-index:1 !important;}
+        .lm-map-wrap .leaflet-popup{z-index:2 !important;}
+      `}</style>
 
       <section className="border-b border-border bg-gradient-to-br from-primary/5 via-background to-success/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
