@@ -67,10 +67,36 @@ export default function NotificationBell() {
         }
         setNotifications(prev => [n, ...prev]);
       })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${user.id}`,
+      }, (payload) => {
+        const updated = payload.new as Notification;
+        setNotifications(prev => prev.map(n => n.id === updated.id ? { ...n, ...updated } : n));
+      })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
   }, [user]);
+
+  const claimOrder = useCallback(async (n: Notification) => {
+    if (!n.related_order_id || n.claimed_by) return;
+    const { data, error } = await supabase.rpc('claim_emergency_order', { _order_id: n.related_order_id });
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    const result = data as { ok: boolean; error?: string; master_id?: string };
+    if (!result.ok) {
+      if (result.error === 'already_claimed') {
+        alert('Bu buyurtmani boshqa usta allaqachon qabul qilgan');
+      } else {
+        alert(result.error || 'Xatolik');
+      }
+    }
+  }, []);
 
   // Close dropdown when clicking outside, but NOT when ChatDialog is open
   useEffect(() => {
