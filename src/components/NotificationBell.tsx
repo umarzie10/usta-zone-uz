@@ -15,6 +15,9 @@ interface Notification {
   is_read: boolean;
   created_at: string;
   sender_id: string | null;
+  related_order_id: string | null;
+  claimed_by: string | null;
+  claimed_at: string | null;
   sender_name?: string;
 }
 
