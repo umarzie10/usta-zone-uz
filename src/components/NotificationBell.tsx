@@ -125,8 +125,10 @@ export default function NotificationBell() {
 
   const getIcon = (type: string) => {
     if (type === 'new_message') return <MessageCircle className="h-4 w-4 text-primary" />;
-    if (type === 'new_order') return <ShoppingBag className="h-4 w-4 text-amber-500" />;
+    if (type === 'new_order' || type === 'order_new') return <ShoppingBag className="h-4 w-4 text-amber-500" />;
     if (type === 'new_review') return <Star className="h-4 w-4 text-amber-400" />;
+    if (type === 'emergency_order') return <AlertTriangle className="h-4 w-4 text-destructive" />;
+    if (type === 'order_accepted') return <CheckCircle2 className="h-4 w-4 text-success" />;
     return <Bell className="h-4 w-4 text-muted-foreground" />;
   };
 
