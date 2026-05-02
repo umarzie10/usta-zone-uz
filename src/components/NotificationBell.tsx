@@ -5,7 +5,7 @@ import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import ChatDialog from '@/components/ChatDialog';
-import { Bell, MessageCircle, ShoppingBag, Star, Check, Reply } from 'lucide-react';
+import { Bell, MessageCircle, ShoppingBag, Star, Check, Reply, AlertTriangle, CheckCircle2, Lock } from 'lucide-react';
 
 interface Notification {
   id: string;
