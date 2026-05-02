@@ -135,27 +135,37 @@ export default function QuickOrder() {
 
       if (error) throw error;
 
-      // Emergency: notify ALL active masters in this category
+      // Emergency: notify masters — prefer category match, fallback to ALL active masters
       if (isEmergency) {
         const { data: masters } = await supabase
           .from('master_profiles')
           .select('user_id, category_ids')
           .eq('is_active', true);
 
-        if (masters) {
-          const targetMasters = masters.filter(m =>
-            m.category_ids?.includes(selectedCategory.id)
+        if (masters && masters.length > 0) {
+          // First try category match
+          let targetMasters = masters.filter(m =>
+            Array.isArray(m.category_ids) && m.category_ids.includes(selectedCategory.id)
           );
-          const notifications = targetMasters.map(m => ({
-            user_id: m.user_id,
-            sender_id: user.id,
-            title: '🚨 Shoshilinch buyurtma!',
-            message: `"${title}" - ${address}`,
-            type: 'emergency_order',
-            related_order_id: orderData?.id || null,
-          }));
+          // Fallback: notify ALL active masters if no category match
+          if (targetMasters.length === 0) {
+            targetMasters = masters;
+          }
+          // Dedupe by user_id and exclude the requester
+          const seen = new Set<string>();
+          const notifications = targetMasters
+            .filter(m => m.user_id && m.user_id !== user.id && !seen.has(m.user_id) && seen.add(m.user_id))
+            .map(m => ({
+              user_id: m.user_id,
+              sender_id: user.id,
+              title: '🚨 Shoshilinch buyurtma!',
+              message: `"${title}" — ${address}`,
+              type: 'emergency_order',
+              related_order_id: orderData?.id || null,
+            }));
           if (notifications.length > 0) {
-            await supabase.from('notifications').insert(notifications);
+            const { error: notifErr } = await supabase.from('notifications').insert(notifications);
+            if (notifErr) console.error('Emergency notify error:', notifErr);
           }
         }
       }

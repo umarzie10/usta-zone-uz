@@ -5,7 +5,7 @@ import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import ChatDialog from '@/components/ChatDialog';
-import { Bell, MessageCircle, ShoppingBag, Star, Check, Reply } from 'lucide-react';
+import { Bell, MessageCircle, ShoppingBag, Star, Check, Reply, AlertTriangle, CheckCircle2, Lock } from 'lucide-react';
 
 interface Notification {
   id: string;
@@ -15,6 +15,9 @@ interface Notification {
   is_read: boolean;
   created_at: string;
   sender_id: string | null;
+  related_order_id: string | null;
+  claimed_by: string | null;
+  claimed_at: string | null;
   sender_name?: string;
 }
 
@@ -64,10 +67,36 @@ export default function NotificationBell() {
         }
         setNotifications(prev => [n, ...prev]);
       })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${user.id}`,
+      }, (payload) => {
+        const updated = payload.new as Notification;
+        setNotifications(prev => prev.map(n => n.id === updated.id ? { ...n, ...updated } : n));
+      })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
   }, [user]);
+
+  const claimOrder = useCallback(async (n: Notification) => {
+    if (!n.related_order_id || n.claimed_by) return;
+    const { data, error } = await supabase.rpc('claim_emergency_order', { _order_id: n.related_order_id });
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    const result = data as { ok: boolean; error?: string; master_id?: string };
+    if (!result.ok) {
+      if (result.error === 'already_claimed') {
+        alert('Bu buyurtmani boshqa usta allaqachon qabul qilgan');
+      } else {
+        alert(result.error || 'Xatolik');
+      }
+    }
+  }, []);
 
   // Close dropdown when clicking outside, but NOT when ChatDialog is open
   useEffect(() => {
@@ -96,8 +125,10 @@ export default function NotificationBell() {
 
   const getIcon = (type: string) => {
     if (type === 'new_message') return <MessageCircle className="h-4 w-4 text-primary" />;
-    if (type === 'new_order') return <ShoppingBag className="h-4 w-4 text-amber-500" />;
+    if (type === 'new_order' || type === 'order_new') return <ShoppingBag className="h-4 w-4 text-amber-500" />;
     if (type === 'new_review') return <Star className="h-4 w-4 text-amber-400" />;
+    if (type === 'emergency_order') return <AlertTriangle className="h-4 w-4 text-destructive" />;
+    if (type === 'order_accepted') return <CheckCircle2 className="h-4 w-4 text-success" />;
     return <Bell className="h-4 w-4 text-muted-foreground" />;
   };
 
@@ -130,18 +161,46 @@ export default function NotificationBell() {
                   Bildirishnomalar yo'q
                 </div>
               ) : (
-                notifications.map(n => (
-                  <div key={n.id} className={`px-4 py-3 border-b border-border last:border-0 ${!n.is_read ? 'bg-primary/5' : ''}`}>
+                notifications.map(n => {
+                  const isEmergency = n.type === 'emergency_order';
+                  const isClaimedByMe = isEmergency && n.claimed_by === user?.id;
+                  const isClaimedByOther = isEmergency && n.claimed_by && n.claimed_by !== user?.id;
+                  return (
+                  <div key={n.id} className={`px-4 py-3 border-b border-border last:border-0 transition-all ${
+                    isClaimedByOther ? 'bg-muted/40 opacity-60' :
+                    isEmergency && !isClaimedByMe ? 'bg-destructive/5 border-l-2 border-l-destructive' :
+                    !n.is_read ? 'bg-primary/5' : ''
+                  }`}>
                     <div className="flex items-start gap-3">
                       <div className="mt-0.5 shrink-0">{getIcon(n.type)}</div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium">{n.title}</p>
                         <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.message}</p>
+
+                        {isClaimedByOther && (
+                          <div className="mt-2 flex items-center gap-1 text-[10px] font-semibold text-muted-foreground">
+                            <Lock className="h-3 w-3" /> Boshqa usta qabul qildi
+                          </div>
+                        )}
+                        {isClaimedByMe && (
+                          <div className="mt-2 flex items-center gap-1 text-[10px] font-semibold text-success">
+                            <CheckCircle2 className="h-3 w-3" /> Siz qabul qildingiz
+                          </div>
+                        )}
+                        {isEmergency && !n.claimed_by && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); claimOrder(n); }}
+                            className="mt-2 w-full px-3 py-1.5 rounded-lg bg-destructive text-destructive-foreground text-xs font-bold hover:bg-destructive/90 transition-colors flex items-center justify-center gap-1"
+                          >
+                            <CheckCircle2 className="h-3.5 w-3.5" /> Men boraman
+                          </button>
+                        )}
+
                         <div className="flex items-center justify-between mt-1.5">
                           <p className="text-[10px] text-muted-foreground">
                             {new Date(n.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                           </p>
-                          {n.sender_id && (
+                          {n.sender_id && !isClaimedByOther && (
                             <button
                               onClick={(e) => { e.stopPropagation(); handleReply(n); }}
                               className="text-[10px] text-primary hover:underline flex items-center gap-0.5 font-medium"
@@ -151,10 +210,11 @@ export default function NotificationBell() {
                           )}
                         </div>
                       </div>
-                      {!n.is_read && <span className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />}
+                      {!n.is_read && !isClaimedByOther && <span className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />}
                     </div>
                   </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
