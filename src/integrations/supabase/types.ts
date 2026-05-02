@@ -166,6 +166,8 @@ export type Database = {
       }
       notifications: {
         Row: {
+          claimed_at: string | null
+          claimed_by: string | null
           created_at: string
           id: string
           is_read: boolean
@@ -177,6 +179,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          claimed_at?: string | null
+          claimed_by?: string | null
           created_at?: string
           id?: string
           is_read?: boolean
@@ -188,6 +192,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          claimed_at?: string | null
+          claimed_by?: string | null
           created_at?: string
           id?: string
           is_read?: boolean
@@ -473,6 +479,7 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: undefined
       }
+      claim_emergency_order: { Args: { _order_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
