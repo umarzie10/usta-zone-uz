@@ -104,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) await fetchProfile(user.id);
   };
 
-  const isAdmin = profile?.role === 'admin' || user?.email === 'umareshqurbonov52@gmail.com';
+  const isAdmin = profile?.role === 'admin' || user?.email === 'admin@gmail.com' || user?.email === 'umareshqurbonov52@gmail.com';
   const isMaster = profile?.role === 'master';
   const isClient = profile?.role === 'client';
 
