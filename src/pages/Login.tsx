@@ -82,8 +82,9 @@ export default function LoginPage() {
           role: role,
         });
 
-        // If master, create master_profiles entry
+        // If master, sign in then create master_profiles entry
         if (role === 'master') {
+          await signIn(form.email, form.password).catch(() => {});
           const { data: { user: newUser } } = await supabase.auth.getUser();
           if (newUser) {
             await supabase.from('master_profiles').insert({
