@@ -160,9 +160,16 @@ export default function LiveMap() {
         let approx = false;
         if (lat == null || lng == null) {
           const c = cityCoords[p.city || 'Toshkent'] || cityCoords['Toshkent'];
-          const seed = m.id.charCodeAt(0) + m.id.charCodeAt(1);
-          lat = c[0] + ((seed % 100) - 50) / 1000;
-          lng = c[1] + (((seed * 7) % 100) - 50) / 1000;
+          // Deterministic spread across the city using id hash (~5km radius)
+          let h1 = 0, h2 = 0;
+          for (let i = 0; i < m.id.length; i++) {
+            h1 = (h1 * 31 + m.id.charCodeAt(i)) | 0;
+            h2 = (h2 * 17 + m.id.charCodeAt(i) * 7) | 0;
+          }
+          const dLat = ((Math.abs(h1) % 1000) - 500) / 12000; // ~±0.04°
+          const dLng = ((Math.abs(h2) % 1000) - 500) / 10000; // ~±0.05°
+          lat = c[0] + dLat;
+          lng = c[1] + dLng;
           approx = true;
         }
         return {
