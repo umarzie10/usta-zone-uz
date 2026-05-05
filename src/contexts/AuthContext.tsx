@@ -73,29 +73,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, profileData: Partial<Profile>) => {
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: window.location.origin }
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+        data: {
+          full_name: profileData.full_name || '',
+          phone: profileData.phone || '',
+          city: profileData.city || 'Toshkent',
+          region: profileData.region || 'Toshkent shahri',
+          role: profileData.role || 'client',
+        },
+      },
     });
     if (error) throw error;
-    if (data.user) {
-      await supabase.from('profiles').insert({
-        user_id: data.user.id,
-        full_name: profileData.full_name || '',
-        phone: profileData.phone,
-        city: profileData.city || 'Toshkent',
-        region: profileData.region || 'Toshkent shahri',
-        role: profileData.role || 'client',
-        is_verified: false,
-        is_blocked: false,
-      });
-
-      await supabase.from('user_roles').insert({
-        user_id: data.user.id,
-        role: profileData.role || 'client',
-      });
-    }
   };
 
   const signIn = async (email: string, password: string) => {
