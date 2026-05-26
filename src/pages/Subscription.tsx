@@ -7,45 +7,39 @@ import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Check, Crown, Zap, Star, Loader2, Sparkles } from 'lucide-react';
 
-type Tier = 'free' | 'standard' | 'premium' | 'vip';
+type Tier = 'free' | 'pro' | 'premium';
 
 const TIERS = [
   {
     id: 'free' as Tier,
     name: 'Free',
     price: 0,
+    badge: '🪪 Yangi Usta',
     color: 'border-border',
     icon: Star,
     iconColor: 'text-muted-foreground',
-    features: ['Kuniga 3 buyurtma', 'Asosiy chat', 'Profil ko\'rinishi', 'Past priority'],
+    features: ['Oddiy profil', 'Maks 3 ta xizmat', 'Qidiruvda pastroq', 'Oddiy ranking'],
   },
   {
-    id: 'standard' as Tier,
-    name: 'Standard',
-    price: 49000,
-    color: 'border-primary/40',
+    id: 'pro' as Tier,
+    name: 'Pro',
+    price: 99000,
+    badge: '⭐ Verified Pro',
+    popular: true,
+    color: 'border-primary',
     icon: Zap,
     iconColor: 'text-primary',
-    features: ['Kuniga 15 buyurtma', 'Unlimited chat', 'Profil yuqorida', 'Statistika'],
+    features: ['Qidiruvda yuqori', 'Cheksiz xizmat', 'Chatda ustunlik', 'Portfolio rasmlari', 'Oddiy analytics'],
   },
   {
     id: 'premium' as Tier,
     name: 'Premium',
-    price: 99000,
-    popular: true,
+    price: 199000,
+    badge: '🏆 Top Usta / Elite',
     color: 'border-amber-500',
     icon: Crown,
     iconColor: 'text-amber-500',
-    features: ['Cheksiz buyurtmalar', 'TOP badge', 'Priority order', 'AI tavsiyalar', 'Portfolio boost', 'Reklama'],
-  },
-  {
-    id: 'vip' as Tier,
-    name: 'VIP',
-    price: 199000,
-    color: 'border-purple-500',
-    icon: Sparkles,
-    iconColor: 'text-purple-500',
-    features: ['Birinchi navbat', 'Alohida support', 'AI auto response', 'Cheksiz hammasi', 'Brigada accountlari'],
+    features: ['Eng yuqori pozitsiya', 'Featured (kategoriya tepasi)', 'Instant booking', 'AI matching ustunlik', 'Kengaytirilgan analytics', 'Reklama & boost'],
   },
 ];
 
