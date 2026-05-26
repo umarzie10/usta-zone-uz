@@ -1,0 +1,1 @@
+ALTER VIEW public.master_badges SET (security_invoker = true);
