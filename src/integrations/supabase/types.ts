@@ -356,6 +356,54 @@ export type Database = {
         }
         Relationships: []
       }
+      services: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          description: string | null
+          estimated_hours: number | null
+          id: string
+          is_active: boolean
+          market_avg_price: number | null
+          master_id: string
+          price: number
+          price_max: number | null
+          pricing_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_hours?: number | null
+          id?: string
+          is_active?: boolean
+          market_avg_price?: number | null
+          master_id: string
+          price?: number
+          price_max?: number | null
+          pricing_type?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_hours?: number | null
+          id?: string
+          is_active?: boolean
+          market_avg_price?: number | null
+          master_id?: string
+          price?: number
+          price_max?: number | null
+          pricing_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           created_at: string
@@ -472,7 +520,19 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      master_badges: {
+        Row: {
+          badge: string | null
+          is_verified: boolean | null
+          jobs_completed: number | null
+          master_id: string | null
+          rating: number | null
+          reviews_count: number | null
+          tier: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_delete_user: {
@@ -486,6 +546,14 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      master_can_add_service: {
+        Args: { _master_user_id: string }
+        Returns: boolean
+      }
+      master_match_score: {
+        Args: { _client_lat?: number; _client_lng?: number; _master_id: string }
+        Returns: number
       }
     }
     Enums: {
