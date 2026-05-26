@@ -92,7 +92,7 @@ export default function Subscription() {
         {loading ? (
           <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
             {TIERS.map(tier => {
               const Icon = tier.icon;
               const isCurrent = tier.id === current;
@@ -106,6 +106,7 @@ export default function Subscription() {
                   )}
                   <Icon className={`h-8 w-8 ${tier.iconColor} mb-3`} />
                   <h3 className="text-2xl font-black mb-1">{tier.name}</h3>
+                  <div className="text-[11px] font-semibold text-muted-foreground mb-2">{tier.badge}</div>
                   <div className="mb-5">
                     <span className="text-3xl font-black">{tier.price === 0 ? 'Bepul' : `${(tier.price / 1000).toFixed(0)}k`}</span>
                     {tier.price > 0 && <span className="text-sm text-muted-foreground"> /oy</span>}
