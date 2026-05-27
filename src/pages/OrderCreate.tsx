@@ -288,12 +288,12 @@ export default function OrderCreatePage() {
                   <span className="font-medium">{parseFloat(form.amount || '0').toLocaleString()} so'm</span>
                 </div>
                 <div className="flex justify-between text-destructive">
-                  <span>{t('platformCommission')}</span>
-                  <span>-{(parseFloat(form.amount || '0') * 0.1).toLocaleString()} so'm</span>
+                  <span>{t('platformCommission')} ({commissionPct}%)</span>
+                  <span>-{(parseFloat(form.amount || '0') * (commissionPct / 100)).toLocaleString()} so'm</span>
                 </div>
                 <div className="flex justify-between font-semibold text-success border-t border-border pt-1.5 mt-1.5">
                   <span>{t('masterReceives')}</span>
-                  <span>{(parseFloat(form.amount || '0') * 0.9).toLocaleString()} so'm</span>
+                  <span>{(parseFloat(form.amount || '0') * (1 - commissionPct / 100)).toLocaleString()} so'm</span>
                 </div>
               </div>
             )}
