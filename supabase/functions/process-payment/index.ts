@@ -57,8 +57,20 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Order not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    // Calculate commission (10%)
-    const commission = amount * 0.1;
+    // Read commission % from platform_settings (admin-configurable)
+    let commissionPct = 10;
+    const { data: settingRow } = await supabase
+      .from('platform_settings')
+      .select('value')
+      .eq('key', 'commission_percent')
+      .maybeSingle();
+    if (settingRow && settingRow.value !== null && settingRow.value !== undefined) {
+      const n = Number(settingRow.value);
+      if (!isNaN(n) && n >= 0 && n <= 100) commissionPct = n;
+    }
+
+    // Calculate commission based on admin-configured percentage
+    const commission = amount * (commissionPct / 100);
     const masterAmount = amount - commission;
 
     let paymentUrl = '';
