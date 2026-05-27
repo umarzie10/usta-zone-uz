@@ -139,7 +139,7 @@ serve(async (req) => {
           order_id: orderId,
           amount: masterAmount,
           type: 'earning',
-          description: `Buyurtma daromadi ${orderId.slice(0, 8)} (10% komissiyadan keyin)`,
+          description: `Buyurtma daromadi ${orderId.slice(0, 8)} (${commissionPct}% komissiyadan keyin)`,
         });
       }
     }
