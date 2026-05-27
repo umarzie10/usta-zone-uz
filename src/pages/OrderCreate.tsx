@@ -101,7 +101,7 @@ export default function OrderCreatePage() {
     setLoading(true);
     try {
       const amount = parseFloat(form.amount) || 0;
-      const commission = amount * 0.1;
+      const commission = amount * (commissionPct / 100);
       const masterAmount = amount - commission;
 
       const { data: orderData, error } = await supabase.from('orders').insert({
