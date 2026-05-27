@@ -130,7 +130,7 @@ serve(async (req) => {
         order_id: orderId,
         amount: -commission,
         type: 'commission',
-        description: `Platforma komissiyasi (10%) - Buyurtma ${orderId.slice(0, 8)}`,
+        description: `Platforma komissiyasi (${commissionPct}%) - Buyurtma ${orderId.slice(0, 8)}`,
       });
 
       if (order.master_id) {
