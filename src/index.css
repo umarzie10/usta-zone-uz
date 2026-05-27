@@ -139,81 +139,90 @@
 }
 
 @layer components {
-  /* Card variants */
+  /* Card variants — premium hover with glow lift */
   .card-premium {
-    @apply bg-card rounded-2xl border border-border/60 transition-all duration-300;
+    @apply bg-card rounded-2xl border border-border/60;
     box-shadow: var(--shadow-sm);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.3s ease;
+    will-change: transform;
   }
 
   .card-premium:hover {
-    box-shadow: var(--shadow-md);
-    @apply -translate-y-0.5;
+    box-shadow: var(--shadow-lg), 0 0 0 1px hsl(var(--primary) / 0.15);
+    border-color: hsl(var(--primary) / 0.35);
+    transform: translateY(-4px);
   }
 
-  /* Button variants */
+  /* Button variants with shimmer overlay */
   .btn-hero {
     background: var(--gradient-primary);
-    @apply text-white font-semibold px-8 py-3.5 rounded-xl transition-all duration-300;
+    @apply text-white font-semibold px-8 py-3.5 rounded-xl relative overflow-hidden;
     box-shadow: 0 4px 14px rgba(29, 78, 216, 0.4);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.3s ease, filter 0.3s ease;
   }
-
+  .btn-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%);
+    transform: translateX(-120%);
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
   .btn-hero:hover {
-    @apply scale-105 brightness-110;
-    box-shadow: 0 8px 25px rgba(29, 78, 216, 0.5);
+    transform: translateY(-2px) scale(1.03);
+    filter: brightness(1.08);
+    box-shadow: 0 12px 32px rgba(29, 78, 216, 0.55);
   }
+  .btn-hero:hover::before { transform: translateX(120%); }
+  .btn-hero:active { transform: translateY(0) scale(0.98); }
 
   .btn-accent {
     background: var(--gradient-accent);
-    @apply text-white font-semibold px-8 py-3.5 rounded-xl transition-all duration-300;
+    @apply text-white font-semibold px-8 py-3.5 rounded-xl relative overflow-hidden;
     box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, filter 0.3s ease;
   }
-
-  .btn-accent:hover {
-    @apply scale-105 brightness-110;
-    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5);
+  .btn-accent::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%);
+    transform: translateX(-120%);
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
   }
+  .btn-accent:hover { transform: translateY(-2px) scale(1.03); filter: brightness(1.08); box-shadow: 0 12px 32px rgba(245,158,11,0.55); }
+  .btn-accent:hover::before { transform: translateX(120%); }
 
-  /* Badge */
   .badge-verified {
     @apply inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full;
     background-color: hsl(var(--success) / 0.1);
     color: hsl(var(--success));
   }
-
   .badge-rating {
     @apply inline-flex items-center gap-1 text-sm font-semibold px-2.5 py-1 rounded-full;
     background-color: hsl(var(--accent) / 0.1);
     color: hsl(var(--accent));
   }
 
-  /* Notification */
   .notification-success {
     @apply fixed top-4 right-4 z-50 flex items-center gap-3 bg-success text-success-foreground px-5 py-3 rounded-xl font-medium shadow-lg;
-    animation: slideInRight 0.3s ease-out, fadeOutUp 0.3s ease-in 2.7s forwards;
+    animation: slideInRight 0.4s cubic-bezier(0.16,1,0.3,1), fadeOutUp 0.3s ease-in 2.7s forwards;
   }
-
   .notification-error {
     @apply fixed top-4 right-4 z-50 flex items-center gap-3 bg-destructive text-destructive-foreground px-5 py-3 rounded-xl font-medium shadow-lg;
-    animation: slideInRight 0.3s ease-out, fadeOutUp 0.3s ease-in 2.7s forwards;
+    animation: slideInRight 0.4s cubic-bezier(0.16,1,0.3,1), fadeOutUp 0.3s ease-in 2.7s forwards;
   }
 
-  /* Star rating */
-  .star-filled {
-    @apply text-amber-400 fill-amber-400;
-  }
-  .star-empty {
-    @apply text-muted-foreground;
-  }
+  .star-filled { @apply text-amber-400 fill-amber-400; }
+  .star-empty { @apply text-muted-foreground; }
 
-  /* Section spacing */
-  .section-padding {
-    @apply py-16 px-4 sm:px-6 lg:px-8;
-  }
+  .section-padding { @apply py-16 px-4 sm:px-6 lg:px-8; }
 
-  /* Hero gradient bg */
-  .hero-bg {
-    background: var(--gradient-hero);
-  }
+  .hero-bg { background: var(--gradient-hero); }
 }
 
 @layer utilities {
