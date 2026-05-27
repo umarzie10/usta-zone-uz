@@ -35,6 +35,17 @@ export default function OrderCreatePage() {
 
   const [preselectedMaster, setPreselectedMaster] = useState<PreselectedMaster | null>(null);
   const [categories, setCategories] = useState<CategoryItem[]>([]);
+  const [commissionPct, setCommissionPct] = useState<number>(10);
+
+  useEffect(() => {
+    supabase.from('platform_settings').select('value').eq('key', 'commission_percent').maybeSingle().then(({ data }) => {
+      if (data && data.value !== null && data.value !== undefined) {
+        const n = Number(data.value);
+        if (!isNaN(n)) setCommissionPct(n);
+      }
+    });
+  }, []);
+
 
   const getCatName = (cat: CategoryItem) => {
     if (lang === 'ru') return cat.name_ru;
