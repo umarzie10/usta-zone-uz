@@ -695,13 +695,14 @@ export default function AdminPanel() {
                   <div>
                     <label className="text-sm font-medium">{t('commissionPercentage')}</label>
                     <div className="flex gap-2 mt-1.5">
-                      <Input className="rounded-xl h-11" type="number" value={commission}
+                      <Input className="rounded-xl h-11" type="number" min="0" max="100" step="0.1" value={commission}
                         onChange={e => setCommission(e.target.value)} />
-                      <Button className="rounded-xl h-11 px-5" onClick={() => showNotification('success', t('commissionUpdated'))}>
-                        {t('save')}
+                      <Button className="rounded-xl h-11 px-5" onClick={handleSaveCommission} disabled={savingCommission}>
+                        {savingCommission ? '...' : t('save')}
                       </Button>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">{t('currentCommission')}: {commission}% {t('perOrder')}</p>
+                    <p className="text-xs text-muted-foreground mt-2">Bu foiz har bir buyurtma summasidan platforma uchun ushlab qolinadi va to'lov hisob-kitoblariga avtomatik qo'llanadi.</p>
                   </div>
                 </div>
               </div>
