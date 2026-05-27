@@ -82,9 +82,35 @@ export default function AdminPanel() {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      await Promise.all([fetchMasters(), fetchOrders(), fetchUsers(), fetchWithdrawals(), fetchStats()]);
+      await Promise.all([fetchMasters(), fetchOrders(), fetchUsers(), fetchWithdrawals(), fetchStats(), fetchCommissionSetting()]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCommissionSetting = async () => {
+    const { data } = await supabase.from('platform_settings').select('value').eq('key', 'commission_percent').maybeSingle();
+    if (data && data.value !== null && data.value !== undefined) setCommission(String(data.value));
+  };
+
+  const [savingCommission, setSavingCommission] = useState(false);
+  const handleSaveCommission = async () => {
+    const v = parseFloat(commission);
+    if (isNaN(v) || v < 0 || v > 100) {
+      showNotification('error', '0-100 oralig\'ida foiz kiriting');
+      return;
+    }
+    setSavingCommission(true);
+    try {
+      const { error } = await supabase
+        .from('platform_settings')
+        .upsert({ key: 'commission_percent', value: v, updated_by: user!.id, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+      if (error) throw error;
+      showNotification('success', t('commissionUpdated'));
+    } catch (err: any) {
+      showNotification('error', err.message);
+    } finally {
+      setSavingCommission(false);
     }
   };
 
