@@ -35,6 +35,17 @@ export default function OrderCreatePage() {
 
   const [preselectedMaster, setPreselectedMaster] = useState<PreselectedMaster | null>(null);
   const [categories, setCategories] = useState<CategoryItem[]>([]);
+  const [commissionPct, setCommissionPct] = useState<number>(10);
+
+  useEffect(() => {
+    supabase.from('platform_settings').select('value').eq('key', 'commission_percent').maybeSingle().then(({ data }) => {
+      if (data && data.value !== null && data.value !== undefined) {
+        const n = Number(data.value);
+        if (!isNaN(n)) setCommissionPct(n);
+      }
+    });
+  }, []);
+
 
   const getCatName = (cat: CategoryItem) => {
     if (lang === 'ru') return cat.name_ru;
@@ -90,7 +101,7 @@ export default function OrderCreatePage() {
     setLoading(true);
     try {
       const amount = parseFloat(form.amount) || 0;
-      const commission = amount * 0.1;
+      const commission = amount * (commissionPct / 100);
       const masterAmount = amount - commission;
 
       const { data: orderData, error } = await supabase.from('orders').insert({
@@ -277,12 +288,12 @@ export default function OrderCreatePage() {
                   <span className="font-medium">{parseFloat(form.amount || '0').toLocaleString()} so'm</span>
                 </div>
                 <div className="flex justify-between text-destructive">
-                  <span>{t('platformCommission')}</span>
-                  <span>-{(parseFloat(form.amount || '0') * 0.1).toLocaleString()} so'm</span>
+                  <span>{t('platformCommission')} ({commissionPct}%)</span>
+                  <span>-{(parseFloat(form.amount || '0') * (commissionPct / 100)).toLocaleString()} so'm</span>
                 </div>
                 <div className="flex justify-between font-semibold text-success border-t border-border pt-1.5 mt-1.5">
                   <span>{t('masterReceives')}</span>
-                  <span>{(parseFloat(form.amount || '0') * 0.9).toLocaleString()} so'm</span>
+                  <span>{(parseFloat(form.amount || '0') * (1 - commissionPct / 100)).toLocaleString()} so'm</span>
                 </div>
               </div>
             )}
