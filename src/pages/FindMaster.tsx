@@ -148,15 +148,17 @@ export default function FindMasterPage() {
     }
   };
 
-  // Client-side filtering for search, city, region
+  // Client-side filtering for search, city, region, category, subcategory
   const filtered = masters.filter(m => {
-    const q = search.toLowerCase();
+    const q = search.trim().toLowerCase();
     const matchSearch = !q || m.full_name.toLowerCase().includes(q) ||
       m.skills.some(s => s.toLowerCase().includes(q)) ||
       (m.bio && m.bio.toLowerCase().includes(q));
     const matchCity = city === 'all' || m.city === city;
     const matchRegion = region === 'all' || m.region === region;
-    return matchSearch && matchCity && matchRegion;
+    const matchCategory = categoryId === 'all' || m.category_ids.includes(categoryId);
+    const matchSub = subcategory === 'all' || m.skills.some(s => s.toLowerCase().includes(subcategory.toLowerCase()));
+    return matchSearch && matchCity && matchRegion && matchCategory && matchSub;
   });
 
   const clearFilters = () => {
@@ -164,10 +166,12 @@ export default function FindMasterPage() {
     setCity('all');
     setRegion('all');
     setSortBy('rating');
+    setCategoryId('all');
+    setSubcategory('all');
     setPage(1);
   };
 
-  const hasFilters = search || city !== 'all' || region !== 'all';
+  const hasFilters = search || city !== 'all' || region !== 'all' || categoryId !== 'all' || subcategory !== 'all';
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   const renderStars = (rating: number) => (
