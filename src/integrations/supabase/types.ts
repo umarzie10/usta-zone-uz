@@ -563,8 +563,23 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: undefined
       }
+      admin_get_master_balances: {
+        Args: never
+        Returns: {
+          balance: number
+          user_id: string
+          withdrawable_balance: number
+        }[]
+      }
       claim_emergency_order: { Args: { _order_id: string }; Returns: Json }
       get_commission_percent: { Args: never; Returns: number }
+      get_my_master_balance: {
+        Args: never
+        Returns: {
+          balance: number
+          withdrawable_balance: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
