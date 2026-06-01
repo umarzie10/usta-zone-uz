@@ -115,17 +115,23 @@ export default function AdminPanel() {
   };
 
   const fetchMasters = async () => {
-    const { data: mp } = await supabase.from('master_profiles').select('*');
+    const { data: mp } = await supabase.from('master_profiles')
+      .select('id,user_id,category_ids,skills,portfolio_urls,bio,experience_years,rating,reviews_count,jobs_completed,is_active,is_approved');
     if (!mp || mp.length === 0) { setMasters([]); return; }
     const userIds = mp.map(m => m.user_id);
-    const { data: profiles } = await supabase.from('profiles').select('*').in('user_id', userIds);
+    const [{ data: profiles }, { data: balances }] = await Promise.all([
+      supabase.from('profiles').select('*').in('user_id', userIds),
+      supabase.rpc('admin_get_master_balances'),
+    ]);
     const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+    const balanceMap = new Map((balances || []).map((b: any) => [b.user_id, b]));
     setMasters(mp.map(m => {
       const p = profileMap.get(m.user_id);
+      const b: any = balanceMap.get(m.user_id) || {};
       return {
         id: m.id, user_id: m.user_id,
         rating: m.rating, reviews_count: m.reviews_count,
-        jobs_completed: m.jobs_completed, balance: m.balance,
+        jobs_completed: m.jobs_completed, balance: b.balance || 0,
         is_approved: m.is_approved, is_active: m.is_active,
         category_ids: m.category_ids,
         full_name: p?.full_name || 'Noma\'lum',
@@ -135,6 +141,7 @@ export default function AdminPanel() {
       };
     }));
   };
+
 
   const fetchOrders = async () => {
     const { data: ords } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
