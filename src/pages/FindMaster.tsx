@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { Search, SlidersHorizontal, X, Star, MapPin, CheckCircle, Phone, MessageCircle, UserPlus } from 'lucide-react';
 import { uzbekCities, uzbekRegions } from '@/lib/demoData';
+import { categoryTree } from '@/lib/categoryTaxonomy';
 
 interface RealMaster {
   id: string;
@@ -20,6 +21,7 @@ interface RealMaster {
   experience_years: number;
   bio: string | null;
   skills: string[];
+  category_ids: string[];
   is_approved: boolean;
   is_active: boolean;
   // from profiles join
@@ -31,6 +33,8 @@ interface RealMaster {
   is_verified: boolean;
 }
 
+interface DbCategory { id: string; name_uz: string; name_ru: string; name_en: string; }
+
 const ITEMS_PER_PAGE = 12;
 
 export default function FindMasterPage() {
@@ -41,13 +45,26 @@ export default function FindMasterPage() {
   const [city, setCity] = useState('all');
   const [region, setRegion] = useState('all');
   const [sortBy, setSortBy] = useState('rating');
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(!!searchParams.get('category'));
   const [masters, setMasters] = useState<RealMaster[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [categories, setCategories] = useState<DbCategory[]>([]);
+  const [categoryId, setCategoryId] = useState<string>(searchParams.get('category') || 'all');
+  const [subcategory, setSubcategory] = useState<string>('all');
 
-  const categoryFromUrl = searchParams.get('category') || '';
+  // Match DB category (by name_uz) to taxonomy main category to get subs
+  const selectedDbCat = categories.find(c => c.id === categoryId);
+  const taxonomyMain = selectedDbCat
+    ? categoryTree.find(m => m.name.toLowerCase() === selectedDbCat.name_uz.toLowerCase())
+    : null;
+  const subOptions = taxonomyMain?.subs ?? [];
+
+  useEffect(() => {
+    supabase.from('categories').select('id, name_uz, name_ru, name_en').order('order_num')
+      .then(({ data }) => setCategories(data || []));
+  }, []);
 
   useEffect(() => {
     fetchMasters();
@@ -110,6 +127,7 @@ export default function FindMasterPage() {
           experience_years: mp.experience_years || 0,
           bio: mp.bio,
           skills: mp.skills || [],
+          category_ids: mp.category_ids || [],
           is_approved: mp.is_approved || false,
           is_active: mp.is_active || false,
           full_name: profile?.full_name || 'Unknown',
@@ -130,15 +148,17 @@ export default function FindMasterPage() {
     }
   };
 
-  // Client-side filtering for search, city, region
+  // Client-side filtering for search, city, region, category, subcategory
   const filtered = masters.filter(m => {
-    const q = search.toLowerCase();
+    const q = search.trim().toLowerCase();
     const matchSearch = !q || m.full_name.toLowerCase().includes(q) ||
       m.skills.some(s => s.toLowerCase().includes(q)) ||
       (m.bio && m.bio.toLowerCase().includes(q));
     const matchCity = city === 'all' || m.city === city;
     const matchRegion = region === 'all' || m.region === region;
-    return matchSearch && matchCity && matchRegion;
+    const matchCategory = categoryId === 'all' || m.category_ids.includes(categoryId);
+    const matchSub = subcategory === 'all' || m.skills.some(s => s.toLowerCase().includes(subcategory.toLowerCase()));
+    return matchSearch && matchCity && matchRegion && matchCategory && matchSub;
   });
 
   const clearFilters = () => {
@@ -146,10 +166,12 @@ export default function FindMasterPage() {
     setCity('all');
     setRegion('all');
     setSortBy('rating');
+    setCategoryId('all');
+    setSubcategory('all');
     setPage(1);
   };
 
-  const hasFilters = search || city !== 'all' || region !== 'all';
+  const hasFilters = search || city !== 'all' || region !== 'all' || categoryId !== 'all' || subcategory !== 'all';
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   const renderStars = (rating: number) => (
@@ -195,7 +217,37 @@ export default function FindMasterPage() {
         {/* Filters */}
         {showFilters && (
           <div className="card-premium p-5 mb-6 animate-fade-in">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              <Select value={categoryId} onValueChange={v => { setCategoryId(v); setSubcategory('all'); setPage(1); }}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Kategoriya" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t('all')} kategoriya</SelectItem>
+                  {categories.map(c => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {lang === 'ru' ? c.name_ru : lang === 'en' ? c.name_en : c.name_uz}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={subcategory}
+                onValueChange={v => { setSubcategory(v); setPage(1); }}
+                disabled={subOptions.length === 0}
+              >
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Subkategoriya" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Barchasi</SelectItem>
+                  {subOptions.map(s => (
+                    <SelectItem key={s.slug} value={s.name}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
               <Select value={region} onValueChange={v => { setRegion(v); setPage(1); }}>
                 <SelectTrigger className="rounded-xl">
                   <SelectValue placeholder={t('region')} />
