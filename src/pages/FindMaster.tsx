@@ -220,7 +220,7 @@ export default function FindMasterPage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               <Select value={categoryId} onValueChange={v => { setCategoryId(v); setSubcategory('all'); setPage(1); }}>
                 <SelectTrigger className="rounded-xl">
-                  <SelectValue placeholder={t('category') || 'Kategoriya'} />
+                  <SelectValue placeholder="Kategoriya" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t('all')} kategoriya</SelectItem>
