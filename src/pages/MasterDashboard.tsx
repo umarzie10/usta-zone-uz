@@ -48,6 +48,11 @@ export default function MasterDashboard() {
   const fetchData = async () => {
     setLoading(true);
     const { data: mp } = await supabase.from('master_profiles').select('*').eq('user_id', user!.id).single();
+    const { data: bal } = await supabase.rpc('get_my_master_balance');
+    if (mp && bal && bal[0]) {
+      (mp as any).balance = bal[0].balance;
+      (mp as any).withdrawable_balance = bal[0].withdrawable_balance;
+    }
     setMasterProfile(mp);
     if (mp) {
       setProfileForm({ bio: mp.bio || '', skills: (mp.skills || []).join(', ') });
