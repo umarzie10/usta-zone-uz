@@ -50,8 +50,21 @@ export default function FindMasterPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [categories, setCategories] = useState<DbCategory[]>([]);
+  const [categoryId, setCategoryId] = useState<string>(searchParams.get('category') || 'all');
+  const [subcategory, setSubcategory] = useState<string>('all');
 
-  const categoryFromUrl = searchParams.get('category') || '';
+  // Match DB category (by name_uz) to taxonomy main category to get subs
+  const selectedDbCat = categories.find(c => c.id === categoryId);
+  const taxonomyMain = selectedDbCat
+    ? categoryTree.find(m => m.name.toLowerCase() === selectedDbCat.name_uz.toLowerCase())
+    : null;
+  const subOptions = taxonomyMain?.subs ?? [];
+
+  useEffect(() => {
+    supabase.from('categories').select('id, name_uz, name_ru, name_en').order('order_num')
+      .then(({ data }) => setCategories(data || []));
+  }, []);
 
   useEffect(() => {
     fetchMasters();
