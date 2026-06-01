@@ -250,6 +250,9 @@ export default function Index() {
         </div>
       </section>
 
+      {/* ============ AI MASTER MATCH ============ */}
+      <AIMasterMatch />
+
       {/* ============ 4. TOP MASTERS ============ */}
       <TopMasters />
 
