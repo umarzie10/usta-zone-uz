@@ -127,6 +127,7 @@ export default function FindMasterPage() {
           experience_years: mp.experience_years || 0,
           bio: mp.bio,
           skills: mp.skills || [],
+          category_ids: mp.category_ids || [],
           is_approved: mp.is_approved || false,
           is_active: mp.is_active || false,
           full_name: profile?.full_name || 'Unknown',
