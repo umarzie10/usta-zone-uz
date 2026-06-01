@@ -45,7 +45,7 @@ export default function FindMasterPage() {
   const [city, setCity] = useState('all');
   const [region, setRegion] = useState('all');
   const [sortBy, setSortBy] = useState('rating');
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(!!searchParams.get('category'));
   const [masters, setMasters] = useState<RealMaster[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
