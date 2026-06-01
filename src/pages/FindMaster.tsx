@@ -21,6 +21,7 @@ interface RealMaster {
   experience_years: number;
   bio: string | null;
   skills: string[];
+  category_ids: string[];
   is_approved: boolean;
   is_active: boolean;
   // from profiles join
@@ -31,6 +32,8 @@ interface RealMaster {
   phone: string | null;
   is_verified: boolean;
 }
+
+interface DbCategory { id: string; name_uz: string; name_ru: string; name_en: string; }
 
 const ITEMS_PER_PAGE = 12;
 
