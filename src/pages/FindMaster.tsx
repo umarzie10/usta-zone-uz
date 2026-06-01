@@ -217,7 +217,37 @@ export default function FindMasterPage() {
         {/* Filters */}
         {showFilters && (
           <div className="card-premium p-5 mb-6 animate-fade-in">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              <Select value={categoryId} onValueChange={v => { setCategoryId(v); setSubcategory('all'); setPage(1); }}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder={t('category') || 'Kategoriya'} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t('all')} kategoriya</SelectItem>
+                  {categories.map(c => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {lang === 'ru' ? c.name_ru : lang === 'en' ? c.name_en : c.name_uz}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={subcategory}
+                onValueChange={v => { setSubcategory(v); setPage(1); }}
+                disabled={subOptions.length === 0}
+              >
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Subkategoriya" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Barchasi</SelectItem>
+                  {subOptions.map(s => (
+                    <SelectItem key={s.slug} value={s.name}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
               <Select value={region} onValueChange={v => { setRegion(v); setPage(1); }}>
                 <SelectTrigger className="rounded-xl">
                   <SelectValue placeholder={t('region')} />
