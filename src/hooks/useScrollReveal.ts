@@ -45,6 +45,13 @@ export function useScrollReveal() {
 
     const observe = () => {
       tag();
+      // Auto-stagger siblings: for any container of multiple .reveal cards, index them 1..8
+      document.querySelectorAll<HTMLElement>('main .grid, main .flex-wrap, main .space-y-4, main .space-y-3').forEach((container) => {
+        const items = Array.from(container.children).filter((c): c is HTMLElement =>
+          c instanceof HTMLElement && c.classList.contains('reveal') && !c.dataset.revealI
+        );
+        items.slice(0, 8).forEach((el, i) => { el.dataset.revealI = String(i + 1); });
+      });
       document.querySelectorAll<HTMLElement>('.reveal, .reveal-left, .reveal-right, .reveal-zoom').forEach((el) => {
         if (!el.classList.contains('in-view')) io.observe(el);
       });

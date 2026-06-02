@@ -216,8 +216,8 @@ export default function MasterDashboard() {
                 { label: 'Jarayonda', value: inProgress, icon: Clock, color: 'text-blue-500' },
                 { label: "Bugungi daromad", value: `${(todayRevenue / 1000).toFixed(0)}k`, icon: DollarSign, color: 'text-success' },
               ].map(s => (
-                <div key={s.label} className="card-premium p-3 sm:p-4">
-                  <s.icon className={`h-5 w-5 ${s.color} mb-1.5`} />
+                <div key={s.label} className="stat-card p-3 sm:p-4 reveal">
+                  <s.icon className={`stat-icon h-5 w-5 ${s.color} mb-1.5`} />
                   <p className="text-lg sm:text-2xl font-black">{s.value}</p>
                   <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">{s.label}</p>
                 </div>
@@ -234,8 +234,8 @@ export default function MasterDashboard() {
             { label: `${t('balanceLabel')} (so'm)`, value: balance > 0 ? `${(balance / 1000000).toFixed(1)}M` : '0', icon: Wallet, color: 'text-success' },
             { label: t('withdraw'), value: withdrawable > 0 ? `${(withdrawable / 1000000).toFixed(1)}M` : '0', icon: ArrowDownToLine, color: 'text-purple-500' },
           ].map(s => (
-            <div key={s.label} className="card-premium p-4">
-              <s.icon className={`h-6 w-6 ${s.color} mb-2`} />
+            <div key={s.label} className="stat-card p-4 reveal">
+              <s.icon className={`stat-icon h-6 w-6 ${s.color} mb-2`} />
               <p className="text-2xl font-black">{s.value}</p>
               <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
             </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
+import AnimatedCounter from '@/components/AnimatedCounter';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -302,9 +303,9 @@ export default function AdminPanel() {
             { label: 'Munozaralar', value: stats.disputes, icon: AlertTriangle, color: 'text-amber-500' },
             { label: 'Komissiya', value: `${(stats.totalCommission / 1000).toFixed(0)}K`, icon: TrendingUp, color: 'text-purple-500' },
           ].map(s => (
-            <div key={s.label} className="card-premium p-4">
-              <s.icon className={`h-6 w-6 ${s.color} mb-2`} />
-              <p className="text-2xl font-black">{s.value}</p>
+            <div key={s.label} className="stat-card p-4 reveal">
+              <s.icon className={`stat-icon h-6 w-6 ${s.color} mb-2`} />
+              <p className="text-2xl font-black">{typeof s.value === 'number' ? <AnimatedCounter value={s.value} /> : s.value}</p>
               <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
             </div>
           ))}

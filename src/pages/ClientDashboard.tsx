@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import ChatDialog from '@/components/ChatDialog';
+import AnimatedCounter from '@/components/AnimatedCounter';
 import ReviewForm from '@/components/ReviewForm';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -134,9 +135,9 @@ export default function ClientDashboard() {
             { label: t('completedLabel'), value: completedCount, icon: CheckCircle, color: 'text-success' },
             { label: t('messagesLabel'), value: reviews.length, icon: Star, color: 'text-purple-500' },
           ].map(s => (
-            <div key={s.label} className="card-premium p-4">
-              <s.icon className={`h-6 w-6 ${s.color} mb-2`} />
-              <p className="text-2xl font-black">{s.value}</p>
+            <div key={s.label} className="stat-card p-4 reveal">
+              <s.icon className={`stat-icon h-6 w-6 ${s.color} mb-2`} />
+              <p className="text-2xl font-black"><AnimatedCounter value={s.value} /></p>
               <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
             </div>
           ))}
@@ -158,7 +159,7 @@ export default function ClientDashboard() {
         {loading ? (
           <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
         ) : (
-          <>
+          <div key={activeTab} className="tab-panel">
             {activeTab === 'orders' && (
               <div className="space-y-4">
                 {orders.length > 0 ? orders.map(order => {
@@ -252,7 +253,7 @@ export default function ClientDashboard() {
                 <p className="text-sm text-muted-foreground">{t('balanceDesc')}</p>
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
 
