@@ -134,9 +134,9 @@ export default function ClientDashboard() {
             { label: t('completedLabel'), value: completedCount, icon: CheckCircle, color: 'text-success' },
             { label: t('messagesLabel'), value: reviews.length, icon: Star, color: 'text-purple-500' },
           ].map(s => (
-            <div key={s.label} className="card-premium p-4">
-              <s.icon className={`h-6 w-6 ${s.color} mb-2`} />
-              <p className="text-2xl font-black">{s.value}</p>
+            <div key={s.label} className="stat-card p-4 reveal">
+              <s.icon className={`stat-icon h-6 w-6 ${s.color} mb-2`} />
+              <p className="text-2xl font-black"><AnimatedCounter value={s.value} /></p>
               <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
             </div>
           ))}
