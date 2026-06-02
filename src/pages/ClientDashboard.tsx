@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import ChatDialog from '@/components/ChatDialog';
+import AnimatedCounter from '@/components/AnimatedCounter';
 import ReviewForm from '@/components/ReviewForm';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
