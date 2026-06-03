@@ -164,6 +164,7 @@ export default function MasterDashboard() {
   const tabs = [
     { id: 'overview', label: t('overview'), icon: TrendingUp },
     { id: 'profile', label: t('editProfile'), icon: User },
+    { id: 'verification', label: 'Verifikatsiya', icon: Shield },
     { id: 'portfolio', label: 'Portfolio', icon: Image },
     { id: 'schedule', label: t('workSchedule'), icon: Clock },
     { id: 'balance', label: t('myBalance'), icon: Wallet },
