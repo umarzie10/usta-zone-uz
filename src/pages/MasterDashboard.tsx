@@ -338,6 +338,10 @@ export default function MasterDashboard() {
           </div>
         )}
 
+        {activeTab === 'verification' && masterProfile && (
+          <VerificationCenter currentTier={masterProfile.verification_tier || 'none'} />
+        )}
+
         {activeTab === 'portfolio' && masterProfile && (
           <div className="card-premium p-6">
             <PortfolioUpload
