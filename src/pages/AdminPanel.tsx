@@ -716,6 +716,9 @@ export default function AdminPanel() {
                 </div>
               </div>
             )}
+
+            {activeTab === 'verification' && <AdminVerificationPanel />}
+
           </>
         )}
       </div>
