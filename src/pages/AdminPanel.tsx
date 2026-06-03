@@ -251,6 +251,7 @@ export default function AdminPanel() {
     { id: 'masters', label: t('allMasters'), icon: Users },
     { id: 'orders', label: t('allOrders'), icon: ShoppingBag },
     { id: 'users', label: 'Foydalanuvchilar', icon: UserCheck },
+    { id: 'verification', label: 'Verifikatsiya', icon: Shield },
     { id: 'withdrawals', label: t('withdrawRequests'), icon: Wallet },
     { id: 'analytics', label: 'Analitika', icon: BarChart3 },
     { id: 'settings', label: t('settings'), icon: Settings },
