@@ -49,7 +49,7 @@ export default function MasterDashboard() {
   const fetchData = async () => {
     setLoading(true);
     const { data: mp } = await supabase.from('master_profiles')
-      .select('id,user_id,category_ids,skills,portfolio_urls,bio,experience_years,rating,reviews_count,jobs_completed,is_active,is_approved,created_at,updated_at')
+      .select('id,user_id,category_ids,skills,portfolio_urls,bio,experience_years,rating,reviews_count,jobs_completed,is_active,is_approved,verification_tier,verified_at,created_at,updated_at')
       .eq('user_id', user!.id).single();
     const { data: bal } = await supabase.rpc('get_my_master_balance');
     if (mp && bal && bal[0]) {
