@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { uzbekCities } from '@/lib/demoData';
+import PromoCodeInput from '@/components/PromoCodeInput';
 import { ArrowLeft, MapPin, Banknote, CreditCard, Loader2 } from 'lucide-react';
 
 interface CategoryItem {
@@ -94,6 +95,7 @@ export default function OrderCreatePage() {
     address: '',
   });
   const [loading, setLoading] = useState(false);
+  const [promo, setPromo] = useState<{ promo_code_id: string; discount: number; code: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
