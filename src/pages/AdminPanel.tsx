@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import AdminVerificationPanel from '@/components/AdminVerificationPanel';
+import AdminPromoCodes from '@/components/AdminPromoCodes';
 import AnimatedCounter from '@/components/AnimatedCounter';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Users, ShoppingBag, Wallet, AlertTriangle, CheckCircle,
   XCircle, Shield, Settings, Search, BarChart3, UserCheck,
-  TrendingUp, Filter, ArrowDownToLine, Loader2
+  TrendingUp, Filter, ArrowDownToLine, Loader2, Tag
 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 
