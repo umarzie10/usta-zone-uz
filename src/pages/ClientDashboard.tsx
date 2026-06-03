@@ -226,6 +226,8 @@ export default function ClientDashboard() {
               </div>
             )}
 
+            {activeTab === 'favorites' && <FavoriteMasters />}
+            {activeTab === 'addresses' && <SavedAddresses />}
             {activeTab === 'reviews' && (
               <div className="space-y-4">
                 {reviews.length > 0 ? reviews.map(r => (
