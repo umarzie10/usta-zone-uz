@@ -12,7 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import LiveTracker from '@/components/LiveTracker';
-import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User, Crown, Navigation as NavIcon, DollarSign } from 'lucide-react';
+import VerificationCenter from '@/components/VerificationCenter';
+import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User, Crown, Navigation as NavIcon, DollarSign, Shield } from 'lucide-react';
 
 const TIER_INFO: Record<string, { label: string; color: string; limit: number }> = {
   free: { label: 'Free', color: 'bg-muted text-muted-foreground', limit: 3 },
