@@ -47,6 +47,27 @@ export type Database = {
         }
         Relationships: []
       }
+      favorite_masters: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          master_profile_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          master_profile_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          master_profile_id?: string
+        }
+        Relationships: []
+      }
       master_availability: {
         Row: {
           created_at: string | null
@@ -463,6 +484,48 @@ export type Database = {
           master_id?: string
           order_id?: string | null
           rating?: number
+        }
+        Relationships: []
+      }
+      saved_addresses: {
+        Row: {
+          address: string
+          city: string | null
+          created_at: string
+          id: string
+          is_default: boolean
+          label: string
+          latitude: number | null
+          longitude: number | null
+          region: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address: string
+          city?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label: string
+          latitude?: number | null
+          longitude?: number | null
+          region?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          city?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label?: string
+          latitude?: number | null
+          longitude?: number | null
+          region?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
