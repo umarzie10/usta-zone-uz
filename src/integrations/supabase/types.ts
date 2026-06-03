@@ -94,6 +94,8 @@ export type Database = {
           skills: string[] | null
           updated_at: string | null
           user_id: string
+          verification_tier: Database["public"]["Enums"]["verification_tier"]
+          verified_at: string | null
           withdrawable_balance: number | null
         }
         Insert: {
@@ -112,6 +114,8 @@ export type Database = {
           skills?: string[] | null
           updated_at?: string | null
           user_id: string
+          verification_tier?: Database["public"]["Enums"]["verification_tier"]
+          verified_at?: string | null
           withdrawable_balance?: number | null
         }
         Update: {
@@ -130,6 +134,8 @@ export type Database = {
           skills?: string[] | null
           updated_at?: string | null
           user_id?: string
+          verification_tier?: Database["public"]["Enums"]["verification_tier"]
+          verified_at?: string | null
           withdrawable_balance?: number | null
         }
         Relationships: []
@@ -509,6 +515,51 @@ export type Database = {
         }
         Relationships: []
       }
+      verification_requests: {
+        Row: {
+          admin_note: string | null
+          certificate_url: string | null
+          created_at: string
+          id: string
+          master_id: string
+          passport_url: string | null
+          requested_tier: Database["public"]["Enums"]["verification_tier"]
+          reviewed_at: string | null
+          reviewed_by: string | null
+          selfie_url: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          certificate_url?: string | null
+          created_at?: string
+          id?: string
+          master_id: string
+          passport_url?: string | null
+          requested_tier?: Database["public"]["Enums"]["verification_tier"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          certificate_url?: string | null
+          created_at?: string
+          id?: string
+          master_id?: string
+          passport_url?: string | null
+          requested_tier?: Database["public"]["Enums"]["verification_tier"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       withdraw_requests: {
         Row: {
           admin_note: string | null
@@ -559,6 +610,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_approve_verification: {
+        Args: { _approve: boolean; _note?: string; _request_id: string }
+        Returns: Json
+      }
       admin_delete_user: {
         Args: { target_user_id: string }
         Returns: undefined
@@ -599,6 +654,7 @@ export type Database = {
     Enums: {
       app_role: "client" | "master" | "admin"
       subscription_tier: "free" | "standard" | "premium" | "vip" | "pro"
+      verification_tier: "none" | "bronze" | "silver" | "gold"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -728,6 +784,7 @@ export const Constants = {
     Enums: {
       app_role: ["client", "master", "admin"],
       subscription_tier: ["free", "standard", "premium", "vip", "pro"],
+      verification_tier: ["none", "bronze", "silver", "gold"],
     },
   },
 } as const
