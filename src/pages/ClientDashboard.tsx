@@ -133,11 +133,11 @@ export default function ClientDashboard() {
             { label: t('totalOrdersLabel'), value: orders.length, icon: ShoppingBag, color: 'text-primary' },
             { label: t('activeLabel'), value: activeCount, icon: Clock, color: 'text-amber-500' },
             { label: t('completedLabel'), value: completedCount, icon: CheckCircle, color: 'text-success' },
-            { label: t('messagesLabel'), value: reviews.length, icon: Star, color: 'text-purple-500' },
+            { label: 'Bonus balans', value: Math.round((profile as any)?.bonus_balance || 0).toLocaleString(), icon: Star, color: 'text-purple-500', isText: true } as any,
           ].map(s => (
             <div key={s.label} className="stat-card p-4 reveal">
               <s.icon className={`stat-icon h-6 w-6 ${s.color} mb-2`} />
-              <p className="text-2xl font-black"><AnimatedCounter value={s.value} /></p>
+              <p className="text-2xl font-black">{(s as any).isText ? s.value : <AnimatedCounter value={s.value as number} />}</p>
               <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
             </div>
           ))}
