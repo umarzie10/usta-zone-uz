@@ -289,6 +289,19 @@ export default function OrderCreatePage() {
               </div>
             </div>
 
+            {/* Promo code */}
+            {form.amount && parseFloat(form.amount) > 0 && (
+              <div>
+                <Label className="text-sm font-medium">Promo kod</Label>
+                <div className="mt-1.5">
+                  <PromoCodeInput
+                    orderAmount={parseFloat(form.amount)}
+                    onApplied={(r) => setPromo(r.promo_code_id ? { promo_code_id: r.promo_code_id, discount: r.discount, code: r.code } : null)}
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Commission info */}
             {form.amount && (
               <div className="p-4 rounded-xl bg-muted text-sm space-y-1.5">
@@ -296,13 +309,19 @@ export default function OrderCreatePage() {
                   <span className="text-muted-foreground">{t('totalAmount')}</span>
                   <span className="font-medium">{parseFloat(form.amount || '0').toLocaleString()} so'm</span>
                 </div>
+                {promo && promo.discount > 0 && (
+                  <div className="flex justify-between text-success">
+                    <span>Promo ({promo.code})</span>
+                    <span>-{promo.discount.toLocaleString()} so'm</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-destructive">
                   <span>{t('platformCommission')} ({commissionPct}%)</span>
-                  <span>-{(parseFloat(form.amount || '0') * (commissionPct / 100)).toLocaleString()} so'm</span>
+                  <span>-{(Math.max(0,(parseFloat(form.amount || '0') - (promo?.discount||0))) * (commissionPct / 100)).toLocaleString()} so'm</span>
                 </div>
                 <div className="flex justify-between font-semibold text-success border-t border-border pt-1.5 mt-1.5">
                   <span>{t('masterReceives')}</span>
-                  <span>{(parseFloat(form.amount || '0') * (1 - commissionPct / 100)).toLocaleString()} so'm</span>
+                  <span>{(Math.max(0,(parseFloat(form.amount || '0') - (promo?.discount||0))) * (1 - commissionPct / 100)).toLocaleString()} so'm</span>
                 </div>
               </div>
             )}
