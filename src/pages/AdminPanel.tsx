@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
+import AdminVerificationPanel from '@/components/AdminVerificationPanel';
 import AnimatedCounter from '@/components/AnimatedCounter';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
