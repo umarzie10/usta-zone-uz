@@ -721,6 +721,7 @@ export default function AdminPanel() {
             )}
 
             {activeTab === 'verification' && <AdminVerificationPanel />}
+            {activeTab === 'promo' && <AdminPromoCodes />}
 
           </>
         )}
