@@ -8,9 +8,11 @@ import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import FavoriteMasters from '@/components/FavoriteMasters';
+import SavedAddresses from '@/components/SavedAddresses';
 import {
   ShoppingBag, MessageCircle, Star, Wallet, Plus,
-  Clock, CheckCircle, AlertCircle, XCircle, Loader2
+  Clock, CheckCircle, AlertCircle, XCircle, Loader2, Heart, MapPin
 } from 'lucide-react';
 
 interface OrderWithMaster {
@@ -103,6 +105,8 @@ export default function ClientDashboard() {
 
   const tabs = [
     { id: 'orders', label: t('activeOrders'), icon: ShoppingBag },
+    { id: 'favorites', label: 'Sevimlilar', icon: Heart },
+    { id: 'addresses', label: 'Manzillar', icon: MapPin },
     { id: 'messages', label: t('messages'), icon: MessageCircle },
     { id: 'reviews', label: t('reviewsTab'), icon: Star },
     { id: 'balance', label: t('balanceTab'), icon: Wallet },
@@ -133,11 +137,11 @@ export default function ClientDashboard() {
             { label: t('totalOrdersLabel'), value: orders.length, icon: ShoppingBag, color: 'text-primary' },
             { label: t('activeLabel'), value: activeCount, icon: Clock, color: 'text-amber-500' },
             { label: t('completedLabel'), value: completedCount, icon: CheckCircle, color: 'text-success' },
-            { label: t('messagesLabel'), value: reviews.length, icon: Star, color: 'text-purple-500' },
+            { label: 'Bonus balans', value: Math.round((profile as any)?.bonus_balance || 0).toLocaleString(), icon: Star, color: 'text-purple-500', isText: true } as any,
           ].map(s => (
             <div key={s.label} className="stat-card p-4 reveal">
               <s.icon className={`stat-icon h-6 w-6 ${s.color} mb-2`} />
-              <p className="text-2xl font-black"><AnimatedCounter value={s.value} /></p>
+              <p className="text-2xl font-black">{(s as any).isText ? s.value : <AnimatedCounter value={s.value as number} />}</p>
               <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
             </div>
           ))}
@@ -222,6 +226,8 @@ export default function ClientDashboard() {
               </div>
             )}
 
+            {activeTab === 'favorites' && <FavoriteMasters />}
+            {activeTab === 'addresses' && <SavedAddresses />}
             {activeTab === 'reviews' && (
               <div className="space-y-4">
                 {reviews.length > 0 ? reviews.map(r => (

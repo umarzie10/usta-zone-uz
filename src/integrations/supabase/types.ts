@@ -47,6 +47,27 @@ export type Database = {
         }
         Relationships: []
       }
+      favorite_masters: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          master_profile_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          master_profile_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          master_profile_id?: string
+        }
+        Relationships: []
+      }
       master_availability: {
         Row: {
           created_at: string | null
@@ -94,6 +115,8 @@ export type Database = {
           skills: string[] | null
           updated_at: string | null
           user_id: string
+          verification_tier: Database["public"]["Enums"]["verification_tier"]
+          verified_at: string | null
           withdrawable_balance: number | null
         }
         Insert: {
@@ -112,6 +135,8 @@ export type Database = {
           skills?: string[] | null
           updated_at?: string | null
           user_id: string
+          verification_tier?: Database["public"]["Enums"]["verification_tier"]
+          verified_at?: string | null
           withdrawable_balance?: number | null
         }
         Update: {
@@ -130,6 +155,8 @@ export type Database = {
           skills?: string[] | null
           updated_at?: string | null
           user_id?: string
+          verification_tier?: Database["public"]["Enums"]["verification_tier"]
+          verified_at?: string | null
           withdrawable_balance?: number | null
         }
         Relationships: []
@@ -299,6 +326,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bonus_balance: number
           city: string | null
           created_at: string | null
           full_name: string
@@ -316,6 +344,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          bonus_balance?: number
           city?: string | null
           created_at?: string | null
           full_name: string
@@ -333,6 +362,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          bonus_balance?: number
           city?: string | null
           created_at?: string | null
           full_name?: string
@@ -349,6 +379,83 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      promo_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          min_order_amount: number | null
+          used_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          discount_type?: string
+          discount_value: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_order_amount?: number | null
+          used_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_order_amount?: number | null
+          used_count?: number
+        }
+        Relationships: []
+      }
+      promo_redemptions: {
+        Row: {
+          discount_applied: number
+          id: string
+          order_id: string | null
+          promo_code_id: string
+          redeemed_at: string
+          user_id: string
+        }
+        Insert: {
+          discount_applied: number
+          id?: string
+          order_id?: string | null
+          promo_code_id: string
+          redeemed_at?: string
+          user_id: string
+        }
+        Update: {
+          discount_applied?: number
+          id?: string
+          order_id?: string | null
+          promo_code_id?: string
+          redeemed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_redemptions_promo_code_id_fkey"
+            columns: ["promo_code_id"]
+            isOneToOne: false
+            referencedRelation: "promo_codes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {
@@ -377,6 +484,48 @@ export type Database = {
           master_id?: string
           order_id?: string | null
           rating?: number
+        }
+        Relationships: []
+      }
+      saved_addresses: {
+        Row: {
+          address: string
+          city: string | null
+          created_at: string
+          id: string
+          is_default: boolean
+          label: string
+          latitude: number | null
+          longitude: number | null
+          region: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address: string
+          city?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label: string
+          latitude?: number | null
+          longitude?: number | null
+          region?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          city?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label?: string
+          latitude?: number | null
+          longitude?: number | null
+          region?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -509,6 +658,51 @@ export type Database = {
         }
         Relationships: []
       }
+      verification_requests: {
+        Row: {
+          admin_note: string | null
+          certificate_url: string | null
+          created_at: string
+          id: string
+          master_id: string
+          passport_url: string | null
+          requested_tier: Database["public"]["Enums"]["verification_tier"]
+          reviewed_at: string | null
+          reviewed_by: string | null
+          selfie_url: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          certificate_url?: string | null
+          created_at?: string
+          id?: string
+          master_id: string
+          passport_url?: string | null
+          requested_tier?: Database["public"]["Enums"]["verification_tier"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          certificate_url?: string | null
+          created_at?: string
+          id?: string
+          master_id?: string
+          passport_url?: string | null
+          requested_tier?: Database["public"]["Enums"]["verification_tier"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       withdraw_requests: {
         Row: {
           admin_note: string | null
@@ -559,6 +753,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_approve_verification: {
+        Args: { _approve: boolean; _note?: string; _request_id: string }
+        Returns: Json
+      }
       admin_delete_user: {
         Args: { target_user_id: string }
         Returns: undefined
@@ -571,6 +769,11 @@ export type Database = {
           withdrawable_balance: number
         }[]
       }
+      apply_promo_code: {
+        Args: { _code: string; _order_amount: number }
+        Returns: Json
+      }
+      award_cashback: { Args: { _order_id: string }; Returns: undefined }
       claim_emergency_order: { Args: { _order_id: string }; Returns: Json }
       get_commission_percent: { Args: never; Returns: number }
       get_my_master_balance: {
@@ -595,10 +798,16 @@ export type Database = {
         Args: { _client_lat?: number; _client_lng?: number; _master_id: string }
         Returns: number
       }
+      redeem_promo_code: {
+        Args: { _discount: number; _order_id: string; _promo_code_id: string }
+        Returns: undefined
+      }
+      use_bonus_balance: { Args: { _amount: number }; Returns: Json }
     }
     Enums: {
       app_role: "client" | "master" | "admin"
       subscription_tier: "free" | "standard" | "premium" | "vip" | "pro"
+      verification_tier: "none" | "bronze" | "silver" | "gold"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -728,6 +937,7 @@ export const Constants = {
     Enums: {
       app_role: ["client", "master", "admin"],
       subscription_tier: ["free", "standard", "premium", "vip", "pro"],
+      verification_tier: ["none", "bronze", "silver", "gold"],
     },
   },
 } as const

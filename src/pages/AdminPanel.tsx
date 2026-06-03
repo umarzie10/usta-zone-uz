@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
+import AdminVerificationPanel from '@/components/AdminVerificationPanel';
+import AdminPromoCodes from '@/components/AdminPromoCodes';
 import AnimatedCounter from '@/components/AnimatedCounter';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Users, ShoppingBag, Wallet, AlertTriangle, CheckCircle,
   XCircle, Shield, Settings, Search, BarChart3, UserCheck,
-  TrendingUp, Filter, ArrowDownToLine, Loader2
+  TrendingUp, Filter, ArrowDownToLine, Loader2, Tag
 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 
@@ -251,6 +253,8 @@ export default function AdminPanel() {
     { id: 'masters', label: t('allMasters'), icon: Users },
     { id: 'orders', label: t('allOrders'), icon: ShoppingBag },
     { id: 'users', label: 'Foydalanuvchilar', icon: UserCheck },
+    { id: 'verification', label: 'Verifikatsiya', icon: Shield },
+    { id: 'promo', label: 'Promo kodlar', icon: Tag },
     { id: 'withdrawals', label: t('withdrawRequests'), icon: Wallet },
     { id: 'analytics', label: 'Analitika', icon: BarChart3 },
     { id: 'settings', label: t('settings'), icon: Settings },
@@ -715,6 +719,10 @@ export default function AdminPanel() {
                 </div>
               </div>
             )}
+
+            {activeTab === 'verification' && <AdminVerificationPanel />}
+            {activeTab === 'promo' && <AdminPromoCodes />}
+
           </>
         )}
       </div>

@@ -12,7 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import LiveTracker from '@/components/LiveTracker';
-import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User, Crown, Navigation as NavIcon, DollarSign } from 'lucide-react';
+import VerificationCenter from '@/components/VerificationCenter';
+import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User, Crown, Navigation as NavIcon, DollarSign, Shield } from 'lucide-react';
 
 const TIER_INFO: Record<string, { label: string; color: string; limit: number }> = {
   free: { label: 'Free', color: 'bg-muted text-muted-foreground', limit: 3 },
@@ -48,7 +49,7 @@ export default function MasterDashboard() {
   const fetchData = async () => {
     setLoading(true);
     const { data: mp } = await supabase.from('master_profiles')
-      .select('id,user_id,category_ids,skills,portfolio_urls,bio,experience_years,rating,reviews_count,jobs_completed,is_active,is_approved,created_at,updated_at')
+      .select('id,user_id,category_ids,skills,portfolio_urls,bio,experience_years,rating,reviews_count,jobs_completed,is_active,is_approved,verification_tier,verified_at,created_at,updated_at')
       .eq('user_id', user!.id).single();
     const { data: bal } = await supabase.rpc('get_my_master_balance');
     if (mp && bal && bal[0]) {
@@ -163,6 +164,7 @@ export default function MasterDashboard() {
   const tabs = [
     { id: 'overview', label: t('overview'), icon: TrendingUp },
     { id: 'profile', label: t('editProfile'), icon: User },
+    { id: 'verification', label: 'Verifikatsiya', icon: Shield },
     { id: 'portfolio', label: 'Portfolio', icon: Image },
     { id: 'schedule', label: t('workSchedule'), icon: Clock },
     { id: 'balance', label: t('myBalance'), icon: Wallet },
@@ -334,6 +336,10 @@ export default function MasterDashboard() {
               {t('save')}
             </Button>
           </div>
+        )}
+
+        {activeTab === 'verification' && masterProfile && (
+          <VerificationCenter currentTier={masterProfile.verification_tier || 'none'} />
         )}
 
         {activeTab === 'portfolio' && masterProfile && (

@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { uzbekCities } from '@/lib/demoData';
+import PromoCodeInput from '@/components/PromoCodeInput';
 import { ArrowLeft, MapPin, Banknote, CreditCard, Loader2 } from 'lucide-react';
 
 interface CategoryItem {
@@ -94,13 +95,16 @@ export default function OrderCreatePage() {
     address: '',
   });
   const [loading, setLoading] = useState(false);
+  const [promo, setPromo] = useState<{ promo_code_id: string; discount: number; code: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) { navigate('/login'); return; }
     setLoading(true);
     try {
-      const amount = parseFloat(form.amount) || 0;
+      const rawAmount = parseFloat(form.amount) || 0;
+      const discount = promo?.discount || 0;
+      const amount = Math.max(0, rawAmount - discount);
       const commission = amount * (commissionPct / 100);
       const masterAmount = amount - commission;
 
@@ -120,6 +124,11 @@ export default function OrderCreatePage() {
       }).select('id').single();
 
       if (error) throw error;
+
+      // Redeem promo if applied
+      if (promo?.promo_code_id && orderData?.id) {
+        await supabase.rpc('redeem_promo_code', { _promo_code_id: promo.promo_code_id, _order_id: orderData.id, _discount: discount });
+      }
 
       // Send notification to master if selected
       if (form.masterId) {
@@ -280,6 +289,19 @@ export default function OrderCreatePage() {
               </div>
             </div>
 
+            {/* Promo code */}
+            {form.amount && parseFloat(form.amount) > 0 && (
+              <div>
+                <Label className="text-sm font-medium">Promo kod</Label>
+                <div className="mt-1.5">
+                  <PromoCodeInput
+                    orderAmount={parseFloat(form.amount)}
+                    onApplied={(r) => setPromo(r.promo_code_id ? { promo_code_id: r.promo_code_id, discount: r.discount, code: r.code } : null)}
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Commission info */}
             {form.amount && (
               <div className="p-4 rounded-xl bg-muted text-sm space-y-1.5">
@@ -287,13 +309,19 @@ export default function OrderCreatePage() {
                   <span className="text-muted-foreground">{t('totalAmount')}</span>
                   <span className="font-medium">{parseFloat(form.amount || '0').toLocaleString()} so'm</span>
                 </div>
+                {promo && promo.discount > 0 && (
+                  <div className="flex justify-between text-success">
+                    <span>Promo ({promo.code})</span>
+                    <span>-{promo.discount.toLocaleString()} so'm</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-destructive">
                   <span>{t('platformCommission')} ({commissionPct}%)</span>
-                  <span>-{(parseFloat(form.amount || '0') * (commissionPct / 100)).toLocaleString()} so'm</span>
+                  <span>-{(Math.max(0,(parseFloat(form.amount || '0') - (promo?.discount||0))) * (commissionPct / 100)).toLocaleString()} so'm</span>
                 </div>
                 <div className="flex justify-between font-semibold text-success border-t border-border pt-1.5 mt-1.5">
                   <span>{t('masterReceives')}</span>
-                  <span>{(parseFloat(form.amount || '0') * (1 - commissionPct / 100)).toLocaleString()} so'm</span>
+                  <span>{(Math.max(0,(parseFloat(form.amount || '0') - (promo?.discount||0))) * (1 - commissionPct / 100)).toLocaleString()} so'm</span>
                 </div>
               </div>
             )}
