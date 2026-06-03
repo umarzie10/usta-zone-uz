@@ -8,9 +8,11 @@ import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import FavoriteMasters from '@/components/FavoriteMasters';
+import SavedAddresses from '@/components/SavedAddresses';
 import {
   ShoppingBag, MessageCircle, Star, Wallet, Plus,
-  Clock, CheckCircle, AlertCircle, XCircle, Loader2
+  Clock, CheckCircle, AlertCircle, XCircle, Loader2, Heart, MapPin
 } from 'lucide-react';
 
 interface OrderWithMaster {
@@ -103,6 +105,8 @@ export default function ClientDashboard() {
 
   const tabs = [
     { id: 'orders', label: t('activeOrders'), icon: ShoppingBag },
+    { id: 'favorites', label: 'Sevimlilar', icon: Heart },
+    { id: 'addresses', label: 'Manzillar', icon: MapPin },
     { id: 'messages', label: t('messages'), icon: MessageCircle },
     { id: 'reviews', label: t('reviewsTab'), icon: Star },
     { id: 'balance', label: t('balanceTab'), icon: Wallet },
