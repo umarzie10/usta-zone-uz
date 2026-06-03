@@ -102,7 +102,9 @@ export default function OrderCreatePage() {
     if (!user) { navigate('/login'); return; }
     setLoading(true);
     try {
-      const amount = parseFloat(form.amount) || 0;
+      const rawAmount = parseFloat(form.amount) || 0;
+      const discount = promo?.discount || 0;
+      const amount = Math.max(0, rawAmount - discount);
       const commission = amount * (commissionPct / 100);
       const masterAmount = amount - commission;
 
@@ -122,6 +124,11 @@ export default function OrderCreatePage() {
       }).select('id').single();
 
       if (error) throw error;
+
+      // Redeem promo if applied
+      if (promo?.promo_code_id && orderData?.id) {
+        await supabase.rpc('redeem_promo_code', { _promo_code_id: promo.promo_code_id, _order_id: orderData.id, _discount: discount });
+      }
 
       // Send notification to master if selected
       if (form.masterId) {
