@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import ChatDialog from '@/components/ChatDialog';
+import ComplaintDialog from '@/components/ComplaintDialog';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -56,6 +57,7 @@ export default function MasterProfilePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [chatOpen, setChatOpen] = useState(false);
+  const [complaintOpen, setComplaintOpen] = useState(false);
   const [master, setMaster] = useState<MasterData | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [availability, setAvailability] = useState<Availability[]>([]);
@@ -417,6 +419,11 @@ export default function MasterProfilePage() {
                   <Share2 className="h-4 w-4" />
                   {t('share')}
                 </Button>
+
+                <Button variant="ghost" className="w-full h-10 rounded-xl gap-2 text-sm text-destructive hover:text-destructive"
+                  onClick={() => setComplaintOpen(true)}>
+                  ⚠️ Shikoyat yuborish
+                </Button>
               </div>
 
               <Separator className="my-5" />
@@ -464,6 +471,7 @@ export default function MasterProfilePage() {
         open={chatOpen}
         onClose={() => setChatOpen(false)}
       />
+      <ComplaintDialog targetUserId={master.user_id} open={complaintOpen} onClose={() => setComplaintOpen(false)} />
     </Layout>
   );
 }

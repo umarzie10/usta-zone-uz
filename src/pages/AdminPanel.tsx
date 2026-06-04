@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import AdminVerificationPanel from '@/components/AdminVerificationPanel';
 import AdminPromoCodes from '@/components/AdminPromoCodes';
+import AdminComplaints from '@/components/AdminComplaints';
+import AdminChatMonitor from '@/components/AdminChatMonitor';
+import AdminBroadcast from '@/components/AdminBroadcast';
+import RevenueChart from '@/components/RevenueChart';
 import AnimatedCounter from '@/components/AnimatedCounter';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,7 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Users, ShoppingBag, Wallet, AlertTriangle, CheckCircle,
   XCircle, Shield, Settings, Search, BarChart3, UserCheck,
-  TrendingUp, Filter, ArrowDownToLine, Loader2, Tag
+  TrendingUp, Filter, ArrowDownToLine, Loader2, Tag, MessageCircle, Megaphone
 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 
@@ -255,6 +259,9 @@ export default function AdminPanel() {
     { id: 'users', label: 'Foydalanuvchilar', icon: UserCheck },
     { id: 'verification', label: 'Verifikatsiya', icon: Shield },
     { id: 'promo', label: 'Promo kodlar', icon: Tag },
+    { id: 'complaints', label: 'Shikoyatlar', icon: AlertTriangle },
+    { id: 'chats', label: 'Chatlar', icon: MessageCircle },
+    { id: 'broadcast', label: 'Ommaviy xabar', icon: Megaphone },
     { id: 'withdrawals', label: t('withdrawRequests'), icon: Wallet },
     { id: 'analytics', label: 'Analitika', icon: BarChart3 },
     { id: 'settings', label: t('settings'), icon: Settings },
@@ -596,6 +603,9 @@ export default function AdminPanel() {
             {/* ANALYTICS TAB */}
             {activeTab === 'analytics' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="md:col-span-2">
+                  <RevenueChart days={30} />
+                </div>
                 <div className="card-premium p-6">
                   <h3 className="font-bold mb-4 flex items-center gap-2"><BarChart3 className="h-5 w-5 text-primary" /> Buyurtma statistikasi</h3>
                   <div className="space-y-3">
@@ -722,6 +732,9 @@ export default function AdminPanel() {
 
             {activeTab === 'verification' && <AdminVerificationPanel />}
             {activeTab === 'promo' && <AdminPromoCodes />}
+            {activeTab === 'complaints' && <AdminComplaints />}
+            {activeTab === 'chats' && <AdminChatMonitor />}
+            {activeTab === 'broadcast' && <AdminBroadcast />}
 
           </>
         )}
