@@ -418,6 +418,11 @@ export default function MasterProfilePage() {
                   <Share2 className="h-4 w-4" />
                   {t('share')}
                 </Button>
+
+                <Button variant="ghost" className="w-full h-10 rounded-xl gap-2 text-sm text-destructive hover:text-destructive"
+                  onClick={() => setComplaintOpen(true)}>
+                  ⚠️ Shikoyat yuborish
+                </Button>
               </div>
 
               <Separator className="my-5" />
