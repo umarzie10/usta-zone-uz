@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import LiveTracker from '@/components/LiveTracker';
 import VerificationCenter from '@/components/VerificationCenter';
+import RevenueChart from '@/components/RevenueChart';
 import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User, Crown, Navigation as NavIcon, DollarSign, Shield } from 'lucide-react';
 
 const TIER_INFO: Record<string, { label: string; color: string; limit: number }> = {
@@ -278,6 +279,9 @@ export default function MasterDashboard() {
                 <p className="text-xs sm:text-sm font-semibold">Pul yechish</p>
               </button>
             </div>
+
+            {/* Revenue chart */}
+            {user && <RevenueChart masterUserId={user.id} days={30} />}
 
             {/* Active order tracker */}
             {orders.find(o => o.status === 'in_progress' || o.status === 'accepted') && (
