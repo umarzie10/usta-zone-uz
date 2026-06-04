@@ -471,6 +471,7 @@ export default function MasterProfilePage() {
         open={chatOpen}
         onClose={() => setChatOpen(false)}
       />
+      <ComplaintDialog targetUserId={master.user_id} open={complaintOpen} onClose={() => setComplaintOpen(false)} />
     </Layout>
   );
 }
