@@ -57,6 +57,7 @@ export default function MasterProfilePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [chatOpen, setChatOpen] = useState(false);
+  const [complaintOpen, setComplaintOpen] = useState(false);
   const [master, setMaster] = useState<MasterData | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [availability, setAvailability] = useState<Availability[]>([]);
