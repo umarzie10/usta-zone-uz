@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      broadcasts: {
+        Row: {
+          audience: string
+          created_at: string
+          id: string
+          message: string
+          recipients_count: number
+          send_sms: boolean
+          sender_id: string
+          title: string
+        }
+        Insert: {
+          audience?: string
+          created_at?: string
+          id?: string
+          message: string
+          recipients_count?: number
+          send_sms?: boolean
+          sender_id: string
+          title: string
+        }
+        Update: {
+          audience?: string
+          created_at?: string
+          id?: string
+          message?: string
+          recipients_count?: number
+          send_sms?: boolean
+          sender_id?: string
+          title?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           color: string | null
@@ -44,6 +77,54 @@ export type Database = {
           name_ru?: string
           name_uz?: string
           order_num?: number | null
+        }
+        Relationships: []
+      }
+      complaints: {
+        Row: {
+          admin_note: string | null
+          category: string
+          created_at: string
+          description: string
+          id: string
+          reporter_id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          target_order_id: string | null
+          target_review_id: string | null
+          target_user_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          reporter_id: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          target_order_id?: string | null
+          target_review_id?: string | null
+          target_user_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          reporter_id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          target_order_id?: string | null
+          target_review_id?: string | null
+          target_user_id?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -768,6 +849,27 @@ export type Database = {
           user_id: string
           withdrawable_balance: number
         }[]
+      }
+      admin_recent_messages: {
+        Args: { _limit?: number }
+        Returns: {
+          content: string
+          created_at: string
+          id: string
+          receiver_id: string
+          receiver_name: string
+          sender_id: string
+          sender_name: string
+        }[]
+      }
+      admin_send_broadcast: {
+        Args: {
+          _audience: string
+          _message: string
+          _send_sms?: boolean
+          _title: string
+        }
+        Returns: Json
       }
       apply_promo_code: {
         Args: { _code: string; _order_amount: number }
