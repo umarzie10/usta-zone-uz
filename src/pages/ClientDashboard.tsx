@@ -10,6 +10,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import FavoriteMasters from '@/components/FavoriteMasters';
 import SavedAddresses from '@/components/SavedAddresses';
+import TrialCountdown from '@/components/TrialCountdown';
+import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import {
   ShoppingBag, MessageCircle, Star, Wallet, Plus,
   Clock, CheckCircle, AlertCircle, XCircle, Loader2, Heart, MapPin
@@ -30,6 +32,7 @@ interface OrderWithMaster {
 export default function ClientDashboard() {
   const { t } = useApp();
   const { user, profile } = useAuth();
+  const { status: subStatus } = useSubscriptionStatus();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('orders');
   const [chatOpen, setChatOpen] = useState(false);
@@ -130,6 +133,8 @@ export default function ClientDashboard() {
             {t('placeOrder')}
           </Button>
         </div>
+
+        <TrialCountdown status={subStatus} audience="client" />
 
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">

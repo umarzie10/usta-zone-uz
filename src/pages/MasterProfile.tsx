@@ -78,6 +78,20 @@ export default function MasterProfilePage() {
         .single();
       if (error) throw error;
 
+      // Hide profile if master has no active subscription (free or expired)
+      const { data: sub } = await supabase
+        .from('subscriptions')
+        .select('tier, expires_at, is_trial, trial_ends_at')
+        .eq('user_id', mp.user_id)
+        .maybeSingle();
+      const hasActivePaid = sub && ['basic','pro','premium','vip','standard'].includes(sub.tier as any) && (!sub.expires_at || new Date(sub.expires_at) > new Date());
+      if (!hasActivePaid) {
+        setMaster(null);
+        setLoading(false);
+        return;
+      }
+
+
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')

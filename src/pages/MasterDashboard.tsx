@@ -14,18 +14,16 @@ import { Textarea } from '@/components/ui/textarea';
 import LiveTracker from '@/components/LiveTracker';
 import VerificationCenter from '@/components/VerificationCenter';
 import RevenueChart from '@/components/RevenueChart';
+import TrialCountdown from '@/components/TrialCountdown';
+import SubscriptionGuard from '@/components/SubscriptionGuard';
+import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+import { TIER_BADGE } from '@/lib/subscriptionPlans';
 import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User, Crown, Navigation as NavIcon, DollarSign, Shield } from 'lucide-react';
-
-const TIER_INFO: Record<string, { label: string; color: string; limit: number }> = {
-  free: { label: 'Free', color: 'bg-muted text-muted-foreground', limit: 3 },
-  standard: { label: 'Standard', color: 'bg-primary/15 text-primary', limit: 15 },
-  premium: { label: 'Premium', color: 'bg-amber-500/15 text-amber-600', limit: 999 },
-  vip: { label: 'VIP', color: 'bg-purple-500/15 text-purple-600', limit: 999 },
-};
 
 export default function MasterDashboard() {
   const { t, showNotification } = useApp();
   const { user, profile, refreshProfile } = useAuth();
+  const { status: subStatus } = useSubscriptionStatus();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [withdrawAmount, setWithdrawAmount] = useState('');
@@ -193,9 +191,9 @@ export default function MasterDashboard() {
           <div className="flex items-center gap-2 self-start shrink-0">
             <button
               onClick={() => navigate('/subscription')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-bold ${(TIER_INFO[subscription?.tier] || TIER_INFO.free).color} hover:opacity-80 transition`}>
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-bold ${(TIER_BADGE[subStatus?.tier || 'free'] || TIER_BADGE.free).color} hover:opacity-80 transition`}>
               <Crown className="h-3.5 w-3.5" />
-              {(TIER_INFO[subscription?.tier] || TIER_INFO.free).label}
+              {(TIER_BADGE[subStatus?.tier || 'free'] || TIER_BADGE.free).label}
             </button>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-xs sm:text-sm font-semibold">
               <span className="w-2 h-2 rounded-full bg-success animate-pulse"></span>
@@ -203,6 +201,11 @@ export default function MasterDashboard() {
             </div>
           </div>
         </div>
+
+        {/* Trial countdown banner */}
+        <TrialCountdown status={subStatus} audience="master" />
+
+        <SubscriptionGuard status={subStatus}>
 
         {/* Today's quick stats */}
         {(() => {
@@ -439,6 +442,7 @@ export default function MasterDashboard() {
             )}
           </div>
         )}
+        </SubscriptionGuard>
       </div>
 
       <ChatDialog receiverId="demo-client" receiverName="Demo Client" open={chatOpen} onClose={() => setChatOpen(false)} />

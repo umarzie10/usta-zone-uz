@@ -1,79 +1,47 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useApp } from '@/contexts/AppContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Check, Crown, Zap, Star, Loader2, Sparkles } from 'lucide-react';
+import { Check, Loader2, Sparkles, Clock } from 'lucide-react';
+import {
+  MASTER_PLANS, CLIENT_PLANS, BILLING_OPTIONS, formatSom,
+  type BillingMonths, type MasterTier, type ClientTier
+} from '@/lib/subscriptionPlans';
+import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 
-type Tier = 'free' | 'pro' | 'premium';
-
-const TIERS = [
-  {
-    id: 'free' as Tier,
-    name: 'Free',
-    price: 0,
-    badge: '🪪 Yangi Usta',
-    color: 'border-border',
-    icon: Star,
-    iconColor: 'text-muted-foreground',
-    features: ['Oddiy profil', 'Maks 3 ta xizmat', 'Qidiruvda pastroq', 'Oddiy ranking'],
-  },
-  {
-    id: 'pro' as Tier,
-    name: 'Pro',
-    price: 99000,
-    badge: '⭐ Verified Pro',
-    popular: true,
-    color: 'border-primary',
-    icon: Zap,
-    iconColor: 'text-primary',
-    features: ['Qidiruvda yuqori', 'Cheksiz xizmat', 'Chatda ustunlik', 'Portfolio rasmlari', 'Oddiy analytics'],
-  },
-  {
-    id: 'premium' as Tier,
-    name: 'Premium',
-    price: 199000,
-    badge: '🏆 Top Usta / Elite',
-    color: 'border-amber-500',
-    icon: Crown,
-    iconColor: 'text-amber-500',
-    features: ['Eng yuqori pozitsiya', 'Featured (kategoriya tepasi)', 'Instant booking', 'AI matching ustunlik', 'Kengaytirilgan analytics', 'Reklama & boost'],
-  },
-];
+type Audience = 'master' | 'client';
 
 export default function Subscription() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { showNotification } = useApp();
   const navigate = useNavigate();
-  const [current, setCurrent] = useState<Tier>('free');
-  const [loading, setLoading] = useState(true);
-  const [activating, setActivating] = useState<Tier | null>(null);
+  const { status, refresh } = useSubscriptionStatus();
 
-  useEffect(() => {
-    if (!user) { setLoading(false); return; }
-    supabase.from('subscriptions').select('tier').eq('user_id', user.id).maybeSingle()
-      .then(({ data }) => {
-        if (data) setCurrent(data.tier as Tier);
-        setLoading(false);
-      });
-  }, [user]);
+  const defaultAudience: Audience = profile?.role === 'master' ? 'master' : 'client';
+  const [audience, setAudience] = useState<Audience>(defaultAudience);
+  const [months, setMonths] = useState<BillingMonths>(1);
+  const [activating, setActivating] = useState<string | null>(null);
 
-  const handleActivate = async (tier: Tier) => {
+  useEffect(() => { setAudience(profile?.role === 'master' ? 'master' : 'client'); }, [profile?.role]);
+
+  const plans = audience === 'master' ? MASTER_PLANS : CLIENT_PLANS;
+  const currentTier = status?.tier;
+
+  const activate = async (tier: MasterTier | ClientTier) => {
     if (!user) { navigate('/login'); return; }
-    if (tier === current) return;
     setActivating(tier);
     try {
-      const expiresAt = tier === 'free' ? null : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-      const { error } = await supabase.from('subscriptions').upsert({
-        user_id: user.id,
-        tier,
-        expires_at: expiresAt,
-      }, { onConflict: 'user_id' });
+      const { data, error } = await supabase.rpc('activate_subscription', {
+        _tier: tier,
+        _months: months,
+      });
       if (error) throw error;
-      setCurrent(tier);
-      showNotification('success', `${tier.toUpperCase()} tarifi faollashtirildi`);
+      if (!(data as any)?.ok) throw new Error('Faollashtirib bo‘lmadi');
+      showNotification('success', `${tier.toUpperCase()} tarifi ${months} oyga faollashtirildi`);
+      await refresh();
     } catch (e: any) {
       showNotification('error', e.message);
     } finally {
@@ -84,58 +52,120 @@ export default function Subscription() {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl sm:text-5xl font-black mb-3">Tarif tanlang</h1>
-          <p className="text-muted-foreground text-base sm:text-lg">Ko'proq buyurtma oling, ko'proq daromad qiling</p>
+        <div className="text-center mb-8 reveal">
+          <h1 className="text-3xl sm:text-5xl font-black mb-3">Obuna tarifi</h1>
+          <p className="text-muted-foreground text-base sm:text-lg">
+            Sizga mos tarifni tanlang — ko‘proq imkoniyat, ko‘proq daromad
+          </p>
         </div>
 
-        {loading ? (
-          <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
-            {TIERS.map(tier => {
-              const Icon = tier.icon;
-              const isCurrent = tier.id === current;
-              return (
-                <div key={tier.id}
-                  className={`relative card-premium p-6 border-2 ${tier.color} ${tier.popular ? 'lg:scale-105 shadow-2xl' : ''}`}>
-                  {tier.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                      Mashhur
-                    </div>
-                  )}
-                  <Icon className={`h-8 w-8 ${tier.iconColor} mb-3`} />
-                  <h3 className="text-2xl font-black mb-1">{tier.name}</h3>
-                  <div className="text-[11px] font-semibold text-muted-foreground mb-2">{tier.badge}</div>
-                  <div className="mb-5">
-                    <span className="text-3xl font-black">{tier.price === 0 ? 'Bepul' : `${(tier.price / 1000).toFixed(0)}k`}</span>
-                    {tier.price > 0 && <span className="text-sm text-muted-foreground"> /oy</span>}
-                  </div>
-                  <ul className="space-y-2.5 mb-6 min-h-[180px]">
-                    {tier.features.map(f => (
-                      <li key={f} className="flex items-start gap-2 text-sm">
-                        <Check className="h-4 w-4 text-success mt-0.5 shrink-0" />
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button
-                    className={`w-full rounded-xl ${isCurrent ? '' : tier.popular ? 'btn-hero' : ''}`}
-                    variant={isCurrent ? 'outline' : tier.popular ? 'default' : 'secondary'}
-                    disabled={isCurrent || activating === tier.id}
-                    onClick={() => handleActivate(tier.id)}>
-                    {activating === tier.id ? <Loader2 className="h-4 w-4 animate-spin" /> :
-                      isCurrent ? 'Joriy tarif' : 'Tanlash'}
-                  </Button>
-                </div>
-              );
-            })}
+        {/* Trial status banner */}
+        {status?.is_trial && (
+          <div className="max-w-2xl mx-auto mb-6 card-premium p-4 border-2 border-primary/30 bg-gradient-to-r from-primary/10 to-transparent">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 text-primary flex items-center justify-center">
+                <Clock className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <p className="font-bold text-sm">
+                  ⏳ Bepul PRO sinov muddati — {status.days_left} kun qoldi
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Sinov tugagandan keyin obuna sotib olishingiz kerak
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
-        <p className="text-center text-xs text-muted-foreground mt-8">
-          To'lovlar Click, Payme va Uzum orqali qabul qilinadi. Test rejimida tarif darhol faollashadi.
-        </p>
+        {/* Audience tabs */}
+        <div className="flex justify-center mb-6">
+          <div className="inline-flex p-1 rounded-2xl bg-muted">
+            {(['master', 'client'] as Audience[]).map(a => (
+              <button key={a} onClick={() => setAudience(a)}
+                className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition ${audience === a ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+                {a === 'master' ? '🛠 Usta tariflari' : '👤 Mijoz tariflari'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Billing period */}
+        <div className="flex justify-center mb-8 flex-wrap gap-2">
+          {BILLING_OPTIONS.map(opt => (
+            <button key={opt.months} onClick={() => setMonths(opt.months)}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition border-2 ${
+                months === opt.months
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border bg-card text-muted-foreground hover:border-primary/40'
+              }`}>
+              {opt.label}
+              {opt.discount && (
+                <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full bg-success/15 text-success font-bold">
+                  {opt.discount}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Plans */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
+          {plans.map(plan => {
+            const isCurrent = plan.id === currentTier;
+            const price = plan.prices[months];
+            return (
+              <div key={plan.id}
+                className={`relative card-premium p-6 border-2 transition reveal ${
+                  plan.popular ? 'border-primary md:scale-105 shadow-2xl' : 'border-border hover:border-primary/40'
+                }`}>
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">
+                    Mashhur tanlov
+                  </div>
+                )}
+                <div className="text-3xl mb-2">{plan.icon}</div>
+                <h3 className="text-2xl font-black mb-1">{plan.name}</h3>
+                <div className="text-[11px] font-semibold text-muted-foreground mb-3">{plan.badge}</div>
+                <div className="mb-5">
+                  <span className="text-3xl font-black">{formatSom(price)}</span>
+                  {price > 0 && (
+                    <span className="text-sm text-muted-foreground"> so‘m / {months} oy</span>
+                  )}
+                </div>
+                <ul className="space-y-2 mb-6 min-h-[200px]">
+                  {plan.features.map(f => (
+                    <li key={f} className="flex items-start gap-2 text-sm">
+                      <Check className="h-4 w-4 text-success mt-0.5 shrink-0" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  className={`w-full rounded-xl ${plan.popular ? 'btn-hero' : ''}`}
+                  variant={isCurrent ? 'outline' : plan.popular ? 'default' : 'secondary'}
+                  disabled={isCurrent || activating === plan.id}
+                  onClick={() => activate(plan.id)}>
+                  {activating === plan.id
+                    ? <Loader2 className="h-4 w-4 animate-spin" />
+                    : isCurrent
+                      ? 'Joriy tarif'
+                      : price === 0 ? 'Bepul foydalanish' : 'Tanlash'}
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="text-center mt-8 space-y-1.5">
+          <p className="text-xs text-muted-foreground flex items-center justify-center gap-1.5">
+            <Sparkles className="h-3 w-3" />
+            To'lovlar Click, Payme va Uzum orqali qabul qilinadi
+          </p>
+          <p className="text-[11px] text-muted-foreground">
+            Test rejimida tarif darhol faollashadi. Yangi ustalarga 30 kun, yangi mijozlarga 7 kun bepul PRO
+          </p>
+        </div>
       </div>
     </Layout>
   );
