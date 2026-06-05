@@ -23,6 +23,7 @@ import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, Trend
 export default function MasterDashboard() {
   const { t, showNotification } = useApp();
   const { user, profile, refreshProfile } = useAuth();
+  const { status: subStatus } = useSubscriptionStatus();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [withdrawAmount, setWithdrawAmount] = useState('');
