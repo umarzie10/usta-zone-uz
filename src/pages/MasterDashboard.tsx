@@ -202,6 +202,11 @@ export default function MasterDashboard() {
           </div>
         </div>
 
+        {/* Trial countdown banner */}
+        <TrialCountdown status={subStatus} audience="master" />
+
+        <SubscriptionGuard status={subStatus}>
+
         {/* Today's quick stats */}
         {(() => {
           const today = new Date().toDateString();
