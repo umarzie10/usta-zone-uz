@@ -32,6 +32,7 @@ interface OrderWithMaster {
 export default function ClientDashboard() {
   const { t } = useApp();
   const { user, profile } = useAuth();
+  const { status: subStatus } = useSubscriptionStatus();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('orders');
   const [chatOpen, setChatOpen] = useState(false);
