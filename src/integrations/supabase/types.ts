@@ -660,32 +660,44 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          audience: string
+          billing_period: string | null
           created_at: string
           daily_orders_used: number
           expires_at: string | null
           id: string
+          is_trial: boolean
           last_reset_date: string
           tier: Database["public"]["Enums"]["subscription_tier"]
+          trial_ends_at: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          audience?: string
+          billing_period?: string | null
           created_at?: string
           daily_orders_used?: number
           expires_at?: string | null
           id?: string
+          is_trial?: boolean
           last_reset_date?: string
           tier?: Database["public"]["Enums"]["subscription_tier"]
+          trial_ends_at?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          audience?: string
+          billing_period?: string | null
           created_at?: string
           daily_orders_used?: number
           expires_at?: string | null
           id?: string
+          is_trial?: boolean
           last_reset_date?: string
           tier?: Database["public"]["Enums"]["subscription_tier"]
+          trial_ends_at?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -834,6 +846,13 @@ export type Database = {
       }
     }
     Functions: {
+      activate_subscription: {
+        Args: {
+          _months?: number
+          _tier: Database["public"]["Enums"]["subscription_tier"]
+        }
+        Returns: Json
+      }
       admin_approve_verification: {
         Args: { _approve: boolean; _note?: string; _request_id: string }
         Returns: Json
@@ -885,6 +904,7 @@ export type Database = {
           withdrawable_balance: number
         }[]
       }
+      get_my_subscription_status: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -892,6 +912,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      master_can_accept_orders: { Args: { _user_id: string }; Returns: boolean }
       master_can_add_service: {
         Args: { _master_user_id: string }
         Returns: boolean
