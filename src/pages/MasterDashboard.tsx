@@ -193,9 +193,9 @@ export default function MasterDashboard() {
           <div className="flex items-center gap-2 self-start shrink-0">
             <button
               onClick={() => navigate('/subscription')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-bold ${TIER_INFO[subscription?.tier || 'free'].color} hover:opacity-80 transition`}>
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-bold ${(TIER_INFO[subscription?.tier] || TIER_INFO.free).color} hover:opacity-80 transition`}>
               <Crown className="h-3.5 w-3.5" />
-              {TIER_INFO[subscription?.tier || 'free'].label}
+              {(TIER_INFO[subscription?.tier] || TIER_INFO.free).label}
             </button>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-xs sm:text-sm font-semibold">
               <span className="w-2 h-2 rounded-full bg-success animate-pulse"></span>
