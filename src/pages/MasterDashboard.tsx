@@ -14,14 +14,11 @@ import { Textarea } from '@/components/ui/textarea';
 import LiveTracker from '@/components/LiveTracker';
 import VerificationCenter from '@/components/VerificationCenter';
 import RevenueChart from '@/components/RevenueChart';
+import TrialCountdown from '@/components/TrialCountdown';
+import SubscriptionGuard from '@/components/SubscriptionGuard';
+import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+import { TIER_BADGE } from '@/lib/subscriptionPlans';
 import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User, Crown, Navigation as NavIcon, DollarSign, Shield } from 'lucide-react';
-
-const TIER_INFO: Record<string, { label: string; color: string; limit: number }> = {
-  free: { label: 'Free', color: 'bg-muted text-muted-foreground', limit: 3 },
-  standard: { label: 'Standard', color: 'bg-primary/15 text-primary', limit: 15 },
-  premium: { label: 'Premium', color: 'bg-amber-500/15 text-amber-600', limit: 999 },
-  vip: { label: 'VIP', color: 'bg-purple-500/15 text-purple-600', limit: 999 },
-};
 
 export default function MasterDashboard() {
   const { t, showNotification } = useApp();
