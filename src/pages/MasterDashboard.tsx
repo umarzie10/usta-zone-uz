@@ -442,6 +442,7 @@ export default function MasterDashboard() {
             )}
           </div>
         )}
+        </SubscriptionGuard>
       </div>
 
       <ChatDialog receiverId="demo-client" receiverName="Demo Client" open={chatOpen} onClose={() => setChatOpen(false)} />
