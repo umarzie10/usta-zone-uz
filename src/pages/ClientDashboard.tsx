@@ -10,6 +10,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import FavoriteMasters from '@/components/FavoriteMasters';
 import SavedAddresses from '@/components/SavedAddresses';
+import TrialCountdown from '@/components/TrialCountdown';
+import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import {
   ShoppingBag, MessageCircle, Star, Wallet, Plus,
   Clock, CheckCircle, AlertCircle, XCircle, Loader2, Heart, MapPin
