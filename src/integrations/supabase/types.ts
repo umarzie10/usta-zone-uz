@@ -658,6 +658,63 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_plans: {
+        Row: {
+          audience: string
+          badge: string | null
+          created_at: string
+          features: string[]
+          icon: string | null
+          id: string
+          is_active: boolean
+          name: string
+          order_num: number
+          popular: boolean
+          price_12m: number
+          price_1m: number
+          price_3m: number
+          price_6m: number
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          audience: string
+          badge?: string | null
+          created_at?: string
+          features?: string[]
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          order_num?: number
+          popular?: boolean
+          price_12m?: number
+          price_1m?: number
+          price_3m?: number
+          price_6m?: number
+          tier: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: string
+          badge?: string | null
+          created_at?: string
+          features?: string[]
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          order_num?: number
+          popular?: boolean
+          price_12m?: number
+          price_1m?: number
+          price_3m?: number
+          price_6m?: number
+          tier?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           audience: string
