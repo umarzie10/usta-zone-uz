@@ -7,6 +7,7 @@ import { AppProvider } from "@/contexts/AppContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import LoginPage from "./pages/Login";
+import RegisterMaster from "./pages/RegisterMaster";
 import FindMasterPage from "./pages/FindMaster";
 import CategoriesPage from "./pages/Categories";
 import MasterProfilePage from "./pages/MasterProfile";
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<LoginPage />} />
+              <Route path="/register/master" element={<RegisterMaster />} />
               <Route path="/find-master" element={<FindMasterPage />} />
               <Route path="/categories" element={<CategoriesPage />} />
               <Route path="/master/:id" element={<MasterProfilePage />} />
