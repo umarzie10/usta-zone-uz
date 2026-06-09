@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import FirstLoginTrialBanner from './FirstLoginTrialBanner';
 import { useHeartbeat } from '@/hooks/useHeartbeat';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
@@ -17,6 +18,7 @@ export default function Layout({ children, noFooter = false }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col bg-background overflow-x-hidden w-full max-w-full">
       <Navbar />
+      <FirstLoginTrialBanner />
       <main key={pathname} className="flex-1 w-full max-w-full overflow-x-hidden page-enter">
         {children}
       </main>
