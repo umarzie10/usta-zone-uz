@@ -152,22 +152,37 @@ export default function LoginPage() {
             </div>
 
             {mode === 'register' && (
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                {(['client', 'master'] as Role[]).map(r => (
-                  <button
-                    key={r}
-                    onClick={() => setRole(r)}
-                    className={`p-4 rounded-xl border-2 transition-all text-center font-medium ${
-                      role === r
-                        ? 'border-primary bg-primary/10 text-primary'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <span className="block text-2xl mb-1">{r === 'client' ? '👤' : '🔧'}</span>
-                    {r === 'client' ? t('asClient') : t('asMaster')}
-                  </button>
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  {(['client', 'master'] as Role[]).map(r => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => {
+                        if (r === 'master') { navigate('/register/master'); return; }
+                        setRole(r);
+                      }}
+                      className={`p-4 rounded-xl border-2 transition-all text-center font-medium ${
+                        role === r
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <span className="block text-2xl mb-1">{r === 'client' ? '👤' : '🔧'}</span>
+                      {r === 'client' ? t('asClient') : t('asMaster')}
+                    </button>
+                  ))}
+                </div>
+                {role === 'client' && (
+                  <p className="text-xs text-muted-foreground mb-4 text-center">
+                    Usta sifatida ro'yxatdan o'tmoqchimisiz?{' '}
+                    <button type="button" onClick={() => navigate('/register/master')}
+                      className="text-primary font-semibold hover:underline">
+                      Bosqichma-bosqich anketa
+                    </button>
+                  </p>
+                )}
+              </>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
