@@ -5,6 +5,7 @@ import AdminPromoCodes from '@/components/AdminPromoCodes';
 import AdminComplaints from '@/components/AdminComplaints';
 import AdminChatMonitor from '@/components/AdminChatMonitor';
 import AdminBroadcast from '@/components/AdminBroadcast';
+import AdminCategories from '@/components/AdminCategories';
 import AdminSubscriptionPlans from '@/components/AdminSubscriptionPlans';
 import RevenueChart from '@/components/RevenueChart';
 import AnimatedCounter from '@/components/AnimatedCounter';
@@ -18,7 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Users, ShoppingBag, Wallet, AlertTriangle, CheckCircle,
   XCircle, Shield, Settings, Search, BarChart3, UserCheck,
-  TrendingUp, Filter, ArrowDownToLine, Loader2, Tag, MessageCircle, Megaphone, Crown
+  TrendingUp, Filter, ArrowDownToLine, Loader2, Tag, MessageCircle, Megaphone, Crown, FolderTree
 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 
@@ -259,6 +260,7 @@ export default function AdminPanel() {
     { id: 'orders', label: t('allOrders'), icon: ShoppingBag },
     { id: 'users', label: 'Foydalanuvchilar', icon: UserCheck },
     { id: 'verification', label: 'Verifikatsiya', icon: Shield },
+    { id: 'categories', label: 'Kategoriyalar', icon: FolderTree },
     { id: 'plans', label: 'Tariflar', icon: Crown },
     { id: 'promo', label: 'Promo kodlar', icon: Tag },
     { id: 'complaints', label: 'Shikoyatlar', icon: AlertTriangle },
@@ -734,6 +736,7 @@ export default function AdminPanel() {
 
             {activeTab === 'verification' && <AdminVerificationPanel />}
             {activeTab === 'plans' && <AdminSubscriptionPlans />}
+            {activeTab === 'categories' && <AdminCategories />}
             {activeTab === 'promo' && <AdminPromoCodes />}
             {activeTab === 'complaints' && <AdminComplaints />}
             {activeTab === 'chats' && <AdminChatMonitor />}

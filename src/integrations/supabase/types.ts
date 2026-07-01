@@ -57,6 +57,8 @@ export type Database = {
           name_ru: string
           name_uz: string
           order_num: number | null
+          parent_id: string | null
+          slug: string | null
         }
         Insert: {
           color?: string | null
@@ -67,6 +69,8 @@ export type Database = {
           name_ru: string
           name_uz: string
           order_num?: number | null
+          parent_id?: string | null
+          slug?: string | null
         }
         Update: {
           color?: string | null
@@ -77,8 +81,18 @@ export type Database = {
           name_ru?: string
           name_uz?: string
           order_num?: number | null
+          parent_id?: string | null
+          slug?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       complaints: {
         Row: {
@@ -181,64 +195,106 @@ export type Database = {
       }
       master_profiles: {
         Row: {
+          accepts_emergency: boolean | null
+          agreed_to_privacy: boolean | null
+          agreed_to_terms: boolean | null
           balance: number | null
+          bank_account: string | null
           bio: string | null
+          card_number: string | null
           category_ids: string[] | null
+          certificate_urls: string[] | null
           created_at: string | null
           experience_years: number | null
           id: string
+          id_document_url: string | null
           is_active: boolean | null
           is_approved: boolean | null
           jobs_completed: number | null
           portfolio_urls: string[] | null
           rating: number | null
           reviews_count: number | null
+          selfie_url: string | null
+          service_radius_km: number | null
           skills: string[] | null
+          subcategory_ids: string[] | null
+          tax_info: string | null
           updated_at: string | null
           user_id: string
           verification_tier: Database["public"]["Enums"]["verification_tier"]
           verified_at: string | null
           withdrawable_balance: number | null
+          work_days: string[] | null
+          work_end: string | null
+          work_start: string | null
         }
         Insert: {
+          accepts_emergency?: boolean | null
+          agreed_to_privacy?: boolean | null
+          agreed_to_terms?: boolean | null
           balance?: number | null
+          bank_account?: string | null
           bio?: string | null
+          card_number?: string | null
           category_ids?: string[] | null
+          certificate_urls?: string[] | null
           created_at?: string | null
           experience_years?: number | null
           id?: string
+          id_document_url?: string | null
           is_active?: boolean | null
           is_approved?: boolean | null
           jobs_completed?: number | null
           portfolio_urls?: string[] | null
           rating?: number | null
           reviews_count?: number | null
+          selfie_url?: string | null
+          service_radius_km?: number | null
           skills?: string[] | null
+          subcategory_ids?: string[] | null
+          tax_info?: string | null
           updated_at?: string | null
           user_id: string
           verification_tier?: Database["public"]["Enums"]["verification_tier"]
           verified_at?: string | null
           withdrawable_balance?: number | null
+          work_days?: string[] | null
+          work_end?: string | null
+          work_start?: string | null
         }
         Update: {
+          accepts_emergency?: boolean | null
+          agreed_to_privacy?: boolean | null
+          agreed_to_terms?: boolean | null
           balance?: number | null
+          bank_account?: string | null
           bio?: string | null
+          card_number?: string | null
           category_ids?: string[] | null
+          certificate_urls?: string[] | null
           created_at?: string | null
           experience_years?: number | null
           id?: string
+          id_document_url?: string | null
           is_active?: boolean | null
           is_approved?: boolean | null
           jobs_completed?: number | null
           portfolio_urls?: string[] | null
           rating?: number | null
           reviews_count?: number | null
+          selfie_url?: string | null
+          service_radius_km?: number | null
           skills?: string[] | null
+          subcategory_ids?: string[] | null
+          tax_info?: string | null
           updated_at?: string | null
           user_id?: string
           verification_tier?: Database["public"]["Enums"]["verification_tier"]
           verified_at?: string | null
           withdrawable_balance?: number | null
+          work_days?: string[] | null
+          work_end?: string | null
+          work_start?: string | null
         }
         Relationships: []
       }
