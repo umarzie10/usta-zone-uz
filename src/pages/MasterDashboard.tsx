@@ -16,9 +16,12 @@ import VerificationCenter from '@/components/VerificationCenter';
 import RevenueChart from '@/components/RevenueChart';
 import TrialCountdown from '@/components/TrialCountdown';
 import SubscriptionGuard from '@/components/SubscriptionGuard';
+import MasterSettingsForm from '@/components/MasterSettingsForm';
+import SubcategoryPricing from '@/components/SubcategoryPricing';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import { TIER_BADGE } from '@/lib/subscriptionPlans';
-import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User, Crown, Navigation as NavIcon, DollarSign, Shield } from 'lucide-react';
+import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User, Crown, Navigation as NavIcon, DollarSign, Shield, Settings, Tag } from 'lucide-react';
+
 
 export default function MasterDashboard() {
   const { t, showNotification } = useApp();
@@ -162,7 +165,9 @@ export default function MasterDashboard() {
 
   const tabs = [
     { id: 'overview', label: t('overview'), icon: TrendingUp },
-    { id: 'profile', label: t('editProfile'), icon: User },
+    { id: 'profile', label: 'Profil', icon: User },
+    { id: 'settings', label: 'Sozlamalar', icon: Settings },
+    { id: 'pricing', label: 'Narxlar', icon: Tag },
     { id: 'verification', label: 'Verifikatsiya', icon: Shield },
     { id: 'portfolio', label: 'Portfolio', icon: Image },
     { id: 'schedule', label: t('workSchedule'), icon: Clock },
@@ -170,6 +175,7 @@ export default function MasterDashboard() {
     { id: 'reviews', label: t('reviewsTab'), icon: Star },
     { id: 'history', label: t('history'), icon: History },
   ];
+
 
   return (
     <Layout>
@@ -248,18 +254,21 @@ export default function MasterDashboard() {
           ))}
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 bg-muted p-1 rounded-xl mb-6 overflow-x-auto">
-          {tabs.map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
-                activeTab === tab.id ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'
-              }`}>
-              <tab.icon className="h-4 w-4" />
-              {tab.label}
-            </button>
-          ))}
+        {/* Tabs — horizontally scrollable on mobile with edge fade */}
+        <div className="relative -mx-1 mb-6">
+          <div className="flex gap-1 bg-muted p-1 rounded-xl overflow-x-auto scrollbar-none snap-x">
+            {tabs.map(tab => (
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap snap-start transition-all ${
+                  activeTab === tab.id ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'
+                }`}>
+                <tab.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
+
 
         {activeTab === 'overview' && (
           <div className="space-y-4">
@@ -345,9 +354,19 @@ export default function MasterDashboard() {
           </div>
         )}
 
+        {activeTab === 'settings' && masterProfile && (
+          <MasterSettingsForm onSaved={fetchData} />
+        )}
+
+        {activeTab === 'pricing' && masterProfile && (
+          <SubcategoryPricing />
+        )}
+
         {activeTab === 'verification' && masterProfile && (
           <VerificationCenter currentTier={masterProfile.verification_tier || 'none'} />
         )}
+
+
 
         {activeTab === 'portfolio' && masterProfile && (
           <div className="card-premium p-6">
