@@ -254,18 +254,21 @@ export default function MasterDashboard() {
           ))}
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 bg-muted p-1 rounded-xl mb-6 overflow-x-auto">
-          {tabs.map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
-                activeTab === tab.id ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'
-              }`}>
-              <tab.icon className="h-4 w-4" />
-              {tab.label}
-            </button>
-          ))}
+        {/* Tabs — horizontally scrollable on mobile with edge fade */}
+        <div className="relative -mx-1 mb-6">
+          <div className="flex gap-1 bg-muted p-1 rounded-xl overflow-x-auto scrollbar-none snap-x">
+            {tabs.map(tab => (
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap snap-start transition-all ${
+                  activeTab === tab.id ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'
+                }`}>
+                <tab.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
+
 
         {activeTab === 'overview' && (
           <div className="space-y-4">
