@@ -27,10 +27,11 @@ export default function AdminVerificationPanel() {
       const { data: profs } = ids.length
         ? await supabase.from('profiles').select('user_id,full_name,phone,avatar_url,is_verified').in('user_id', ids)
         : { data: [] as any[] };
-      const pm = new Map(profs?.map(p => [p.user_id, p]) || []);
+      const pm = new Map<string, any>((profs || []).map((p: any) => [p.user_id, p]));
       setMasters((mps || []).map(m => ({ ...m, profile: pm.get(m.user_id) })));
       setLoading(false); return;
     }
+
     const { data: reqs } = await supabase.from('verification_requests')
       .select('*').eq('status', tab).order('created_at', { ascending: false }).limit(100);
     if (reqs && reqs.length) {
