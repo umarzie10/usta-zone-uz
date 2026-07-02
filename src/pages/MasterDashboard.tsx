@@ -354,9 +354,19 @@ export default function MasterDashboard() {
           </div>
         )}
 
+        {activeTab === 'settings' && masterProfile && (
+          <MasterSettingsForm onSaved={fetchData} />
+        )}
+
+        {activeTab === 'pricing' && masterProfile && (
+          <SubcategoryPricing />
+        )}
+
         {activeTab === 'verification' && masterProfile && (
           <VerificationCenter currentTier={masterProfile.verification_tier || 'none'} />
         )}
+
+
 
         {activeTab === 'portfolio' && masterProfile && (
           <div className="card-premium p-6">
