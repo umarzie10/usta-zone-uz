@@ -165,7 +165,9 @@ export default function MasterDashboard() {
 
   const tabs = [
     { id: 'overview', label: t('overview'), icon: TrendingUp },
-    { id: 'profile', label: t('editProfile'), icon: User },
+    { id: 'profile', label: 'Profil', icon: User },
+    { id: 'settings', label: 'Sozlamalar', icon: Settings },
+    { id: 'pricing', label: 'Narxlar', icon: Tag },
     { id: 'verification', label: 'Verifikatsiya', icon: Shield },
     { id: 'portfolio', label: 'Portfolio', icon: Image },
     { id: 'schedule', label: t('workSchedule'), icon: Clock },
@@ -173,6 +175,7 @@ export default function MasterDashboard() {
     { id: 'reviews', label: t('reviewsTab'), icon: Star },
     { id: 'history', label: t('history'), icon: History },
   ];
+
 
   return (
     <Layout>
