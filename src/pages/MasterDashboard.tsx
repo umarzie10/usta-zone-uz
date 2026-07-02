@@ -16,9 +16,12 @@ import VerificationCenter from '@/components/VerificationCenter';
 import RevenueChart from '@/components/RevenueChart';
 import TrialCountdown from '@/components/TrialCountdown';
 import SubscriptionGuard from '@/components/SubscriptionGuard';
+import MasterSettingsForm from '@/components/MasterSettingsForm';
+import SubcategoryPricing from '@/components/SubcategoryPricing';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import { TIER_BADGE } from '@/lib/subscriptionPlans';
-import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User, Crown, Navigation as NavIcon, DollarSign, Shield } from 'lucide-react';
+import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User, Crown, Navigation as NavIcon, DollarSign, Shield, Settings, Tag } from 'lucide-react';
+
 
 export default function MasterDashboard() {
   const { t, showNotification } = useApp();
