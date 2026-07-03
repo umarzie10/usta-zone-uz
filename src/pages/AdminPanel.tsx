@@ -129,7 +129,7 @@ export default function AdminPanel() {
     if (!mp || mp.length === 0) { setMasters([]); return; }
     const userIds = mp.map(m => m.user_id);
     const [{ data: profiles }, { data: balances }] = await Promise.all([
-      supabase.from('profiles').select('*').in('user_id', userIds),
+      supabase.rpc('admin_get_profiles', { _user_ids: userIds }),
       supabase.rpc('admin_get_master_balances'),
     ]);
     const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
@@ -168,7 +168,7 @@ export default function AdminPanel() {
   };
 
   const fetchUsers = async () => {
-    const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase.rpc('admin_list_profiles');
     setUsers(data || []);
   };
 

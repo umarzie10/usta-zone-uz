@@ -85,7 +85,7 @@ export default function FindMasterPage() {
       // Fetch master profiles
       let query = supabase
         .from('master_profiles')
-        .select('*')
+        .select('id,user_id,category_ids,skills,portfolio_urls,bio,experience_years,rating,reviews_count,jobs_completed,is_active,is_approved,verification_tier')
         .eq('is_active', true)
         .eq('is_approved', true);
 
@@ -110,7 +110,7 @@ export default function FindMasterPage() {
       const userIds = masterProfiles.map(mp => mp.user_id);
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('*')
+        .select('user_id,full_name,avatar_url,city,region,is_verified,latitude,longitude')
         .in('user_id', userIds);
       if (profilesError) throw profilesError;
 

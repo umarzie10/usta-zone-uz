@@ -45,11 +45,12 @@ export default function MasterSettingsForm({ onSaved }: { onSaved?: () => void }
 
   const load = async () => {
     setLoading(true);
-    const [{ data: c }, { data: m }, { data: p }] = await Promise.all([
+    const [{ data: c }, { data: mArr }, { data: p }] = await Promise.all([
       supabase.from('categories').select('id,name_uz,parent_id').order('name_uz'),
-      supabase.from('master_profiles').select('*').eq('user_id', user!.id).maybeSingle(),
+      supabase.rpc('get_my_master_profile'),
       supabase.from('profiles').select('region,city').eq('user_id', user!.id).maybeSingle(),
     ]);
+    const m = Array.isArray(mArr) ? mArr[0] : mArr;
     setCats(c || []);
     setMp(m);
     setProfile(p);

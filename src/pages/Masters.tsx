@@ -63,14 +63,14 @@ export default function MastersPage() {
     setLoading(true);
     const { data: mps } = await supabase
       .from('master_profiles')
-      .select('*')
+      .select('id,user_id,category_ids,skills,portfolio_urls,bio,experience_years,rating,reviews_count,jobs_completed,is_active,is_approved,verification_tier')
       .eq('is_active', true)
       .order('rating', { ascending: false });
 
     if (!mps || mps.length === 0) { setMasters([]); setLoading(false); return; }
 
     const userIds = mps.map(m => m.user_id);
-    const { data: profiles } = await supabase.from('profiles').select('*').in('user_id', userIds);
+    const { data: profiles } = await supabase.from('profiles').select('user_id,full_name,avatar_url,city,region,is_verified').in('user_id', userIds);
     const pMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
 
     setMasters(mps.map(mp => {

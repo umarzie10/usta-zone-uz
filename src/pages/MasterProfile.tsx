@@ -73,7 +73,7 @@ export default function MasterProfilePage() {
     try {
       const { data: mp, error } = await supabase
         .from('master_profiles')
-        .select('*')
+        .select('id,user_id,category_ids,subcategory_ids,skills,portfolio_urls,bio,experience_years,rating,reviews_count,jobs_completed,is_active,is_approved,verification_tier,verified_at,service_radius_km,work_days,work_start,work_end,accepts_emergency,created_at,updated_at')
         .eq('id', id!)
         .single();
       if (error) throw error;
@@ -94,7 +94,7 @@ export default function MasterProfilePage() {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('*')
+        .select('user_id,full_name,avatar_url,city,region,role,is_verified,latitude,longitude')
         .eq('user_id', mp.user_id)
         .single();
 
