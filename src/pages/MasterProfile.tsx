@@ -122,7 +122,7 @@ export default function MasterProfilePage() {
         avatar_url: profile?.avatar_url,
         city: profile?.city,
         region: profile?.region,
-        phone: profile?.phone,
+        phone: null,
         is_verified: profile?.is_verified || false,
       });
 

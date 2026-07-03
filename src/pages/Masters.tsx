@@ -81,7 +81,7 @@ export default function MastersPage() {
         jobs_completed: mp.jobs_completed || 0, experience_years: mp.experience_years || 0,
         skills: mp.skills || [], category_ids: mp.category_ids || [],
         full_name: p?.full_name || 'Unknown', avatar_url: p?.avatar_url,
-        city: p?.city, phone: p?.phone, is_verified: p?.is_verified || false,
+        city: p?.city, phone: null, is_verified: p?.is_verified || false,
       };
     }));
     setLoading(false);
