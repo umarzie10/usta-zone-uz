@@ -982,6 +982,103 @@ export type Database = {
           withdrawable_balance: number
         }[]
       }
+      admin_get_master_profile: {
+        Args: { _user_id: string }
+        Returns: {
+          accepts_emergency: boolean | null
+          agreed_to_privacy: boolean | null
+          agreed_to_terms: boolean | null
+          balance: number | null
+          bank_account: string | null
+          bio: string | null
+          card_number: string | null
+          category_ids: string[] | null
+          certificate_urls: string[] | null
+          created_at: string | null
+          experience_years: number | null
+          id: string
+          id_document_url: string | null
+          is_active: boolean | null
+          is_approved: boolean | null
+          jobs_completed: number | null
+          portfolio_urls: string[] | null
+          rating: number | null
+          reviews_count: number | null
+          selfie_url: string | null
+          service_radius_km: number | null
+          skills: string[] | null
+          subcategory_ids: string[] | null
+          tax_info: string | null
+          updated_at: string | null
+          user_id: string
+          verification_tier: Database["public"]["Enums"]["verification_tier"]
+          verified_at: string | null
+          withdrawable_balance: number | null
+          work_days: string[] | null
+          work_end: string | null
+          work_start: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "master_profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      admin_get_profiles: {
+        Args: { _user_ids: string[] }
+        Returns: {
+          avatar_url: string | null
+          bonus_balance: number
+          city: string | null
+          created_at: string | null
+          full_name: string
+          id: string
+          is_blocked: boolean | null
+          is_verified: boolean | null
+          last_seen_at: string | null
+          latitude: number | null
+          longitude: number | null
+          phone: string | null
+          region: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string | null
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      admin_list_profiles: {
+        Args: never
+        Returns: {
+          avatar_url: string | null
+          bonus_balance: number
+          city: string | null
+          created_at: string | null
+          full_name: string
+          id: string
+          is_blocked: boolean | null
+          is_verified: boolean | null
+          last_seen_at: string | null
+          latitude: number | null
+          longitude: number | null
+          phone: string | null
+          region: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string | null
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       admin_recent_messages: {
         Args: { _limit?: number }
         Returns: {
@@ -1016,6 +1113,76 @@ export type Database = {
           balance: number
           withdrawable_balance: number
         }[]
+      }
+      get_my_master_profile: {
+        Args: never
+        Returns: {
+          accepts_emergency: boolean | null
+          agreed_to_privacy: boolean | null
+          agreed_to_terms: boolean | null
+          balance: number | null
+          bank_account: string | null
+          bio: string | null
+          card_number: string | null
+          category_ids: string[] | null
+          certificate_urls: string[] | null
+          created_at: string | null
+          experience_years: number | null
+          id: string
+          id_document_url: string | null
+          is_active: boolean | null
+          is_approved: boolean | null
+          jobs_completed: number | null
+          portfolio_urls: string[] | null
+          rating: number | null
+          reviews_count: number | null
+          selfie_url: string | null
+          service_radius_km: number | null
+          skills: string[] | null
+          subcategory_ids: string[] | null
+          tax_info: string | null
+          updated_at: string | null
+          user_id: string
+          verification_tier: Database["public"]["Enums"]["verification_tier"]
+          verified_at: string | null
+          withdrawable_balance: number | null
+          work_days: string[] | null
+          work_end: string | null
+          work_start: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "master_profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_my_profile: {
+        Args: never
+        Returns: {
+          avatar_url: string | null
+          bonus_balance: number
+          city: string | null
+          created_at: string | null
+          full_name: string
+          id: string
+          is_blocked: boolean | null
+          is_verified: boolean | null
+          last_seen_at: string | null
+          latitude: number | null
+          longitude: number | null
+          phone: string | null
+          region: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string | null
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_my_subscription_status: { Args: never; Returns: Json }
       has_role: {
