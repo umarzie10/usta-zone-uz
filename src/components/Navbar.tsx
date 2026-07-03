@@ -78,11 +78,11 @@ export default function Navbar() {
 
 
           {/* Right actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {/* Language */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-lg">
+                <Button variant="ghost" size="icon" className="rounded-lg h-9 w-9 hover:rotate-12 transition-transform duration-300">
                   <Globe className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -100,8 +100,10 @@ export default function Navbar() {
             </DropdownMenu>
 
             {/* Theme toggle */}
-            <Button variant="ghost" size="icon" className="rounded-lg" onClick={toggleTheme}>
-              {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" className="rounded-lg h-9 w-9 group" onClick={toggleTheme}>
+              {theme === 'light'
+                ? <Moon className="h-4 w-4 transition-transform duration-500 group-hover:-rotate-12 group-hover:scale-110" />
+                : <Sun className="h-4 w-4 transition-transform duration-500 group-hover:rotate-45 group-hover:scale-110" />}
             </Button>
 
             {user ? (
@@ -109,11 +111,11 @@ export default function Navbar() {
                 <NotificationBell />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="rounded-xl gap-2 pl-2 pr-3">
+                    <Button variant="ghost" className="rounded-xl gap-2 pl-1.5 pr-2 sm:pr-3 h-9">
                       <div className="w-7 h-7 rounded-lg bg-primary/15 flex items-center justify-center">
                         <User className="h-4 w-4 text-primary" />
                       </div>
-                      <span className="text-sm font-medium hidden sm:block max-w-[120px] truncate">
+                      <span className="text-sm font-medium hidden xl:block max-w-[120px] truncate">
                         {profile?.full_name || 'User'}
                       </span>
                     </Button>
@@ -140,26 +142,27 @@ export default function Navbar() {
                 </DropdownMenu>
               </>
             ) : (
-              <div className="hidden sm:flex items-center gap-2">
-                <Button variant="ghost" className="rounded-xl" onClick={() => navigate('/login')}>
+              <div className="hidden md:flex items-center gap-1.5">
+                <Button variant="ghost" size="sm" className="rounded-xl h-9" onClick={() => navigate('/login')}>
                   {t('login')}
                 </Button>
-                <Button className="rounded-xl btn-hero" onClick={() => navigate('/register')}>
+                <Button size="sm" className="rounded-xl btn-hero h-9 !px-4 !py-2 text-sm whitespace-nowrap" onClick={() => navigate('/register')}>
                   {t('register')}
                 </Button>
               </div>
             )}
 
-            {/* Mobile menu */}
+            {/* Mobile menu — visible below lg */}
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden rounded-lg"
+              className="lg:hidden rounded-lg h-9 w-9"
               onClick={() => setMobileOpen(!mobileOpen)}
             >
-              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {mobileOpen ? <X className="h-5 w-5 animate-scale-in" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
+
         </div>
 
         {/* Mobile menu */}
