@@ -44,34 +44,38 @@ export default function Navbar() {
   const isActive = (href: string) => location.pathname === href;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/95 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/90 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between gap-2">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <img src={logoImg} alt="UstaZone" className="h-10 w-10 object-contain" />
-            <span className="font-black text-xl tracking-tight">
+          <Link to="/" className="flex items-center gap-2 group shrink-0">
+            <img src={logoImg} alt="UstaZone" className="h-9 w-9 sm:h-10 sm:w-10 object-contain transition-transform duration-500 group-hover:rotate-[8deg] group-hover:scale-110" />
+            <span className="font-black text-lg sm:text-xl tracking-tight whitespace-nowrap">
               <span className="text-gradient">Usta</span>
               <span className="text-foreground">Zone</span>
             </span>
           </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1">
+          {/* Desktop nav — only on lg+ to avoid tablet overlap */}
+          <nav className="hidden lg:flex items-center gap-0.5 min-w-0 flex-1 justify-center">
             {navLinks.map(link => (
               <Link
                 key={link.href}
                 to={link.href}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                className={`relative px-3 xl:px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-300 group ${
                   isActive(link.href)
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    ? 'text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                {link.label}
+                <span className="relative z-10">{link.label}</span>
+                <span className={`absolute inset-0 rounded-lg bg-primary/10 transition-all duration-300 ${
+                  isActive(link.href) ? 'scale-100 opacity-100' : 'scale-75 opacity-0 group-hover:scale-100 group-hover:opacity-100'
+                }`} />
               </Link>
             ))}
           </nav>
+
 
           {/* Right actions */}
           <div className="flex items-center gap-2">
