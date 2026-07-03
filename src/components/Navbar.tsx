@@ -167,13 +167,14 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div className="md:hidden border-t border-border/60 py-3 space-y-1 animate-fade-in">
-            {navLinks.map(link => (
+          <div className="lg:hidden border-t border-border/60 py-3 space-y-1 animate-fade-in-up">
+            {navLinks.map((link, i) => (
               <Link
                 key={link.href}
                 to={link.href}
-                className={`block px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  isActive(link.href) ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted'
+                style={{ animationDelay: `${i * 40}ms` }}
+                className={`block px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 animate-fade-in-up ${
+                  isActive(link.href) ? 'bg-primary/10 text-primary translate-x-1' : 'text-foreground hover:bg-muted hover:translate-x-1'
                 }`}
                 onClick={() => setMobileOpen(false)}
               >
@@ -185,7 +186,7 @@ export default function Navbar() {
                 <Button variant="outline" className="flex-1 rounded-xl" onClick={() => { navigate('/login'); setMobileOpen(false); }}>
                   {t('login')}
                 </Button>
-                <Button className="flex-1 rounded-xl" onClick={() => { navigate('/register'); setMobileOpen(false); }}>
+                <Button className="flex-1 rounded-xl btn-hero" onClick={() => { navigate('/register'); setMobileOpen(false); }}>
                   {t('register')}
                 </Button>
               </div>
@@ -196,3 +197,4 @@ export default function Navbar() {
     </header>
   );
 }
+
