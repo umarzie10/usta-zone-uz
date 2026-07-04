@@ -33,7 +33,7 @@ interface RealMaster {
   is_verified: boolean;
 }
 
-interface DbCategory { id: string; name_uz: string; name_ru: string; name_en: string; }
+interface DbCategory { id: string; name_uz: string; name_ru: string | null; name_en: string | null; parent_id: string | null; }
 
 const ITEMS_PER_PAGE = 12;
 
@@ -54,17 +54,16 @@ export default function FindMasterPage() {
   const [categoryId, setCategoryId] = useState<string>(searchParams.get('category') || 'all');
   const [subcategory, setSubcategory] = useState<string>('all');
 
-  // Match DB category (by name_uz) to taxonomy main category to get subs
-  const selectedDbCat = categories.find(c => c.id === categoryId);
-  const taxonomyMain = selectedDbCat
-    ? categoryTree.find(m => m.name.toLowerCase() === selectedDbCat.name_uz.toLowerCase())
-    : null;
-  const subOptions = taxonomyMain?.subs ?? [];
+  // DB-driven categories (admin panel manages these). Subs = rows with parent_id === selected main.
+  const subOptions = categoryId === 'all' ? [] : categories.filter(c => c.parent_id === categoryId);
+  const catName = (c: DbCategory) =>
+    lang === 'ru' ? (c.name_ru || c.name_uz) : lang === 'en' ? (c.name_en || c.name_uz) : c.name_uz;
 
   useEffect(() => {
-    supabase.from('categories').select('id, name_uz, name_ru, name_en').order('order_num')
-      .then(({ data }) => setCategories(data || []));
+    supabase.from('categories').select('id, name_uz, name_ru, name_en, parent_id').order('order_num')
+      .then(({ data }) => setCategories((data as DbCategory[]) || []));
   }, []);
+
 
   useEffect(() => {
     fetchMasters();
