@@ -175,9 +175,9 @@ export default function AdminCategories() {
         </div>
       )}
 
-      {(editing !== null || newParentId !== null || (editing === null && newParentId === null && form.name_uz === '__' )) && false}
 
-      {(editing || newParentId !== null) && (
+      {dialogOpen && (
+
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={closeDialog}>
           <div className="bg-background rounded-2xl w-full max-w-md p-5 shadow-xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
