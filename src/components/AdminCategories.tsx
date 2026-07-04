@@ -57,6 +57,7 @@ export default function AdminCategories() {
       icon: parent?.icon || 'wrench',
       color: parent?.color || '#1a56db',
     });
+    setDialogOpen(true);
   };
   const openEdit = (c: Cat) => {
     setEditing(c);
@@ -68,8 +69,10 @@ export default function AdminCategories() {
       icon: c.icon || 'wrench',
       color: c.color || '#1a56db',
     });
+    setDialogOpen(true);
   };
-  const closeDialog = () => { setEditing(null); setNewParentId(null); };
+  const closeDialog = () => { setDialogOpen(false); setEditing(null); setNewParentId(null); };
+
 
   const save = async () => {
     if (!form.name_uz.trim()) return showNotification('error', 'Nom kiriting');
