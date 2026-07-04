@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { Search, SlidersHorizontal, X, Star, MapPin, CheckCircle, Phone, MessageCircle, UserPlus } from 'lucide-react';
 import { uzbekCities, uzbekRegions } from '@/lib/demoData';
-import { categoryTree } from '@/lib/categoryTaxonomy';
+
 
 interface RealMaster {
   id: string;
