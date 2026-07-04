@@ -107,8 +107,8 @@ export default function AdminCategories() {
     load();
   };
 
-  const isOpen = editing !== null || newParentId !== null || (editing === null && newParentId === null && false);
-  const showForm = editing !== null || newParentId !== undefined && (newParentId !== null || (editing === null && (form.name_uz !== '' || false)));
+
+
 
   return (
     <div className="space-y-5">
