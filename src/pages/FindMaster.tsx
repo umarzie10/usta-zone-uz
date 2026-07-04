@@ -156,7 +156,11 @@ export default function FindMasterPage() {
     const matchCity = city === 'all' || m.city === city;
     const matchRegion = region === 'all' || m.region === region;
     const matchCategory = categoryId === 'all' || m.category_ids.includes(categoryId);
-    const matchSub = subcategory === 'all' || m.skills.some(s => s.toLowerCase().includes(subcategory.toLowerCase()));
+    const subCat = subcategory !== 'all' ? categories.find(c => c.id === subcategory) : null;
+    const matchSub = subcategory === 'all'
+      || m.category_ids.includes(subcategory)
+      || (subCat && m.skills.some(s => s.toLowerCase().includes(subCat.name_uz.toLowerCase())));
+
     return matchSearch && matchCity && matchRegion && matchCategory && matchSub;
   });
 
