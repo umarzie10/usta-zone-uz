@@ -24,10 +24,12 @@ export default function AdminCategories() {
   const [cats, setCats] = useState<Cat[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Cat | null>(null);
   const [newParentId, setNewParentId] = useState<string | null>(null);
   const [form, setForm] = useState({ name_uz: '', name_ru: '', name_en: '', icon: 'wrench', color: '#1a56db' });
   const [saving, setSaving] = useState(false);
+
 
   const load = async () => {
     setLoading(true);
