@@ -24,10 +24,12 @@ export default function AdminCategories() {
   const [cats, setCats] = useState<Cat[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Cat | null>(null);
   const [newParentId, setNewParentId] = useState<string | null>(null);
   const [form, setForm] = useState({ name_uz: '', name_ru: '', name_en: '', icon: 'wrench', color: '#1a56db' });
   const [saving, setSaving] = useState(false);
+
 
   const load = async () => {
     setLoading(true);
@@ -55,6 +57,7 @@ export default function AdminCategories() {
       icon: parent?.icon || 'wrench',
       color: parent?.color || '#1a56db',
     });
+    setDialogOpen(true);
   };
   const openEdit = (c: Cat) => {
     setEditing(c);
@@ -66,8 +69,10 @@ export default function AdminCategories() {
       icon: c.icon || 'wrench',
       color: c.color || '#1a56db',
     });
+    setDialogOpen(true);
   };
-  const closeDialog = () => { setEditing(null); setNewParentId(null); };
+  const closeDialog = () => { setDialogOpen(false); setEditing(null); setNewParentId(null); };
+
 
   const save = async () => {
     if (!form.name_uz.trim()) return showNotification('error', 'Nom kiriting');
@@ -102,8 +107,8 @@ export default function AdminCategories() {
     load();
   };
 
-  const isOpen = editing !== null || newParentId !== null || (editing === null && newParentId === null && false);
-  const showForm = editing !== null || newParentId !== undefined && (newParentId !== null || (editing === null && (form.name_uz !== '' || false)));
+
+
 
   return (
     <div className="space-y-5">
@@ -170,9 +175,9 @@ export default function AdminCategories() {
         </div>
       )}
 
-      {(editing !== null || newParentId !== null || (editing === null && newParentId === null && form.name_uz === '__' )) && false}
 
-      {(editing || newParentId !== null) && (
+      {dialogOpen && (
+
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={closeDialog}>
           <div className="bg-background rounded-2xl w-full max-w-md p-5 shadow-xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
