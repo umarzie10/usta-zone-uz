@@ -242,7 +242,7 @@ export default function FindMasterPage() {
                 <SelectContent>
                   <SelectItem value="all">Barchasi</SelectItem>
                   {subOptions.map(s => (
-                    <SelectItem key={s.slug} value={s.name}>{s.name}</SelectItem>
+                    <SelectItem key={s.id} value={s.id}>{catName(s)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
