@@ -1,9 +1,9 @@
-# Texnik Topshiriq — Backend (UstaZone)
+# Texnik Topshiriq — Backend (UstaZone) · FINAL 10/10
 
-**Versiya:** Final &nbsp;|&nbsp; **Sana:** 2026-07-06 &nbsp;|&nbsp; **Auditoriya:** Backend jamoasi
+**Versiya:** Final v2 &nbsp;|&nbsp; **Sana:** 2026-07-06 &nbsp;|&nbsp; **Auditoriya:** Backend jamoasi
 **Platforma:** Lovable Cloud (Supabase: Postgres 15 + Auth + Storage + Edge Functions + Realtime)
 
-Ushbu hujjat backend dasturchi uchun **yagona manba**. Ichida: sxema, GRANT'lar, RLS siyosati, RPC kontraktlari, Edge Function'lar, xavfsizlik va DoD.
+Ushbu hujjat backend dasturchi uchun **yagona manba**. Bo'limlar: umumiy qoidalar → sxema → RLS → RPC → Edge Functions → **Order Flow** → **AI Match** → Payments → Subscriptions → Notifications → Realtime → Xavfsizlik → DoD.
 
 ---
 
@@ -13,202 +13,371 @@ Ushbu hujjat backend dasturchi uchun **yagona manba**. Ichida: sxema, GRANT'lar,
    ```
    CREATE TABLE  →  GRANT  →  ENABLE RLS  →  CREATE POLICY
    ```
-   GRANT bo'lmasa PostgREST `permission denied` qaytaradi. RLS yolg'iz kifoya emas.
+   GRANT bo'lmasa PostgREST `permission denied` qaytaradi.
 
-2. **GRANT shabloni** (user-facing jadval uchun):
+2. GRANT shabloni:
    ```sql
    GRANT SELECT, INSERT, UPDATE, DELETE ON public.<t> TO authenticated;
    GRANT ALL ON public.<t> TO service_role;
-   -- faqat public read kerak bo'lsa:
-   GRANT SELECT ON public.<t> TO anon;
+   GRANT SELECT ON public.<t> TO anon;  -- faqat public read kerak bo'lsa
    ```
 
-3. Har bir jadvalda `created_at timestamptz default now()` va `updated_at timestamptz default now()` + trigger `update_updated_at_column()`.
+3. Har bir jadvalda `created_at`, `updated_at` + trigger `update_updated_at_column()`.
 
-4. **Rollarni faqat `user_roles`** jadvalida saqlash. `profiles.role` faqat display uchun; ruxsatlar tekshiruvi `has_role(auth.uid(), 'admin')` orqali.
+4. **Rollarni faqat `user_roles`**da saqlash. Tekshiruv: `has_role(auth.uid(),'admin')`.
 
 5. **Sensitiv ustunlar** (`phone`, `card_number`, `bank_account`, `tax_info`, `id_document_url`, `selfie_url`, `certificate_urls`):
-   - `REVOKE SELECT (col) ON <t> FROM anon, authenticated;`
-   - Egasi uchun: `get_my_*()` RPC (`SECURITY DEFINER`).
-   - Admin uchun: `admin_get_*()` RPC (ichida `has_role` tekshiruvi).
+   - `REVOKE SELECT (col) FROM anon, authenticated;`
+   - Egasi: `get_my_*` RPC. Admin: `admin_get_*` RPC.
 
-6. **Tegilmaydi:** `auth`, `storage`, `realtime`, `supabase_functions`, `vault` sxemalari; `src/integrations/supabase/client.ts` va `types.ts` (auto-gen).
+6. **Tegilmaydi:** `auth`, `storage`, `realtime`, `supabase_functions`, `vault` sxemalari; `src/integrations/supabase/client.ts` va `types.ts`.
 
-7. **`ALTER DATABASE postgres ...` taqiqlangan** — migration'da qabul qilinmaydi.
+7. `ALTER DATABASE postgres ...` **taqiqlangan**.
 
-8. **CHECK constraint** faqat immutable ifodalar uchun. `now()`, `current_user` va h.k. — trigger orqali validatsiya.
+8. CHECK constraint faqat immutable ifodalar uchun. `now()`/`current_user` uchun — trigger.
 
 ---
 
 ## 1. Rollar va autentifikatsiya
 
-### 1.1 `app_role` enum
-```sql
-CREATE TYPE public.app_role AS ENUM ('client', 'master', 'admin');
-```
+### `app_role` enum
+`'client' | 'master' | 'admin'`
 
-### 1.2 `user_roles`
+### `user_roles`
 ```sql
 CREATE TABLE public.user_roles (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  id uuid PK DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   role app_role NOT NULL,
   UNIQUE (user_id, role)
 );
-GRANT SELECT ON public.user_roles TO authenticated;
-GRANT ALL ON public.user_roles TO service_role;
-ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "self read" ON public.user_roles FOR SELECT
-  TO authenticated USING (user_id = auth.uid());
 ```
 
-### 1.3 `has_role` (rekursiv RLS'ni oldini oladi)
-```sql
-CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role app_role)
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
-AS $$ SELECT EXISTS (SELECT 1 FROM public.user_roles WHERE user_id=_user_id AND role=_role) $$;
-```
-Har bir admin siyosatida shu funksiya chaqiriladi: `USING (public.has_role(auth.uid(),'admin'))`.
+### `has_role`
+`SECURITY DEFINER STABLE SET search_path = public` — rekursiv RLS'ni oldini oladi.
 
-### 1.4 `handle_new_user` trigger
-- `auth.users` INSERT → `profiles` + `user_roles` + boshlang'ich `subscriptions` (master 30 kun / client 7 kun trial `pro`).
+### `handle_new_user` trigger
+`auth.users` INSERT → `profiles` + `user_roles` + boshlang'ich `subscriptions` (master `pro` 30 kun trial / client `pro` 7 kun trial).
 
 ---
 
-## 2. Asosiy jadvallar (kontrakt)
+## 2. Asosiy jadvallar
 
 ### 2.1 `profiles`
-- `user_id uuid UNIQUE REFERENCES auth.users`, `full_name`, `phone` (**sensitiv**), `city`, `region`, `role app_role`, `avatar_url`, `is_verified bool`, `is_blocked bool`, `bonus_balance numeric default 0`, `latitude/longitude`.
-- RLS: SELECT — hamma (public katalog uchun) **lekin** `REVOKE SELECT (phone) FROM anon, authenticated`. UPDATE — egasi.
-- Egasi to'liq profilni `get_my_profile()` RPC orqali oladi.
+`user_id UNIQUE`, `full_name`, `phone` (**sensitiv**), `city`, `region`, `role`, `avatar_url`, `is_verified`, `is_blocked`, `bonus_balance`, `latitude/longitude`.
 
 ### 2.2 `categories` (2 darajali daraxt)
-```sql
-CREATE TABLE public.categories (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name_uz text NOT NULL,
-  name_ru text, name_en text,
-  icon text, color text,
-  order_num int DEFAULT 0,
-  parent_id uuid REFERENCES public.categories(id) ON DELETE CASCADE,
-  slug text,
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
-);
-CREATE INDEX idx_categories_parent ON public.categories(parent_id);
-
-GRANT SELECT ON public.categories TO anon;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.categories TO authenticated;
-GRANT ALL ON public.categories TO service_role;
-
-ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "public read" ON public.categories FOR SELECT USING (true);
-CREATE POLICY "admin write" ON public.categories FOR ALL
-  TO authenticated
-  USING (public.has_role(auth.uid(),'admin'))
-  WITH CHECK (public.has_role(auth.uid(),'admin'));
-```
-- Tartiblash: frontend 2 ta `UPDATE ... SET order_num = ?` yuboradi. Ommaviy tartib kerak bo'lsa `admin_reorder_categories(_ids uuid[])` RPC yozing (hozircha kerak emas).
+`name_uz/ru/en`, `icon`, `color`, `order_num`, `parent_id → categories(id) ON DELETE CASCADE`, `slug`.
+Indeks: `idx_categories_parent`. Admin CRUD `has_role('admin')`; SELECT hamma.
 
 ### 2.3 `master_profiles`
-- `user_id UNIQUE`, `bio`, `experience_years`, `rating numeric`, `jobs_completed int`, `is_verified`, `verification_tier`, `balance`, `withdrawable_balance`.
-- Kategoriyalar: `category_ids uuid[]` (asosiy + subkategoriya id'lari birga saqlanadi).
-- Onboarding: `service_radius_km int default 20`, `work_days text[]`, `work_start time`, `work_end time`, `accepts_emergency bool`.
-- **Sensitiv**: `id_document_url`, `selfie_url`, `certificate_urls text[]`, `card_number`, `bank_account`, `tax_info` — `REVOKE SELECT (col) FROM anon, authenticated`.
-- Indeks: `CREATE INDEX idx_master_profiles_category_ids ON public.master_profiles USING GIN (category_ids);`
-- RLS: SELECT — hamma (public profil uchun, sensitiv kolonkalar REVOKE bilan yopilgan); UPDATE — egasi; admin ALL.
+`user_id UNIQUE`, `bio`, `experience_years`, `rating`, `jobs_completed`, `is_verified`, `verification_tier`, `balance`, `withdrawable_balance`.
+Kategoriyalar: `category_ids uuid[]` (asosiy + sub birga). Onboarding: `service_radius_km`, `work_days text[]`, `work_start/end time`, `accepts_emergency bool`.
+**Sensitiv**: `id_document_url`, `selfie_url`, `certificate_urls`, `card_number`, `bank_account`, `tax_info`.
+Indeks: `USING GIN (category_ids)`.
 
-### 2.4 `services` (subkategoriya narxi)
-- `master_id → master_profiles.id`, `subcategory_id → categories.id`, `price_type text CHECK (price_type IN ('fixed','from','hourly'))`, `price numeric`, `is_negotiable bool`, `experience_years int`, `portfolio_urls text[]`.
-- RLS: SELECT hamma; INSERT/UPDATE/DELETE faqat egasi (`master_id` orqali `master_profiles.user_id = auth.uid()`).
-- Limit trigger: `master_can_add_service(user_id)` — free tier 3 tagacha.
+### 2.4 `services`
+`master_id`, `subcategory_id`, `price_type ('fixed'|'from'|'hourly')`, `price`, `is_negotiable`, `experience_years`, `portfolio_urls[]`.
+Limit: free tier 3 tagacha (`master_can_add_service`).
 
-### 2.5 `verification_requests`
-- `master_id`, `requested_tier verification_tier`, `documents jsonb`, `status text ('pending'|'approved'|'rejected')`, `admin_note`, `reviewed_by`, `reviewed_at`.
-- RLS: usta o'z arizasini o'qiy oladi va yaratadi; admin ALL.
-- Boshqarish: `admin_approve_verification(_request_id, _approve bool, _note text)` RPC.
+### 2.5 `orders` — **to'liq sxema**
 
-### 2.6 Qolgan biznes jadvallar
-`orders`, `reviews`, `messages`, `notifications`, `favorite_masters`, `saved_addresses`, `complaints`, `promo_codes`, `promo_redemptions`, `subscriptions`, `subscription_plans`, `transactions`, `withdraw_requests`, `master_availability`, `platform_settings`, `broadcasts` — barchasi mavjud. Yangi ustun qo'shishda § 0 qoidalarini takrorlang.
+| Ustun | Tip | Izoh |
+|---|---|---|
+| `id` | uuid PK | |
+| `client_id` | uuid NOT NULL → auth.users | Buyurtmachi |
+| `master_id` | uuid NULL → auth.users | Accept qilingandan keyin to'ladi |
+| `category_id` | uuid → categories | Sub yoki asosiy |
+| `title` | text NOT NULL | Qisqa sarlavha |
+| `description` | text | Muammo tavsifi |
+| `city` / `address` | text | Manzil |
+| `payment_method` | text default `'cash'` | `cash`/`click`/`payme`/`bonus` |
+| `status` | text default `'pending'` | § 4dagi state machine |
+| `amount` | numeric | Yakuniy narx |
+| `commission_amount` | numeric | Platforma ulushi |
+| `master_amount` | numeric | Ustaga tegadigan sof summa |
+| `client_confirmed` | bool | Client ish tugadi tasdig'i |
+| `master_confirmed` | bool | Master ish tugadi tasdig'i |
+| `admin_approved` | bool | Nizo/dispute yechimidan keyin |
+| `is_dispute` | bool | Nizo bayrog'i |
+| `created_at` / `updated_at` | timestamptz | |
+
+**Kelajakda qo'shiladigan ustunlar** (agar kerak bo'lsa migration bilan):
+- `accepted_at`, `enroute_at`, `started_at`, `completed_at`, `cancelled_at`, `cancel_reason`
+- `client_lat/lng`, `master_lat/lng` (LiveTracker uchun)
+- `promo_code_id`, `discount`, `bonus_used`
+- `is_emergency bool default false`
+
+### 2.6 `messages` (chat)
+`sender_id`, `receiver_id`, `order_id NULL`, `content`, `is_read bool default false`, `created_at`.
+**Realtime:** `ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;` bajarilgan.
+**Rasm yuborish:** `content` maydoniga `storage://chat-media/<uuid>.jpg` URL yozish (yoki keyingi bosqichda `attachment_url text`, `attachment_type text` ustunlarini qo'shish). Bucket kerak bo'lsa `chat-media` (auth read).
+**Read status:** `is_read` — receiver ochganda UPDATE.
+
+### 2.7 `notifications`
+`user_id`, `sender_id`, `title`, `message`, `type` (`info`|`order_new`|`order_accepted`|`emergency_order`|`verification_approved`|`verification_rejected`|`broadcast`|`payment`|`review`), `related_order_id`, `is_read`, `claimed_by`, `claimed_at`.
+**Kanal:** DB notifications (real-time bell) + tanlab **SMS** (Eskiz.uz) + kelajakda **Web Push** (VAPID). Push hozircha yo'q.
+
+### 2.8 `transactions`
+`user_id`, `order_id`, `type` (`payment`|`commission`|`payout`|`refund`|`bonus`|`cashback`), `amount`, `status` (`pending`|`success`|`failed`), `provider` (`click`|`payme`|`cash`|`internal`), `provider_ref`.
+
+### 2.9 `subscriptions` va `subscription_plans`
+`subscriptions`: `user_id UNIQUE`, `tier ('free'|'basic'|'standard'|'pro'|'premium'|'vip')`, `is_trial`, `trial_ends_at`, `expires_at`, `billing_period`, `audience`.
+`subscription_plans`: admin tomonidan sozlanadigan tarif katalogi (narx, davomiylik, cheklovlar, badge).
+
+### 2.10 Qolganlar
+`reviews` (1..5 CHECK, unique per order+client), `favorite_masters`, `saved_addresses`, `complaints`, `promo_codes` + `promo_redemptions`, `withdraw_requests`, `master_availability`, `platform_settings` (masalan `commission_percent`), `broadcasts`.
 
 ---
 
-## 3. RPC kontraktlari
+## 3. RLS qisqa ma'lumot
 
-| RPC | Kirish | Chiqish | Kim chaqiradi |
+- `orders`: client — o'z buyurtmalari; master — `master_id = auth.uid()` yoki `status='pending'` + emergency ko'radi; admin ALL.
+- `messages`: `sender_id = auth.uid() OR receiver_id = auth.uid()`.
+- `reviews`: SELECT hamma; INSERT — client faqat o'z tugagan orderi uchun.
+- `transactions`: SELECT egasi; INSERT — service_role/edge function.
+- `verification_requests`: usta o'zi; admin ALL.
+- `user_roles`: SELECT o'zi; write faqat service_role.
+
+---
+
+## 4. Order Flow (state machine) — **eng muhim**
+
+### 4.1 Statuslar
+```
+pending   → buyurtma yaratildi, master tanlanmagan
+matching  → AI/emergency broadcast yuborildi (ixtiyoriy, hozir 'pending' ichida)
+accepted  → master qabul qildi (master_id to'ldi)
+enroute   → master yo'lda (LiveTracker start)
+in_progress → ish boshlandi
+completed → master ish tugadi deb belgiladi
+confirmed → client tasdiqladi → to'lov triggeri
+paid      → to'lov muvaffaqiyatli o'tdi (commission ajratildi)
+reviewed  → client review qoldirdi
+cancelled → bekor qilindi (client yoki master yoki timeout)
+disputed  → nizo, admin qaraydi
+```
+
+### 4.2 To'liq oqim
+
+```
+1)  Client Order yaratadi (status='pending')
+        └─ INSERT orders + INSERT notifications (type='order_new') mos ustalarga
+2)  AI mos ustalarni topadi  (ai-match edge function)
+        └─ Top 10 usta ID qaytaradi (score bo'yicha § 5)
+3)  Top 10 ustaga notification
+        └─ type='emergency_order' bo'lsa hammaga; oddiy bo'lsa top 10ga
+4)  1-chi accept qilgan oladi  (claim_emergency_order RPC — row lock)
+        └─ orders.master_id = _master, status='accepted', accepted_at=now()
+        └─ boshqa notification'lar 'claimed' bo'ladi (claimed_by, claimed_at)
+        └─ client'ga notification (type='order_accepted')
+5)  Master yo'lga chiqdi   → status='enroute',  enroute_at=now()
+        └─ LiveTracker: master_lat/lng har 10s Realtime broadcast
+6)  Ish boshlandi          → status='in_progress', started_at=now()
+7)  Ish tugadi (master)    → status='completed', master_confirmed=true, completed_at=now()
+        └─ Client'ga notification "Ishni tasdiqlang"
+8)  Client tasdiqlaydi     → status='confirmed', client_confirmed=true
+        └─ Trigger: to'lov (§6) + commission ajratish
+9)  To'lov
+        └─ cash: transactions(type='payment', status='success', provider='cash')
+        └─ click/payme: process-payment edge function → callback → status='paid'
+        └─ commission_amount = amount * get_commission_percent()/100
+        └─ master_amount    = amount - commission_amount
+        └─ master_profiles.balance += master_amount
+10) Review     → INSERT reviews (rating 1..5)
+        └─ Trigger: master_profiles.rating qayta hisoblanadi
+11) Cashback   → trg_award_cashback_on_complete → profiles.bonus_balance += 1%
+```
+
+### 4.3 Ruxsat etilgan o'tishlar
+```
+pending → accepted | cancelled
+accepted → enroute | cancelled
+enroute → in_progress | cancelled
+in_progress → completed | disputed
+completed → confirmed | disputed
+confirmed → paid
+paid → reviewed
+* → disputed (client yoki master shikoyat qildi)
+disputed → confirmed | cancelled (admin qaror qiladi, admin_approved=true)
+```
+Har bir o'tish RPC orqali (masalan `order_advance(_id, _to text)`) yoki tekshiruvchi trigger orqali cheklanadi. Client `pending → cancelled` va `completed → confirmed` qila oladi; master `accepted → enroute → in_progress → completed`; admin — istalgan holat.
+
+### 4.4 Timeout va bekor qilish
+- `pending` 15 daqiqada hech kim accept qilmasa — Edge Function cron (`order-timeout`) `status='cancelled'`, sabab `no_master`.
+- `enroute` 60 daqiqada `in_progress` bo'lmasa — client'ga eslatma.
+- `completed` 48 soatda tasdiqlanmasa — avtomatik `confirmed` (yoki dispute uchun ochiq qoldiriladi — biznes qarori).
+
+---
+
+## 5. AI Match algoritmi
+
+Edge function `ai-match` (Lovable AI Gateway). Alohida DB funksiyasi `master_match_score(_master_id, _client_lat, _client_lng)` mavjud.
+
+### Score formulasi (0..200)
+```
+score = rating * 10                                  -- 0..50
+      + LEAST(jobs_completed, 100) * 0.3             -- 0..30
+      + tier_boost                                    -- free 0, pro 15, premium 30
+      + distance_score                                -- 0..50 (yaqinroq — yuqoriroq)
+      + verification_bonus                           -- verified +10
+      + response_time_bonus                          -- <5min +10, <15min +5
+      + price_fit_bonus                              -- diapazonga tushsa +10
+      - blocked_penalty                              -- is_blocked bo'lsa -1000
+```
+
+**Distance:** Haversine (yoki soddalashtirilgan) formulasi, `service_radius_km` dan tashqarida bo'lsa `score = 0`.
+
+**Rating:** `master_profiles.rating` (reviewslar avg).
+
+**Verification:** `is_verified = true` → +10, `verification_tier='premium'` → +15.
+
+**Experience:** `experience_years` → `LEAST(experience, 20) * 0.5`.
+
+**Price:** `services.price` client so'ragan `budget_range` ichida bo'lsa +10.
+
+**Response time:** oxirgi 30 kunda o'rtacha accept vaqti (`accepted_at - created_at`); tez usta yuqori chiqadi.
+
+**Chiqish:** yuqori 10 ta `master_id` massivi + score. Top-1 emergency uchun; qolganlar oddiy accept uchun.
+
+**Emergency**: `claim_emergency_order(_order_id)` — birinchi accept qilgan oladi (row-level lock `FOR UPDATE`).
+
+---
+
+## 6. Payments va commission
+
+### 6.1 Oqim
+```
+client tasdiqlagach → payment_method bo'yicha yo'l:
+  cash    → offline; commission master balansidan hisoblab yechiladi
+  click   → process-payment (verify_jwt=false) → provider callback → transactions.status='success'
+  payme   → xuddi shunday
+  bonus   → use_bonus_balance RPC
+```
+
+### 6.2 Commission
+- Foiz: `get_commission_percent()` → `platform_settings.commission_percent` (default 10%).
+- Hisoblash `paid` bo'lganda (yoki cashda `confirmed` bo'lganda):
+  ```
+  commission = round(amount * pct / 100)
+  master_amount = amount - commission
+  ```
+- Transactions'ga 2 ta yozuv: `type='payment'` (client -amount), `type='commission'` (platform +commission), `type='payout'` (master +master_amount).
+- `withdraw_requests`: master `withdrawable_balance` ni qaytarib olishni so'raydi; admin tasdiqlaydi → provider'ga o'tkazma → status='paid'.
+
+### 6.3 Refund
+Dispute'da admin `admin_refund_order(order_id)` RPC (kelajakda) chaqiradi — transactions `type='refund'`, master balansidan yechiladi.
+
+---
+
+## 7. Subscriptions — Free / Pro / Premium
+
+| Tier | Kim uchun | Narx (misol) | Nima beradi |
 |---|---|---|---|
-| `has_role(uid, role)` | uuid, app_role | boolean | Ichki |
-| `get_my_profile()` | — | `profiles` row | Har qanday auth |
-| `get_my_master_profile()` | — | `master_profiles` row | Master |
-| `get_my_subscription_status()` | — | jsonb `{tier,is_trial,expires_at,days_left,active,expired}` | Auth |
-| `get_my_master_balance()` | — | `(balance,withdrawable_balance)` | Master |
-| `admin_list_profiles()` | — | setof profiles | Admin |
-| `admin_get_profiles(uid[])` | uuid[] | setof profiles | Admin |
-| `admin_get_master_profile(uid)` | uuid | setof master_profiles | Admin |
-| `admin_get_master_balances()` | — | setof(user_id,balance,withdrawable) | Admin |
-| `admin_send_broadcast(audience,title,message,send_sms)` | — | jsonb `{ok,count,broadcast_id}` | Admin |
-| `admin_approve_verification(id,approve,note)` | — | jsonb `{ok}` | Admin |
-| `admin_delete_user(uid)` | uuid | void | Admin |
-| `admin_recent_messages(limit)` | int | setof | Admin |
-| `apply_promo_code(code,amount)` | — | jsonb `{ok,discount,final_amount,...}` | Auth |
-| `redeem_promo_code(pc_id,order_id,discount)` | — | void | Auth |
-| `activate_subscription(tier,months)` | — | jsonb `{ok,tier,expires_at}` | Auth |
-| `use_bonus_balance(amount)` | numeric | jsonb `{ok,new_balance}` | Auth |
-| `claim_emergency_order(order_id)` | uuid | jsonb `{ok,order_id,master_id}` | Master |
-| `award_cashback(order_id)` | uuid | void | Trigger |
-| `master_can_add_service(uid)` | uuid | boolean | Ichki |
-| `master_can_accept_orders(uid)` | uuid | boolean | Ichki |
-| `master_match_score(master_id, lat, lng)` | — | numeric | AI |
-| `get_commission_percent()` | — | numeric | Ichki |
+| **free** | Client + Master | 0 | Master: 3 ta service, order accept **YO'Q**. Client: hamma asosiy funksiya. |
+| **basic/standard** | Master | past | Order accept qilish yoqiladi (`master_can_accept_orders = true`) |
+| **pro** | Master | o'rtacha | Cheksiz service, AI match +15 boost, "Pro" badge, birinchi 30 kun trial |
+| **premium** | Master | yuqori | Pro + AI match +30 boost, top listing, verified priority, emergency birinchi bo'lib ko'radi |
+| **vip** | Master | eng yuqori | Premium + shaxsiy admin qo'llab-quvvatlash, kengaytirilgan analytics |
 
-**Barcha admin RPC ichida birinchi qator:**
+### Trial
+- Master: 30 kun `pro` trial (`is_trial=true`, `trial_ends_at`).
+- Client: 7 kun `pro` trial.
+- Tugagach: `subscriptions.tier='free'`, `expires_at=now()` — Edge cron `subscription-expire` kunlik ishlaydi.
+- Trial tugaganidan keyin master **yangi order accept qila olmaydi** toki `basic+` sotib olmaguncha (`master_can_accept_orders`).
+
+### Aktivatsiya
+- `activate_subscription(_tier, _months)` RPC — to'lov o'tgach chaqiriladi.
+- Provider callback → `activate_subscription` → `expires_at = now() + N months`.
+
+---
+
+## 8. Notifications — 3 kanal
+
+| Kanal | Qachon | Qanday |
+|---|---|---|
+| **DB (Bell)** | Har doim | INSERT `notifications` → Realtime `notifications` channel → NavBar bell |
+| **SMS** | Muhim voqealar (accept, tasdiq, to'lov) | `send-sms` edge (Eskiz.uz), `send_sms=true` argumenti bilan |
+| **Web Push** | KELAJAKDA (v2) | VAPID keys + `push_subscriptions` jadvali |
+
+Broadcast: `admin_send_broadcast(audience, title, message, send_sms)` — barcha (yoki `clients`/`masters`) foydalanuvchilarga bir vaqtda.
+
+---
+
+## 9. Realtime kanallari
+
+Publication'ga qo'shilgan:
+```sql
+ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
+```
+Frontend `useEffect` ichida `.channel(...).on('postgres_changes', ...).subscribe()` va `return () => supabase.removeChannel(channel)`. RLS Realtime'da ham qo'llanadi — subscriber faqat ko'ra oladigan qatorlarni oladi.
+
+LiveTracker: `supabase.channel('order:'+id).on('broadcast', {event:'location'}, ...)` — master koordinatasini yuboradi (DBga yozmasdan), client oladi.
+
+---
+
+## 10. RPC kontrakti (qisqa jadval)
+
+| RPC | Kim | Chiqish |
+|---|---|---|
+| `has_role(uid, role)` | ichki | bool |
+| `get_my_profile / get_my_master_profile / get_my_subscription_status / get_my_master_balance` | egasi | row/jsonb |
+| `admin_list_profiles / admin_get_profiles / admin_get_master_profile / admin_get_master_balances / admin_recent_messages / admin_delete_user / admin_send_broadcast / admin_approve_verification` | admin | ... |
+| `claim_emergency_order(order_id)` | master | jsonb `{ok, order_id, master_id}` |
+| `apply_promo_code / redeem_promo_code / use_bonus_balance` | auth | jsonb |
+| `activate_subscription(tier, months)` | auth (to'lovdan keyin) | jsonb |
+| `award_cashback(order_id)` | trigger | void |
+| `master_can_add_service / master_can_accept_orders / master_match_score / get_commission_percent` | ichki | ... |
+
+Har bir admin RPC birinchi qatori:
 ```sql
 IF NOT public.has_role(auth.uid(),'admin') THEN RAISE EXCEPTION 'admin only'; END IF;
 ```
 
 ---
 
-## 4. Edge Functions
+## 11. Edge Functions
 
-Barchasi `service_role` bilan ishlaydi; ichida JWT/`auth.uid()` tekshiradi.
-
-| Funksiya | Vazifasi | `verify_jwt` | Secrets |
+| Funksiya | verify_jwt | Vazifasi | Secrets |
 |---|---|---|---|
-| `ai-estimate` | Muammo matnidan narx oralig'i (Lovable AI Gateway) | `false` | `LOVABLE_API_KEY` |
-| `ai-match` | Mos ustani tanlash | `true` | `LOVABLE_API_KEY` |
-| `send-sms` | Eskiz.uz SMS | `false` | `ESKIZ_EMAIL`, `ESKIZ_PASSWORD` |
-| `process-payment` | Click / Payme callback | `false` | provider secretlari |
-
-`supabase/config.toml`da faqat kerakli funksiya uchun `verify_jwt = false` yozilgan. Callback yoki public endpoint bo'lmasa **doim `true`**.
+| `ai-estimate` | false | Muammo matnidan narx oralig'i | `LOVABLE_API_KEY` |
+| `ai-match` | true | Top 10 usta ID + score | `LOVABLE_API_KEY` |
+| `send-sms` | false | Eskiz.uz SMS | `ESKIZ_EMAIL/PASSWORD` |
+| `process-payment` | false | Click/Payme callback | provider |
+| `order-timeout` (v2) | cron | 15 daq accept bo'lmasa cancel | — |
+| `subscription-expire` (v2) | cron | Kunlik trial/subscription tugatish | — |
 
 ---
 
-## 5. Storage bucketlari
+## 12. Storage bucketlari
 
 | Bucket | Public | Foydalanish |
 |---|---|---|
-| `avatars` | ✅ | Foydalanuvchi rasmlari |
-| `portfolio` | ✅ | Usta portfolio (services.portfolio_urls) |
-| `verification-docs` | ❌ | Passport, selfie, sertifikatlar (faqat egasi + admin signed URL orqali) |
-
-Yangi bucket qo'shsangiz: `supabase.storage.create_bucket` + policy (owner read/write, admin ALL).
+| `avatars` | ✅ | Foydalanuvchi rasmi |
+| `portfolio` | ✅ | Usta ish namunalari |
+| `verification-docs` | ❌ | Passport, selfie (owner + admin signed URL) |
+| `chat-media` (v2) | ❌ | Chat rasm/fayllari |
 
 ---
 
-## 6. Xavfsizlik checklist (PR uchun)
+## 13. Xavfsizlik checklist (PR)
 
-- [ ] Yangi `public` jadvalga darhol GRANT + RLS + policy.
-- [ ] Sensitiv ustunga `REVOKE SELECT (col)` + owner/admin RPC.
-- [ ] `auth`/`storage`/`realtime`/`supabase_functions`/`vault` sxemalariga tegilmagan.
+- [ ] Yangi `public` jadvalga GRANT + RLS + policy (§ 0).
+- [ ] Sensitiv ustunga `REVOKE SELECT (col)` + RPC.
+- [ ] `auth`/`storage`/`realtime`/`supabase_functions`/`vault` — tegilmagan.
 - [ ] `client.ts` / `types.ts` / `.env` — o'zgarmagan.
-- [ ] Roles faqat `user_roles`da; admin tekshiruvi faqat `has_role`.
-- [ ] Har bir yangi RPC `SECURITY DEFINER`, `SET search_path = public`, va ichida rol/uid tekshiruvi bor.
+- [ ] Rollar faqat `user_roles`da; tekshiruv `has_role`.
+- [ ] Har bir RPC `SECURITY DEFINER SET search_path = public` + ichida rol/uid tekshiruvi.
 - [ ] `updated_at` trigger o'rnatilgan.
-- [ ] `supabase--linter` ogohlantirishlarsiz.
+- [ ] Realtime'ga qo'shilgan jadvalda RLS yoqilgan.
+- [ ] `supabase--linter` yashil.
 
 ---
 
-## 7. Yangi jadval shabloni (copy-paste)
+## 14. Yangi jadval shabloni
+
 ```sql
 CREATE TABLE public.example (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -223,10 +392,10 @@ GRANT ALL ON public.example TO service_role;
 
 ALTER TABLE public.example ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "own rows read"   ON public.example FOR SELECT TO authenticated USING (auth.uid() = user_id);
-CREATE POLICY "own rows write"  ON public.example FOR ALL    TO authenticated
-  USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "admin all"       ON public.example FOR ALL    TO authenticated
+CREATE POLICY "own read"  ON public.example FOR SELECT TO authenticated USING (auth.uid()=user_id);
+CREATE POLICY "own write" ON public.example FOR ALL    TO authenticated
+  USING (auth.uid()=user_id) WITH CHECK (auth.uid()=user_id);
+CREATE POLICY "admin all" ON public.example FOR ALL    TO authenticated
   USING (public.has_role(auth.uid(),'admin')) WITH CHECK (public.has_role(auth.uid(),'admin'));
 
 CREATE TRIGGER trg_example_updated
@@ -236,15 +405,15 @@ CREATE TRIGGER trg_example_updated
 
 ---
 
-## 8. Definition of Done (backend)
+## 15. Definition of Done (backend)
 
-1. Barcha yangi jadval § 0 tartibida yaratilgan (GRANT + RLS + trigger).
-2. Sensitiv ustunlar faqat egasi/admin RPC orqali qaytariladi — anon/authenticated to'g'ridan-to'g'ri `SELECT`da ko'ra olmaydi.
-3. Rollar faqat `user_roles`da; `has_role` orqali tekshiriladi.
-4. `categories` — 2 darajali daraxt, `order_num` orqali tartiblanadi, admin CRUD ishlaydi.
-5. `master_profiles.category_ids` — asosiy + sub id'lari birga; GIN indeks kerak bo'lsa qo'shiladi.
-6. `verification_requests` oqimi ishlaydi (pending → admin approve/reject → `master_profiles.is_verified`).
-7. Har bir admin RPC ichida `has_role` tekshiruvi bor.
-8. Edge function'lar `service_role` bilan, ichida JWT tekshiruvi (public callback'lardan tashqari).
-9. `supabase--linter` ogohlantirishsiz; `supabase--db_health` yashil.
-10. Loyihada demo/soxta ma'lumot yo'q; barcha migration idempotent (`IF NOT EXISTS` / `ON CONFLICT`).
+1. Barcha jadval § 0 tartibida (GRANT + RLS + trigger).
+2. Sensitiv ustunlar — faqat egasi/admin RPC orqali.
+3. Rollar faqat `user_roles`; `has_role` orqali tekshiriladi.
+4. `orders` state machine (§ 4) to'liq ishlaydi — har o'tish ruxsat tekshiruvi bilan.
+5. AI match (§ 5) top 10 usta qaytaradi, emergency first-accept-wins ishlaydi (`claim_emergency_order`).
+6. Payment flow (§ 6): commission avtomatik ajratiladi, `transactions` yozuvlari to'g'ri, `withdraw_requests` admin approve orqali.
+7. Subscriptions (§ 7): trial avtomatik, tugagach master accept qila olmaydi; `activate_subscription` to'lovdan keyin ishlaydi.
+8. Notifications 3 kanal (§ 8) — DB Realtime bell + tanlab SMS; admin broadcast ishlaydi.
+9. Realtime (§ 9) — `messages`, `notifications`, `orders` publication'da; RLS orqali filtrlangan.
+10. `supabase--linter` va `supabase--db_health` yashil; loyihada demo/soxta data yo'q; barcha migration idempotent.
