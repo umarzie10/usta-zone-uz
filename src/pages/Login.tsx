@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, Mail, Lock, User, Phone, Loader2, Briefcase, Clock } from 'lucide-react';
+import LoginScene3D from '@/components/LoginScene3D';
 
 type Mode = 'login' | 'register';
 type Role = 'client' | 'master';
@@ -109,33 +110,43 @@ export default function LoginPage() {
 
   return (
     <Layout noFooter>
-      <div className="min-h-[calc(100vh-4rem)] flex">
-        {/* Left side */}
-        <div className="hidden lg:flex lg:w-1/2 hero-bg relative overflow-hidden items-center justify-center p-12">
-          <div className="relative z-10 text-white text-center">
-            <div className="text-7xl mb-6">🏗️</div>
-            <h2 className="text-4xl font-black mb-4">UstaZone</h2>
-            <p className="text-white/80 text-lg max-w-sm">{t('platformDesc')}</p>
-            <div className="mt-8 grid grid-cols-3 gap-4">
+      <div className="min-h-[calc(100vh-4rem)] flex relative overflow-hidden">
+        {/* Mobile 3D banner */}
+        <div className="lg:hidden absolute inset-x-0 top-0 h-56 pointer-events-none z-0 opacity-90">
+          <LoginScene3D />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-background" />
+        </div>
+
+        {/* Left side — 3D scene */}
+        <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center">
+          <div className="absolute inset-0">
+            <LoginScene3D />
+          </div>
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-background/40" />
+          <div className="relative z-10 text-white text-center px-10 [text-shadow:_0_4px_24px_rgb(0_0_0_/_60%)]">
+            <h2 className="text-5xl font-black mb-4 tracking-tight">
+              <span className="bg-gradient-to-r from-white via-sky-200 to-blue-300 bg-clip-text text-transparent">UstaZone</span>
+            </h2>
+            <p className="text-white/90 text-lg max-w-sm mx-auto">{t('platformDesc')}</p>
+            <div className="mt-8 grid grid-cols-3 gap-3 max-w-md mx-auto">
               {[
                 { n: '10K+', l: t('masters') },
                 { n: '50K+', l: t('orders') },
                 { n: '4.8★', l: t('rating') },
               ].map(s => (
-                <div key={s.l} className="glass rounded-xl p-4">
+                <div key={s.l} className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-4 shadow-2xl hover:scale-105 transition-transform duration-500">
                   <p className="text-2xl font-black">{s.n}</p>
-                  <p className="text-white/70 text-xs mt-1">{s.l}</p>
+                  <p className="text-white/80 text-xs mt-1">{s.l}</p>
                 </div>
               ))}
             </div>
           </div>
-          <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-white/5 translate-y-1/2 -translate-x-1/2" />
         </div>
 
         {/* Right side - form */}
-        <div className="flex-1 flex items-center justify-center p-6">
-          <div className="w-full max-w-md">
+        <div className="flex-1 flex items-center justify-center p-6 relative z-10 lg:pt-6 pt-60">
+          <div className="w-full max-w-md rounded-3xl lg:bg-transparent bg-card/80 lg:backdrop-blur-0 backdrop-blur-xl lg:border-0 border border-border/60 lg:shadow-none shadow-2xl p-6 lg:p-0 animate-fade-in-up">
+
             <div className="mb-8">
               <h1 className="text-3xl font-black mb-2">
                 {mode === 'login' ? t('login') : t('register')}
