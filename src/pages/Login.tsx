@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, Mail, Lock, User, Phone, Loader2, Briefcase, Clock } from 'lucide-react';
+import LoginScene3D from '@/components/LoginScene3D';
 
 type Mode = 'login' | 'register';
 type Role = 'client' | 'master';
