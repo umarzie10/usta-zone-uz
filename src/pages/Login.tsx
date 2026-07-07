@@ -144,8 +144,9 @@ export default function LoginPage() {
         </div>
 
         {/* Right side - form */}
-        <div className="flex-1 flex items-center justify-center p-6">
-          <div className="w-full max-w-md">
+        <div className="flex-1 flex items-center justify-center p-6 relative z-10 lg:pt-6 pt-60">
+          <div className="w-full max-w-md rounded-3xl lg:bg-transparent bg-card/80 lg:backdrop-blur-0 backdrop-blur-xl lg:border-0 border border-border/60 lg:shadow-none shadow-2xl p-6 lg:p-0 animate-fade-in-up">
+
             <div className="mb-8">
               <h1 className="text-3xl font-black mb-2">
                 {mode === 'login' ? t('login') : t('register')}
