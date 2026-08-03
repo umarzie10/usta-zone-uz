@@ -14,6 +14,7 @@ import {
   FileText, Clock, CreditCard, Shield, AlertCircle,
 } from 'lucide-react';
 import { uzbekRegions } from '@/lib/demoData';
+import RegisterIntro3D from '@/components/RegisterIntro3D';
 
 interface Cat {
   id: string;
@@ -53,6 +54,7 @@ export default function RegisterMaster() {
   const { lang, showNotification } = useApp();
   const navigate = useNavigate();
 
+  const [showIntro, setShowIntro] = useState(true);
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
@@ -234,6 +236,13 @@ export default function RegisterMaster() {
 
   return (
     <Layout noFooter>
+      {showIntro && (
+        <RegisterIntro3D
+          title="Usta bo'ling"
+          subtitle="Anketani bosqichma-bosqich to'ldiring"
+          onDone={() => setShowIntro(false)}
+        />
+      )}
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <div className="text-center mb-6">
           <h1 className="text-2xl sm:text-3xl font-black mb-2">Usta sifatida ro'yxatdan o'tish</h1>
