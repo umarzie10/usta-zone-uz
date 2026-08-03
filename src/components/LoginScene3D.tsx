@@ -139,7 +139,7 @@ export default function LoginScene3D() {
   return (
     <Canvas
       dpr={[1, 2]}
-      camera={{ position: [0, 0, 7], fov: 45 }}
+      camera={{ position: [0, 0, 10], fov: 45 }}
       gl={{ antialias: true, alpha: true }}
       style={{ width: '100%', height: '100%' }}
     >
