@@ -14,6 +14,7 @@ import {
   FileText, Clock, CreditCard, Shield, AlertCircle,
 } from 'lucide-react';
 import { uzbekRegions } from '@/lib/demoData';
+import RegisterIntro3D from '@/components/RegisterIntro3D';
 
 interface Cat {
   id: string;
@@ -53,6 +54,7 @@ export default function RegisterMaster() {
   const { lang, showNotification } = useApp();
   const navigate = useNavigate();
 
+  const [showIntro, setShowIntro] = useState(true);
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);

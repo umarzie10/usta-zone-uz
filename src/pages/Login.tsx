@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, Mail, Lock, User, Phone, Loader2, Briefcase, Clock } from 'lucide-react';
 import LoginScene3D from '@/components/LoginScene3D';
+import RegisterIntro3D from '@/components/RegisterIntro3D';
 
 type Mode = 'login' | 'register';
 type Role = 'client' | 'master';
@@ -24,8 +25,10 @@ export default function LoginPage() {
   const { t, lang, showNotification } = useApp();
   const { signUp, signIn } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
-  const [mode, setMode] = useState<Mode>('login');
+  const [mode, setMode] = useState<Mode>(pathname === '/register' ? 'register' : 'login');
+  const [showIntro, setShowIntro] = useState(pathname === '/register');
   const [role, setRole] = useState<Role>('client');
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
@@ -110,6 +113,7 @@ export default function LoginPage() {
 
   return (
     <Layout noFooter>
+      {showIntro && <RegisterIntro3D onDone={() => setShowIntro(false)} />}
       <div className="min-h-[calc(100vh-4rem)] flex relative overflow-hidden">
         {/* Mobile 3D banner */}
         <div className="lg:hidden absolute inset-x-0 top-0 h-56 pointer-events-none z-0 opacity-90">
@@ -154,7 +158,11 @@ export default function LoginPage() {
               <p className="text-muted-foreground">
                 {mode === 'login' ? t('noAccount') : t('alreadyHave')}{' '}
                 <button
-                  onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+                  onClick={() => {
+                    const next = mode === 'login' ? 'register' : 'login';
+                    if (next === 'register') setShowIntro(true);
+                    setMode(next);
+                  }}
                   className="text-primary font-semibold hover:underline"
                 >
                   {mode === 'login' ? t('registerHere') : t('loginHere')}
