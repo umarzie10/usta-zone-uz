@@ -1,3 +1,4 @@
+import FoundingMasterBadge from '@/components/FoundingMasterBadge';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -192,6 +193,7 @@ export default function MasterDashboard() {
             <div className="min-w-0">
               <h1 className="text-xl sm:text-3xl font-black truncate">{t('masterDashboard')}</h1>
               <p className="text-muted-foreground text-sm mt-0.5 truncate">{profile?.full_name}</p>
+              <FoundingMasterBadge number={masterProfile?.founding_number} size="sm" className="mt-1.5" />
             </div>
           </div>
           <div className="flex items-center gap-2 self-start shrink-0">

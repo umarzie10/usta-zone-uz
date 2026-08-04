@@ -206,6 +206,7 @@ export type Database = {
           certificate_urls: string[] | null
           created_at: string | null
           experience_years: number | null
+          founding_number: number | null
           id: string
           id_document_url: string | null
           is_active: boolean | null
@@ -240,6 +241,7 @@ export type Database = {
           certificate_urls?: string[] | null
           created_at?: string | null
           experience_years?: number | null
+          founding_number?: number | null
           id?: string
           id_document_url?: string | null
           is_active?: boolean | null
@@ -274,6 +276,7 @@ export type Database = {
           certificate_urls?: string[] | null
           created_at?: string | null
           experience_years?: number | null
+          founding_number?: number | null
           id?: string
           id_document_url?: string | null
           is_active?: boolean | null
@@ -996,6 +999,7 @@ export type Database = {
           certificate_urls: string[] | null
           created_at: string | null
           experience_years: number | null
+          founding_number: number | null
           id: string
           id_document_url: string | null
           is_active: boolean | null
@@ -1128,6 +1132,7 @@ export type Database = {
           certificate_urls: string[] | null
           created_at: string | null
           experience_years: number | null
+          founding_number: number | null
           id: string
           id_document_url: string | null
           is_active: boolean | null
