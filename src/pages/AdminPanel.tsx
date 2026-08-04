@@ -4,6 +4,7 @@ import AdminVerificationPanel from '@/components/AdminVerificationPanel';
 import AdminPromoCodes from '@/components/AdminPromoCodes';
 import AdminComplaints from '@/components/AdminComplaints';
 import AdminChatMonitor from '@/components/AdminChatMonitor';
+import AdminFoundingSettings from '@/components/AdminFoundingSettings';
 import AdminBroadcast from '@/components/AdminBroadcast';
 import AdminCategories from '@/components/AdminCategories';
 import AdminSubscriptionPlans from '@/components/AdminSubscriptionPlans';
@@ -268,6 +269,7 @@ export default function AdminPanel() {
     { id: 'broadcast', label: 'Ommaviy xabar', icon: Megaphone },
     { id: 'withdrawals', label: t('withdrawRequests'), icon: Wallet },
     { id: 'analytics', label: 'Analitika', icon: BarChart3 },
+    { id: 'founding', label: 'Asoschi Usta', icon: Crown },
     { id: 'settings', label: t('settings'), icon: Settings },
   ];
 
@@ -741,6 +743,7 @@ export default function AdminPanel() {
             {activeTab === 'complaints' && <AdminComplaints />}
             {activeTab === 'chats' && <AdminChatMonitor />}
             {activeTab === 'broadcast' && <AdminBroadcast />}
+            {activeTab === 'founding' && <AdminFoundingSettings />}
 
           </>
         )}
