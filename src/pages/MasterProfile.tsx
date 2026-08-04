@@ -71,25 +71,32 @@ export default function MasterProfilePage() {
   const fetchMaster = async () => {
     setLoading(true);
     try {
-      const { data: mp, error } = await supabase
-        .from('master_profiles')
-        .select('id,user_id,category_ids,subcategory_ids,skills,portfolio_urls,bio,experience_years,rating,reviews_count,jobs_completed,is_active,is_approved,verification_tier,verified_at,service_radius_km,work_days,work_start,work_end,accepts_emergency,created_at,updated_at')
-        .eq('id', id!)
-        .single();
-      if (error) throw error;
+      const cols = 'id,user_id,category_ids,subcategory_ids,skills,portfolio_urls,bio,experience_years,rating,reviews_count,jobs_completed,is_active,is_approved,verification_tier,verified_at,service_radius_km,work_days,work_start,work_end,accepts_emergency,created_at,updated_at';
 
-      // Hide profile if master has no active subscription (free or expired)
-      const { data: sub } = await supabase
-        .from('subscriptions')
-        .select('tier, expires_at, is_trial, trial_ends_at')
-        .eq('user_id', mp.user_id)
+      // Try by master_profiles.id first, then fall back to user_id
+      // (some lists navigate with the user id)
+      let { data: mp } = await supabase
+        .from('master_profiles')
+        .select(cols)
+        .eq('id', id!)
         .maybeSingle();
-      const hasActivePaid = sub && ['basic','pro','premium','vip','standard'].includes(sub.tier as any) && (!sub.expires_at || new Date(sub.expires_at) > new Date());
-      if (!hasActivePaid) {
+
+      if (!mp) {
+        const res = await supabase
+          .from('master_profiles')
+          .select(cols)
+          .eq('user_id', id!)
+          .maybeSingle();
+        mp = res.data;
+      }
+
+      if (!mp) {
         setMaster(null);
         setLoading(false);
         return;
       }
+
+
 
 
       const { data: profile } = await supabase
