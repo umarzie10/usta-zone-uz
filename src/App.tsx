@@ -18,6 +18,8 @@ import MastersPage from "./pages/Masters";
 import AdminPanel from "./pages/AdminPanel";
 import Subscription from "./pages/Subscription";
 import LiveMap from "./pages/LiveMap";
+import CategoryLanding from "./pages/CategoryLanding";
+import CityLanding from "./pages/CityLanding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +47,8 @@ const App = () => (
               <Route path="/admin" element={<AdminPanel />} />
               <Route path="/subscription" element={<Subscription />} />
               <Route path="/map" element={<LiveMap />} />
+              <Route path="/xizmatlar/:slug" element={<CategoryLanding />} />
+              <Route path="/shahar/:city" element={<CityLanding />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

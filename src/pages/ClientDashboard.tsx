@@ -1,3 +1,4 @@
+import ReferralDashboard from '@/components/ReferralDashboard';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -13,7 +14,7 @@ import SavedAddresses from '@/components/SavedAddresses';
 import TrialCountdown from '@/components/TrialCountdown';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import {
-  ShoppingBag, MessageCircle, Star, Wallet, Plus,
+  ShoppingBag, MessageCircle, Star, Wallet, Plus, Gift,
   Clock, CheckCircle, AlertCircle, XCircle, Loader2, Heart, MapPin
 } from 'lucide-react';
 
@@ -113,6 +114,7 @@ export default function ClientDashboard() {
     { id: 'messages', label: t('messages'), icon: MessageCircle },
     { id: 'reviews', label: t('reviewsTab'), icon: Star },
     { id: 'balance', label: t('balanceTab'), icon: Wallet },
+    { id: 'referral', label: 'Referral', icon: Gift },
   ];
 
   const openChat = (masterId: string, masterName: string) => {
@@ -231,6 +233,7 @@ export default function ClientDashboard() {
               </div>
             )}
 
+            {activeTab === 'referral' && <ReferralDashboard />}
             {activeTab === 'favorites' && <FavoriteMasters />}
             {activeTab === 'addresses' && <SavedAddresses />}
             {activeTab === 'reviews' && (

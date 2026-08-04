@@ -81,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           city: profileData.city || 'Toshkent',
           region: profileData.region || 'Toshkent shahri',
           role: profileData.role || 'client',
+          referral_code: (typeof window !== 'undefined' && localStorage.getItem('ustazone_ref')) || '',
         },
       },
     });

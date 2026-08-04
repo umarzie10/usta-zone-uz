@@ -11,7 +11,15 @@ interface LayoutProps {
   noFooter?: boolean;
 }
 
+function useReferralCapture() {
+  useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get('ref');
+    if (ref) localStorage.setItem('ustazone_ref', ref.toUpperCase());
+  }, []);
+}
+
 export default function Layout({ children, noFooter = false }: LayoutProps) {
+  useReferralCapture();
   useHeartbeat();
   useScrollReveal();
   const { pathname } = useLocation();

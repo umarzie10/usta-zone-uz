@@ -477,6 +477,8 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           phone: string | null
+          referral_code: string | null
+          referred_by: string | null
           region: string | null
           role: Database["public"]["Enums"]["app_role"]
           updated_at: string | null
@@ -495,6 +497,8 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           phone?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           region?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string | null
@@ -513,6 +517,8 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           phone?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           region?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string | null
@@ -596,6 +602,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      referrals: {
+        Row: {
+          bonus_amount: number
+          code: string
+          converted_at: string | null
+          created_at: string
+          id: string
+          referred_user_id: string
+          referrer_id: string
+          status: string
+        }
+        Insert: {
+          bonus_amount?: number
+          code: string
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          referred_user_id: string
+          referrer_id: string
+          status?: string
+        }
+        Update: {
+          bonus_amount?: number
+          code?: string
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          referred_user_id?: string
+          referrer_id?: string
+          status?: string
+        }
+        Relationships: []
       }
       reviews: {
         Row: {
@@ -1044,6 +1083,8 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           phone: string | null
+          referral_code: string | null
+          referred_by: string | null
           region: string | null
           role: Database["public"]["Enums"]["app_role"]
           updated_at: string | null
@@ -1071,6 +1112,8 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           phone: string | null
+          referral_code: string | null
+          referred_by: string | null
           region: string | null
           role: Database["public"]["Enums"]["app_role"]
           updated_at: string | null
@@ -1095,6 +1138,7 @@ export type Database = {
           sender_name: string
         }[]
       }
+      admin_resync_founding_numbers: { Args: never; Returns: Json }
       admin_send_broadcast: {
         Args: {
           _audience: string
@@ -1110,7 +1154,9 @@ export type Database = {
       }
       award_cashback: { Args: { _order_id: string }; Returns: undefined }
       claim_emergency_order: { Args: { _order_id: string }; Returns: Json }
+      gen_referral_code: { Args: never; Returns: string }
       get_commission_percent: { Args: never; Returns: number }
+      get_founding_config: { Args: never; Returns: Json }
       get_my_master_balance: {
         Args: never
         Returns: {
@@ -1177,6 +1223,8 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           phone: string | null
+          referral_code: string | null
+          referred_by: string | null
           region: string | null
           role: Database["public"]["Enums"]["app_role"]
           updated_at: string | null
@@ -1189,6 +1237,19 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_my_referral_code: { Args: never; Returns: string }
+      get_my_referral_list: {
+        Args: never
+        Returns: {
+          bonus_amount: number
+          converted_at: string
+          created_at: string
+          full_name: string
+          id: string
+          status: string
+        }[]
+      }
+      get_my_referral_stats: { Args: never; Returns: Json }
       get_my_subscription_status: { Args: never; Returns: Json }
       has_role: {
         Args: {
