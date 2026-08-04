@@ -18,8 +18,8 @@ function useReferralCapture() {
   }, []);
 }
 
-export default function Layout({
-  useReferralCapture(); children, noFooter = false }: LayoutProps) {
+export default function Layout({ children, noFooter = false }: LayoutProps) {
+  useReferralCapture();
   useHeartbeat();
   useScrollReveal();
   const { pathname } = useLocation();
