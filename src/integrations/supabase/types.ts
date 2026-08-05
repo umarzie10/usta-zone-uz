@@ -1154,6 +1154,7 @@ export type Database = {
       }
       award_cashback: { Args: { _order_id: string }; Returns: undefined }
       claim_emergency_order: { Args: { _order_id: string }; Returns: Json }
+      ensure_my_referral_code: { Args: never; Returns: string }
       gen_referral_code: { Args: never; Returns: string }
       get_commission_percent: { Args: never; Returns: number }
       get_founding_config: { Args: never; Returns: Json }
