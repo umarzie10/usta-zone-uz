@@ -79,6 +79,9 @@ export default function LoginPage() {
         showNotification('success', t('successLogin'));
         navigate('/');
       } else {
+        const ref = form.referralCode.trim().toUpperCase();
+        if (ref) localStorage.setItem('ustazone_ref', ref);
+        else localStorage.removeItem('ustazone_ref');
         await signUp(form.email, form.password, {
           full_name: form.fullName,
           phone: form.phone,
