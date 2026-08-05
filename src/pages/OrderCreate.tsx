@@ -39,11 +39,9 @@ export default function OrderCreatePage() {
   const [commissionPct, setCommissionPct] = useState<number>(10);
 
   useEffect(() => {
-    supabase.from('platform_settings').select('value').eq('key', 'commission_percent').maybeSingle().then(({ data }) => {
-      if (data && data.value !== null && data.value !== undefined) {
-        const n = Number(data.value);
-        if (!isNaN(n)) setCommissionPct(n);
-      }
+    supabase.rpc('get_commission_percent').then(({ data }) => {
+      const n = Number(data);
+      if (data !== null && data !== undefined && !isNaN(n)) setCommissionPct(n);
     });
   }, []);
 
