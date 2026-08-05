@@ -43,6 +43,7 @@ export default function LoginPage() {
     region: 'Toshkent shahri',
     categoryId: '',
     experienceYears: '',
+    referralCode: (typeof window !== 'undefined' && localStorage.getItem('ustazone_ref')) || '',
   });
 
   useEffect(() => {
