@@ -32,6 +32,7 @@ export default function ReferralDashboard() {
   const [copied, setCopied] = useState(false);
 
   const load = async () => {
+    await supabase.rpc('ensure_my_referral_code');
     const [{ data: s }, { data: list }] = await Promise.all([
       supabase.rpc('get_my_referral_stats'),
       supabase.rpc('get_my_referral_list'),
