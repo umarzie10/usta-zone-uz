@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Eye, EyeOff, Mail, Lock, User, Phone, Loader2, Briefcase, Clock } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Phone, Loader2, Briefcase, Clock, Gift } from 'lucide-react';
 import LoginScene3D from '@/components/LoginScene3D';
 import RegisterIntro3D from '@/components/RegisterIntro3D';
 
@@ -43,6 +43,7 @@ export default function LoginPage() {
     region: 'Toshkent shahri',
     categoryId: '',
     experienceYears: '',
+    referralCode: (typeof window !== 'undefined' && localStorage.getItem('ustazone_ref')) || '',
   });
 
   useEffect(() => {
@@ -78,6 +79,9 @@ export default function LoginPage() {
         showNotification('success', t('successLogin'));
         navigate('/');
       } else {
+        const ref = form.referralCode.trim().toUpperCase();
+        if (ref) localStorage.setItem('ustazone_ref', ref);
+        else localStorage.removeItem('ustazone_ref');
         await signUp(form.email, form.password, {
           full_name: form.fullName,
           phone: form.phone,
@@ -289,6 +293,22 @@ export default function LoginPage() {
                   </button>
                 </div>
               </div>
+
+              {mode === 'register' && (
+                <div>
+                  <Label htmlFor="referralCode" className="text-sm font-medium">Taklif kodi (ixtiyoriy)</Label>
+                  <div className="relative mt-1.5">
+                    <Gift className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="referralCode" placeholder="ABC1234"
+                      className="pl-10 rounded-xl h-11 font-mono uppercase tracking-widest"
+                      value={form.referralCode}
+                      onChange={e => setForm({ ...form, referralCode: e.target.value.toUpperCase() })} />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Sizni taklif qilgan foydalanuvchining kodi. Birinchi buyurtmangiz yakunlanganda unga bonus beriladi.
+                  </p>
+                </div>
+              )}
 
               <Button type="submit" className="w-full h-12 rounded-xl btn-hero text-base font-semibold mt-2" disabled={loading}>
                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (mode === 'login' ? t('login') : t('register'))}
