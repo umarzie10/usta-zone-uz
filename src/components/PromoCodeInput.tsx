@@ -25,6 +25,8 @@ export default function PromoCodeInput({ orderAmount, onApplied }: Props) {
     if (!r?.ok) {
       const msgs: Record<string, string> = {
         invalid_code: 'Promo kod topilmadi', expired: 'Muddati tugagan',
+        inactive: "Bu promo kod hozircha faol emas",
+        is_referral: "Bu taklif (referral) kodi — promo kod emas",
         limit_reached: 'Limit tugagan', already_used: 'Siz allaqachon ishlatgansiz',
         min_amount: `Minimal summa: ${r.required?.toLocaleString()} so'm`,
       };
