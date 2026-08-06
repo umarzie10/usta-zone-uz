@@ -5,6 +5,7 @@ import AdminPromoCodes from '@/components/AdminPromoCodes';
 import AdminComplaints from '@/components/AdminComplaints';
 import AdminChatMonitor from '@/components/AdminChatMonitor';
 import AdminFoundingSettings from '@/components/AdminFoundingSettings';
+import AdminWallet from '@/components/wallet/AdminWallet';
 import AdminBroadcast from '@/components/AdminBroadcast';
 import AdminCategories from '@/components/AdminCategories';
 import AdminSubscriptionPlans from '@/components/AdminSubscriptionPlans';
@@ -552,59 +553,9 @@ export default function AdminPanel() {
               </div>
             )}
 
-            {/* WITHDRAWALS TAB */}
-            {activeTab === 'withdrawals' && (
-              <div>
-                {withdrawals.length === 0 ? (
-                  <div className="card-premium p-8 text-center">
-                    <Wallet className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                    <p className="font-semibold">{t('withdrawRequests')}</p>
-                    <p className="text-sm text-muted-foreground mt-1">{t('noWithdrawals')}</p>
-                  </div>
-                ) : (
-                  <div className="card-premium overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead className="border-b border-border bg-muted/50">
-                          <tr>
-                            {['Usta ID', 'Summa', 'Karta', 'Status', 'Sana', 'Amallar'].map(h => (
-                              <th key={h} className="text-left px-4 py-3 font-semibold text-muted-foreground">{h}</th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {withdrawals.map(w => (
-                            <tr key={w.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                              <td className="px-4 py-3 font-mono text-xs">{w.master_id.slice(0,8)}...</td>
-                              <td className="px-4 py-3 font-semibold">{w.amount.toLocaleString()} so'm</td>
-                              <td className="px-4 py-3 text-muted-foreground">{w.card_number || '-'}</td>
-                              <td className="px-4 py-3">
-                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(w.status)}`}>{w.status}</span>
-                              </td>
-                              <td className="px-4 py-3 text-muted-foreground text-xs">{formatDate(w.created_at)}</td>
-                              <td className="px-4 py-3">
-                                {w.status === 'pending' && (
-                                  <div className="flex gap-1.5">
-                                    <Button size="sm" variant="outline" className="rounded-lg h-7 px-2 text-xs gap-1"
-                                      onClick={() => handleWithdrawalAction(w.id, 'approved')}>
-                                      <CheckCircle className="h-3 w-3 text-green-500" /> Tasdiqlash
-                                    </Button>
-                                    <Button size="sm" variant="outline" className="rounded-lg h-7 px-2 text-xs gap-1 text-destructive"
-                                      onClick={() => handleWithdrawalAction(w.id, 'rejected')}>
-                                      <XCircle className="h-3 w-3" /> Rad
-                                    </Button>
-                                  </div>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+            {/* WITHDRAWALS / WALLET TAB */}
+            {activeTab === 'withdrawals' && <AdminWallet />}
+
 
             {/* ANALYTICS TAB */}
             {activeTab === 'analytics' && (

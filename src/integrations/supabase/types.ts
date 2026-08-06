@@ -14,6 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          entity: string | null
+          entity_id: string | null
+          id: string
+          ip_address: string | null
+          meta: Json
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          entity?: string | null
+          entity_id?: string | null
+          id?: string
+          ip_address?: string | null
+          meta?: Json
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity?: string | null
+          entity_id?: string | null
+          id?: string
+          ip_address?: string | null
+          meta?: Json
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      bank_cards: {
+        Row: {
+          brand: string
+          card_holder: string
+          card_last4: string
+          card_masked: string
+          created_at: string
+          expiry: string | null
+          id: string
+          is_default: boolean
+          is_verified: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand?: string
+          card_holder: string
+          card_last4: string
+          card_masked: string
+          created_at?: string
+          expiry?: string | null
+          id?: string
+          is_default?: boolean
+          is_verified?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand?: string
+          card_holder?: string
+          card_last4?: string
+          card_masked?: string
+          created_at?: string
+          expiry?: string | null
+          id?: string
+          is_default?: boolean
+          is_verified?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       broadcasts: {
         Row: {
           audience: string
@@ -951,6 +1029,140 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          balance_after: number | null
+          created_at: string
+          id: string
+          note: string | null
+          order_id: string | null
+          payment_method: string | null
+          ref_code: string
+          status: Database["public"]["Enums"]["wallet_tx_status"]
+          type: Database["public"]["Enums"]["wallet_tx_type"]
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after?: number | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          order_id?: string | null
+          payment_method?: string | null
+          ref_code?: string
+          status?: Database["public"]["Enums"]["wallet_tx_status"]
+          type: Database["public"]["Enums"]["wallet_tx_type"]
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          order_id?: string | null
+          payment_method?: string | null
+          ref_code?: string
+          status?: Database["public"]["Enums"]["wallet_tx_status"]
+          type?: Database["public"]["Enums"]["wallet_tx_type"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallet_withdrawals: {
+        Row: {
+          admin_note: string | null
+          amount: number
+          card_id: string | null
+          created_at: string
+          id: string
+          otp_code: string | null
+          otp_verified: boolean
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["withdrawal_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount: number
+          card_id?: string | null
+          created_at?: string
+          id?: string
+          otp_code?: string | null
+          otp_verified?: boolean
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount?: number
+          card_id?: string | null
+          created_at?: string
+          id?: string
+          otp_code?: string | null
+          otp_verified?: boolean
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_withdrawals_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "bank_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wallets: {
+        Row: {
+          balance: number
+          created_at: string
+          currency: string
+          frozen_balance: number
+          id: string
+          total_deposited: number
+          total_spent: number
+          total_withdrawn: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          currency?: string
+          frozen_balance?: number
+          id?: string
+          total_deposited?: number
+          total_spent?: number
+          total_withdrawn?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          currency?: string
+          frozen_balance?: number
+          id?: string
+          total_deposited?: number
+          total_spent?: number
+          total_withdrawn?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       withdraw_requests: {
         Row: {
           admin_note: string | null
@@ -1126,6 +1338,38 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      admin_list_wallet_transactions: {
+        Args: { _limit?: number }
+        Returns: {
+          amount: number
+          created_at: string
+          full_name: string
+          id: string
+          note: string
+          payment_method: string
+          ref_code: string
+          role: string
+          status: Database["public"]["Enums"]["wallet_tx_status"]
+          type: Database["public"]["Enums"]["wallet_tx_type"]
+          user_id: string
+        }[]
+      }
+      admin_list_withdrawals: {
+        Args: never
+        Returns: {
+          admin_note: string
+          amount: number
+          card_holder: string
+          card_masked: string
+          created_at: string
+          full_name: string
+          id: string
+          reviewed_at: string
+          role: string
+          status: Database["public"]["Enums"]["withdrawal_status"]
+          user_id: string
+        }[]
+      }
       admin_recent_messages: {
         Args: { _limit?: number }
         Returns: {
@@ -1139,6 +1383,10 @@ export type Database = {
         }[]
       }
       admin_resync_founding_numbers: { Args: never; Returns: Json }
+      admin_review_withdrawal: {
+        Args: { _decision: string; _id: string; _note?: string }
+        Returns: Json
+      }
       admin_send_broadcast: {
         Args: {
           _audience: string
@@ -1148,6 +1396,7 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_wallet_overview: { Args: never; Returns: Json }
       apply_promo_code: {
         Args: { _code: string; _order_amount: number }
         Returns: Json
@@ -1158,6 +1407,7 @@ export type Database = {
       gen_referral_code: { Args: never; Returns: string }
       get_commission_percent: { Args: never; Returns: number }
       get_founding_config: { Args: never; Returns: Json }
+      get_my_earnings_summary: { Args: never; Returns: Json }
       get_my_master_balance: {
         Args: never
         Returns: {
@@ -1252,6 +1502,27 @@ export type Database = {
       }
       get_my_referral_stats: { Args: never; Returns: Json }
       get_my_subscription_status: { Args: never; Returns: Json }
+      get_my_wallet: {
+        Args: never
+        Returns: {
+          balance: number
+          created_at: string
+          currency: string
+          frozen_balance: number
+          id: string
+          total_deposited: number
+          total_spent: number
+          total_withdrawn: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wallets"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1273,6 +1544,14 @@ export type Database = {
         Returns: undefined
       }
       use_bonus_balance: { Args: { _amount: number }; Returns: Json }
+      wallet_deposit: {
+        Args: { _amount: number; _method: string }
+        Returns: Json
+      }
+      wallet_request_withdrawal: {
+        Args: { _amount: number; _card_id: string; _otp?: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "client" | "master" | "admin"
@@ -1284,6 +1563,16 @@ export type Database = {
         | "pro"
         | "basic"
       verification_tier: "none" | "bronze" | "silver" | "gold"
+      wallet_tx_status: "pending" | "success" | "cancelled" | "failed"
+      wallet_tx_type:
+        | "deposit"
+        | "withdrawal"
+        | "payment"
+        | "refund"
+        | "bonus"
+        | "earning"
+        | "commission"
+      withdrawal_status: "pending" | "approved" | "completed" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1414,6 +1703,17 @@ export const Constants = {
       app_role: ["client", "master", "admin"],
       subscription_tier: ["free", "standard", "premium", "vip", "pro", "basic"],
       verification_tier: ["none", "bronze", "silver", "gold"],
+      wallet_tx_status: ["pending", "success", "cancelled", "failed"],
+      wallet_tx_type: [
+        "deposit",
+        "withdrawal",
+        "payment",
+        "refund",
+        "bonus",
+        "earning",
+        "commission",
+      ],
+      withdrawal_status: ["pending", "approved", "completed", "rejected"],
     },
   },
 } as const

@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import FavoriteMasters from '@/components/FavoriteMasters';
 import SavedAddresses from '@/components/SavedAddresses';
+import UserWallet from '@/components/wallet/UserWallet';
 import TrialCountdown from '@/components/TrialCountdown';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import {
@@ -258,15 +259,8 @@ export default function ClientDashboard() {
               </div>
             )}
 
-            {activeTab === 'balance' && (
-              <div className="card-premium p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="font-bold text-lg">{t('myBalance')}</h3>
-                  <span className="text-3xl font-black text-primary">0 so'm</span>
-                </div>
-                <p className="text-sm text-muted-foreground">{t('balanceDesc')}</p>
-              </div>
-            )}
+            {activeTab === 'balance' && <UserWallet />}
+
           </div>
         )}
       </div>
