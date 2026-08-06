@@ -385,37 +385,8 @@ export default function MasterDashboard() {
           </div>
         )}
 
-        {activeTab === 'balance' && (
-          <div className="space-y-5">
-            <div className="card-premium p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-lg">{t('balanceLabel')}</h3>
-                <span className="text-3xl font-black text-primary">{balance.toLocaleString()} so'm</span>
-              </div>
-              <div className="flex justify-between text-sm text-muted-foreground mb-6">
-                <span>{t('withdrawableLabel')}</span>
-                <span className="font-semibold text-success">{withdrawable.toLocaleString()} so'm</span>
-              </div>
-              <div className="space-y-4 border-t border-border pt-5">
-                <h4 className="font-semibold">{t('withdraw')}</h4>
-                <div>
-                  <Label className="text-sm">{t('amountLabel')}</Label>
-                  <Input className="mt-1.5 rounded-xl h-11" type="number" placeholder="500000"
-                    value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-sm">{t('cardNumber')}</Label>
-                  <Input className="mt-1.5 rounded-xl h-11" placeholder="8600 0000 0000 0000"
-                    value={cardNumber} onChange={e => setCardNumber(e.target.value)} />
-                </div>
-                <Button className="w-full h-11 rounded-xl btn-hero gap-2" onClick={handleWithdraw} disabled={withdrawing || !withdrawAmount}>
-                  {withdrawing ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowDownToLine className="h-4 w-4" />}
-                  {t('withdraw')}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+        {activeTab === 'balance' && <MasterWallet />}
+
 
         {activeTab === 'reviews' && (
           <div className="space-y-4">
