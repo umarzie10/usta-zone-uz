@@ -19,6 +19,7 @@ import TrialCountdown from '@/components/TrialCountdown';
 import SubscriptionGuard from '@/components/SubscriptionGuard';
 import MasterSettingsForm from '@/components/MasterSettingsForm';
 import SubcategoryPricing from '@/components/SubcategoryPricing';
+import MasterWallet from '@/components/wallet/MasterWallet';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import { TIER_BADGE } from '@/lib/subscriptionPlans';
 import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User, Crown, Navigation as NavIcon, DollarSign, Shield, Settings, Tag } from 'lucide-react';

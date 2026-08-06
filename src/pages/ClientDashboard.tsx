@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import FavoriteMasters from '@/components/FavoriteMasters';
 import SavedAddresses from '@/components/SavedAddresses';
+import UserWallet from '@/components/wallet/UserWallet';
 import TrialCountdown from '@/components/TrialCountdown';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import {
