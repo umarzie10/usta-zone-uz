@@ -5,6 +5,7 @@ import AdminPromoCodes from '@/components/AdminPromoCodes';
 import AdminComplaints from '@/components/AdminComplaints';
 import AdminChatMonitor from '@/components/AdminChatMonitor';
 import AdminFoundingSettings from '@/components/AdminFoundingSettings';
+import AdminWallet from '@/components/wallet/AdminWallet';
 import AdminBroadcast from '@/components/AdminBroadcast';
 import AdminCategories from '@/components/AdminCategories';
 import AdminSubscriptionPlans from '@/components/AdminSubscriptionPlans';
