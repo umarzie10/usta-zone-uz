@@ -5,6 +5,7 @@ import Layout from '@/components/Layout';
 import ChatDialog from '@/components/ChatDialog';
 import AnimatedCounter from '@/components/AnimatedCounter';
 import ReviewForm from '@/components/ReviewForm';
+import WarrantyClaimDialog from '@/components/WarrantyClaimDialog';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
