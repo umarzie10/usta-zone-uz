@@ -213,6 +213,11 @@ export default function ClientDashboard() {
                             <MessageCircle className="h-3.5 w-3.5" />
                             {t('messageBtn')}
                           </Button>
+                          <Button size="sm" variant="ghost" className="rounded-xl gap-1.5"
+                            onClick={() => setWarrantyOrderId(order.id)}>
+                            <ShieldCheck className="h-3.5 w-3.5" />
+                            Kafolat
+                          </Button>
                         </div>
                       )}
                     </div>
