@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import FirstLoginTrialBanner from './FirstLoginTrialBanner';
+import AIAssistant from './AIAssistant';
 import { useHeartbeat } from '@/hooks/useHeartbeat';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
@@ -31,6 +32,7 @@ export default function Layout({ children, noFooter = false }: LayoutProps) {
         {children}
       </main>
       {!noFooter && <Footer />}
+      <AIAssistant />
     </div>
   );
 }

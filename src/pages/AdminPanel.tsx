@@ -3,6 +3,7 @@ import Layout from '@/components/Layout';
 import AdminVerificationPanel from '@/components/AdminVerificationPanel';
 import AdminPromoCodes from '@/components/AdminPromoCodes';
 import AdminComplaints from '@/components/AdminComplaints';
+import AdminWarranty from '@/components/AdminWarranty';
 import AdminChatMonitor from '@/components/AdminChatMonitor';
 import AdminFoundingSettings from '@/components/AdminFoundingSettings';
 import AdminWallet from '@/components/wallet/AdminWallet';
@@ -266,6 +267,7 @@ export default function AdminPanel() {
     { id: 'plans', label: 'Tariflar', icon: Crown },
     { id: 'promo', label: 'Promo kodlar', icon: Tag },
     { id: 'complaints', label: 'Shikoyatlar', icon: AlertTriangle },
+    { id: 'warranty', label: 'Kafolat', icon: Shield },
     { id: 'chats', label: 'Chatlar', icon: MessageCircle },
     { id: 'broadcast', label: 'Ommaviy xabar', icon: Megaphone },
     { id: 'withdrawals', label: t('withdrawRequests'), icon: Wallet },
@@ -692,6 +694,7 @@ export default function AdminPanel() {
             {activeTab === 'categories' && <AdminCategories />}
             {activeTab === 'promo' && <AdminPromoCodes />}
             {activeTab === 'complaints' && <AdminComplaints />}
+            {activeTab === 'warranty' && <AdminWarranty />}
             {activeTab === 'chats' && <AdminChatMonitor />}
             {activeTab === 'broadcast' && <AdminBroadcast />}
             {activeTab === 'founding' && <AdminFoundingSettings />}

@@ -5,6 +5,7 @@ import Layout from '@/components/Layout';
 import ChatDialog from '@/components/ChatDialog';
 import AnimatedCounter from '@/components/AnimatedCounter';
 import ReviewForm from '@/components/ReviewForm';
+import WarrantyClaimDialog from '@/components/WarrantyClaimDialog';
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,7 +17,7 @@ import TrialCountdown from '@/components/TrialCountdown';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import {
   ShoppingBag, MessageCircle, Star, Wallet, Plus, Gift,
-  Clock, CheckCircle, AlertCircle, XCircle, Loader2, Heart, MapPin
+  Clock, CheckCircle, AlertCircle, XCircle, Loader2, Heart, MapPin, ShieldCheck
 } from 'lucide-react';
 
 interface OrderWithMaster {
@@ -43,6 +44,7 @@ export default function ClientDashboard() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [reviewTarget, setReviewTarget] = useState<{ masterId: string; orderId: string } | null>(null);
+  const [warrantyOrderId, setWarrantyOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) fetchData();
@@ -213,6 +215,11 @@ export default function ClientDashboard() {
                             <MessageCircle className="h-3.5 w-3.5" />
                             {t('messageBtn')}
                           </Button>
+                          <Button size="sm" variant="ghost" className="rounded-xl gap-1.5"
+                            onClick={() => setWarrantyOrderId(order.id)}>
+                            <ShieldCheck className="h-3.5 w-3.5" />
+                            Kafolat
+                          </Button>
                         </div>
                       )}
                     </div>
@@ -279,6 +286,13 @@ export default function ClientDashboard() {
           open={true}
           onClose={() => setReviewTarget(null)}
           onSubmitted={fetchData}
+        />
+      )}
+      {warrantyOrderId && (
+        <WarrantyClaimDialog
+          orderId={warrantyOrderId}
+          open={true}
+          onOpenChange={(v) => { if (!v) setWarrantyOrderId(null); }}
         />
       )}
     </Layout>
