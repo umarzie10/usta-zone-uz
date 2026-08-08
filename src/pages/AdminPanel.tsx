@@ -3,6 +3,7 @@ import Layout from '@/components/Layout';
 import AdminVerificationPanel from '@/components/AdminVerificationPanel';
 import AdminPromoCodes from '@/components/AdminPromoCodes';
 import AdminComplaints from '@/components/AdminComplaints';
+import AdminWarranty from '@/components/AdminWarranty';
 import AdminChatMonitor from '@/components/AdminChatMonitor';
 import AdminFoundingSettings from '@/components/AdminFoundingSettings';
 import AdminWallet from '@/components/wallet/AdminWallet';
