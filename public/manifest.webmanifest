@@ -1,0 +1,14 @@
+{
+  "name": "UstaZone — Ustalar platformasi",
+  "short_name": "UstaZone",
+  "description": "O'zbekistondagi eng yaxshi ustalarni toping va xizmat buyurtma qiling",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a56db",
+  "lang": "uz",
+  "icons": [
+    { "src": "/placeholder.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
