@@ -266,6 +266,7 @@ export default function AdminPanel() {
     { id: 'plans', label: 'Tariflar', icon: Crown },
     { id: 'promo', label: 'Promo kodlar', icon: Tag },
     { id: 'complaints', label: 'Shikoyatlar', icon: AlertTriangle },
+    { id: 'warranty', label: 'Kafolat', icon: Shield },
     { id: 'chats', label: 'Chatlar', icon: MessageCircle },
     { id: 'broadcast', label: 'Ommaviy xabar', icon: Megaphone },
     { id: 'withdrawals', label: t('withdrawRequests'), icon: Wallet },
