@@ -287,6 +287,13 @@ export default function ClientDashboard() {
           onSubmitted={fetchData}
         />
       )}
+      {warrantyOrderId && (
+        <WarrantyClaimDialog
+          orderId={warrantyOrderId}
+          open={true}
+          onOpenChange={(v) => { if (!v) setWarrantyOrderId(null); }}
+        />
+      )}
     </Layout>
   );
 }
