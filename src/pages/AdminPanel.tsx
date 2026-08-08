@@ -693,6 +693,7 @@ export default function AdminPanel() {
             {activeTab === 'categories' && <AdminCategories />}
             {activeTab === 'promo' && <AdminPromoCodes />}
             {activeTab === 'complaints' && <AdminComplaints />}
+            {activeTab === 'warranty' && <AdminWarranty />}
             {activeTab === 'chats' && <AdminChatMonitor />}
             {activeTab === 'broadcast' && <AdminBroadcast />}
             {activeTab === 'founding' && <AdminFoundingSettings />}
