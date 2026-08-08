@@ -43,6 +43,7 @@ export default function ClientDashboard() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [reviewTarget, setReviewTarget] = useState<{ masterId: string; orderId: string } | null>(null);
+  const [warrantyOrderId, setWarrantyOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) fetchData();
