@@ -16,7 +16,7 @@ import TrialCountdown from '@/components/TrialCountdown';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import {
   ShoppingBag, MessageCircle, Star, Wallet, Plus, Gift,
-  Clock, CheckCircle, AlertCircle, XCircle, Loader2, Heart, MapPin
+  Clock, CheckCircle, AlertCircle, XCircle, Loader2, Heart, MapPin, ShieldCheck
 } from 'lucide-react';
 
 interface OrderWithMaster {
