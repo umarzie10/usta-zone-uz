@@ -451,6 +451,51 @@ export type Database = {
         }
         Relationships: []
       }
+      order_escrow: {
+        Row: {
+          amount: number
+          client_id: string
+          commission_amount: number
+          created_at: string
+          id: string
+          master_amount: number
+          master_id: string | null
+          order_id: string
+          refunded_at: string | null
+          released_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          client_id: string
+          commission_amount?: number
+          created_at?: string
+          id?: string
+          master_amount?: number
+          master_id?: string | null
+          order_id: string
+          refunded_at?: string | null
+          released_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          client_id?: string
+          commission_amount?: number
+          created_at?: string
+          id?: string
+          master_amount?: number
+          master_id?: string | null
+          order_id?: string
+          refunded_at?: string | null
+          released_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           address: string | null
@@ -463,6 +508,7 @@ export type Database = {
           commission_amount: number | null
           created_at: string | null
           description: string | null
+          escrow_status: string
           id: string
           is_dispute: boolean | null
           master_amount: number | null
@@ -472,6 +518,7 @@ export type Database = {
           status: string
           title: string
           updated_at: string | null
+          warranty_until: string | null
         }
         Insert: {
           address?: string | null
@@ -484,6 +531,7 @@ export type Database = {
           commission_amount?: number | null
           created_at?: string | null
           description?: string | null
+          escrow_status?: string
           id?: string
           is_dispute?: boolean | null
           master_amount?: number | null
@@ -493,6 +541,7 @@ export type Database = {
           status?: string
           title: string
           updated_at?: string | null
+          warranty_until?: string | null
         }
         Update: {
           address?: string | null
@@ -505,6 +554,7 @@ export type Database = {
           commission_amount?: number | null
           created_at?: string | null
           description?: string | null
+          escrow_status?: string
           id?: string
           is_dispute?: boolean | null
           master_amount?: number | null
@@ -514,6 +564,7 @@ export type Database = {
           status?: string
           title?: string
           updated_at?: string | null
+          warranty_until?: string | null
         }
         Relationships: []
       }
@@ -722,7 +773,9 @@ export type Database = {
           id: string
           master_id: string
           order_id: string | null
+          photo_urls: string[]
           rating: number
+          video_url: string | null
         }
         Insert: {
           client_id: string
@@ -731,7 +784,9 @@ export type Database = {
           id?: string
           master_id: string
           order_id?: string | null
+          photo_urls?: string[]
           rating: number
+          video_url?: string | null
         }
         Update: {
           client_id?: string
@@ -740,7 +795,9 @@ export type Database = {
           id?: string
           master_id?: string
           order_id?: string | null
+          photo_urls?: string[]
           rating?: number
+          video_url?: string | null
         }
         Relationships: []
       }
@@ -1163,6 +1220,51 @@ export type Database = {
         }
         Relationships: []
       }
+      warranty_claims: {
+        Row: {
+          admin_note: string | null
+          client_id: string
+          created_at: string
+          id: string
+          master_id: string | null
+          order_id: string
+          photos: string[]
+          reason: string
+          resolution: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          client_id: string
+          created_at?: string
+          id?: string
+          master_id?: string | null
+          order_id: string
+          photos?: string[]
+          reason: string
+          resolution?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          client_id?: string
+          created_at?: string
+          id?: string
+          master_id?: string | null
+          order_id?: string
+          photos?: string[]
+          reason?: string
+          resolution?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       withdraw_requests: {
         Row: {
           admin_note: string | null
@@ -1354,6 +1456,20 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_list_warranty_claims: {
+        Args: never
+        Returns: {
+          admin_note: string
+          client_name: string
+          created_at: string
+          id: string
+          master_name: string
+          order_id: string
+          photos: string[]
+          reason: string
+          resolution: string
+        }[]
+      }
       admin_list_withdrawals: {
         Args: never
         Returns: {
@@ -1382,6 +1498,10 @@ export type Database = {
           sender_name: string
         }[]
       }
+      admin_resolve_warranty: {
+        Args: { _id: string; _note?: string; _resolution: string }
+        Returns: Json
+      }
       admin_resync_founding_numbers: { Args: never; Returns: Json }
       admin_review_withdrawal: {
         Args: { _decision: string; _id: string; _note?: string }
@@ -1403,7 +1523,17 @@ export type Database = {
       }
       award_cashback: { Args: { _order_id: string }; Returns: undefined }
       claim_emergency_order: { Args: { _order_id: string }; Returns: Json }
+      create_warranty_claim: {
+        Args: { _order_id: string; _photos?: string[]; _reason: string }
+        Returns: Json
+      }
       ensure_my_referral_code: { Args: never; Returns: string }
+      escrow_hold: { Args: { _order_id: string }; Returns: Json }
+      escrow_refund: {
+        Args: { _note?: string; _order_id: string }
+        Returns: Json
+      }
+      escrow_release: { Args: { _order_id: string }; Returns: Json }
       gen_referral_code: { Args: never; Returns: string }
       get_commission_percent: { Args: never; Returns: number }
       get_founding_config: { Args: never; Returns: Json }
