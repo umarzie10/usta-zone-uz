@@ -20,9 +20,10 @@ import SubscriptionGuard from '@/components/SubscriptionGuard';
 import MasterSettingsForm from '@/components/MasterSettingsForm';
 import SubcategoryPricing from '@/components/SubcategoryPricing';
 import MasterWallet from '@/components/wallet/MasterWallet';
+import AIAssistant from '@/components/AIAssistant';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import { TIER_BADGE } from '@/lib/subscriptionPlans';
-import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User, Crown, Navigation as NavIcon, DollarSign, Shield, Settings, Tag } from 'lucide-react';
+import { Wallet, Star, MessageCircle, History, ArrowDownToLine, Briefcase, TrendingUp, Loader2, Clock, Camera, Image, User, Crown, Navigation as NavIcon, DollarSign, Shield, Settings, Tag, Sparkles } from 'lucide-react';
 
 
 export default function MasterDashboard() {
@@ -176,6 +177,7 @@ export default function MasterDashboard() {
     { id: 'balance', label: t('myBalance'), icon: Wallet },
     { id: 'reviews', label: t('reviewsTab'), icon: Star },
     { id: 'history', label: t('history'), icon: History },
+    { id: 'ai', label: 'AI yordamchi', icon: Sparkles },
   ];
 
 
@@ -387,6 +389,7 @@ export default function MasterDashboard() {
         )}
 
         {activeTab === 'balance' && <MasterWallet />}
+        {activeTab === 'ai' && <AIAssistant embedded />}
 
 
         {activeTab === 'reviews' && (
