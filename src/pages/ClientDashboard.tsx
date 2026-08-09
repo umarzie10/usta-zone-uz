@@ -118,6 +118,7 @@ export default function ClientDashboard() {
     { id: 'reviews', label: t('reviewsTab'), icon: Star },
     { id: 'balance', label: t('balanceTab'), icon: Wallet },
     { id: 'referral', label: 'Referral', icon: Gift },
+    { id: 'ai', label: 'AI yordamchi', icon: Sparkles },
   ];
 
   const openChat = (masterId: string, masterName: string) => {
