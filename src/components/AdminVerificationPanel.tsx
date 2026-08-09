@@ -25,7 +25,7 @@ export default function AdminVerificationPanel() {
         .select('id,user_id,verification_tier,verified_at,is_approved').order('verified_at', { ascending: false, nullsFirst: false }).limit(100);
       const ids = (mps || []).map(m => m.user_id);
       const { data: profs } = ids.length
-        ? await supabase.from('profiles').select('user_id,full_name,phone,avatar_url,is_verified').in('user_id', ids)
+        ? await supabase.rpc('admin_get_profiles', { _user_ids: ids })
         : { data: [] as any[] };
       const pm = new Map<string, any>((profs || []).map((p: any) => [p.user_id, p]));
       setMasters((mps || []).map(m => ({ ...m, profile: pm.get(m.user_id) })));
