@@ -15,9 +15,10 @@ import SavedAddresses from '@/components/SavedAddresses';
 import UserWallet from '@/components/wallet/UserWallet';
 import TrialCountdown from '@/components/TrialCountdown';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+import AIAssistant from '@/components/AIAssistant';
 import {
   ShoppingBag, MessageCircle, Star, Wallet, Plus, Gift,
-  Clock, CheckCircle, AlertCircle, XCircle, Loader2, Heart, MapPin, ShieldCheck
+  Clock, CheckCircle, AlertCircle, XCircle, Loader2, Heart, MapPin, ShieldCheck, Sparkles
 } from 'lucide-react';
 
 interface OrderWithMaster {
