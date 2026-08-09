@@ -10,8 +10,8 @@ const SUGGESTIONS = [
   'Usta tariflari qanday?',
 ];
 
-export default function AIAssistant() {
-  const [open, setOpen] = useState(false);
+export default function AIAssistant({ embedded = false }: { embedded?: boolean } = {}) {
+  const [open, setOpen] = useState(embedded);
   const [messages, setMessages] = useState<Msg[]>([
     { role: 'assistant', content: "Salom! Men UstaZone yordamchisiman 👋 Sizga qanday yordam bera olaman?" },
   ]);
