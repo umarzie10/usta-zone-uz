@@ -41,22 +41,24 @@ export default function AIAssistant({ embedded = false }: { embedded?: boolean }
     }
   };
 
-  return (
-    <>
-      <button
-        onClick={() => setOpen((v) => !v)}
-        aria-label="AI yordamchi"
-        className="fixed bottom-5 right-5 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-xl grid place-items-center hover-scale transition-transform"
-      >
-        {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
-      </button>
+  const panel = (
+    <div className={
+      embedded
+        ? 'rounded-2xl border border-border bg-card overflow-hidden'
+        : 'fixed bottom-24 right-4 left-4 sm:left-auto sm:w-[380px] z-50 rounded-2xl border border-border bg-card shadow-2xl overflow-hidden animate-fade-in-up'
+    }>
+      <div className="flex items-center gap-2 px-4 py-3 bg-primary text-primary-foreground">
+        <Sparkles className="h-4 w-4" />
+        <span className="font-semibold text-sm">UstaZone AI yordamchi</span>
+      </div>
+      <AIBody />
+    </div>
+  );
 
-      {open && (
-        <div className="fixed bottom-24 right-4 left-4 sm:left-auto sm:w-[380px] z-50 rounded-2xl border border-border bg-card shadow-2xl overflow-hidden animate-fade-in-up">
-          <div className="flex items-center gap-2 px-4 py-3 bg-primary text-primary-foreground">
-            <Sparkles className="h-4 w-4" />
-            <span className="font-semibold text-sm">UstaZone AI yordamchi</span>
-          </div>
+  function AIBody() {
+    return (
+      <>
+
 
           <div className="max-h-[50vh] min-h-[220px] overflow-y-auto p-3 space-y-3">
             {messages.map((m, i) => (
