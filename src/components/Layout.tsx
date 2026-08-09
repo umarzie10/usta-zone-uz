@@ -32,7 +32,7 @@ export default function Layout({ children, noFooter = false }: LayoutProps) {
         {children}
       </main>
       {!noFooter && <Footer />}
-      <AIAssistant />
+
     </div>
   );
 }
