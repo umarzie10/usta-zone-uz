@@ -184,7 +184,7 @@ export default function AdminPanel() {
     const [{ count: mc }, { count: oc }, { count: uc }, { data: ords }] = await Promise.all([
       supabase.from('master_profiles').select('*', { count: 'exact', head: true }),
       supabase.from('orders').select('*', { count: 'exact', head: true }),
-      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      supabase.from('profiles').select('user_id', { count: 'exact', head: true }),
       supabase.from('orders').select('commission_amount, is_dispute'),
     ]);
     const totalComm = ords?.reduce((s, o) => s + (o.commission_amount || 0), 0) || 0;

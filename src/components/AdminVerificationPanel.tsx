@@ -25,7 +25,7 @@ export default function AdminVerificationPanel() {
         .select('id,user_id,verification_tier,verified_at,is_approved').order('verified_at', { ascending: false, nullsFirst: false }).limit(100);
       const ids = (mps || []).map(m => m.user_id);
       const { data: profs } = ids.length
-        ? await supabase.from('profiles').select('user_id,full_name,phone,avatar_url,is_verified').in('user_id', ids)
+        ? await supabase.rpc('admin_get_profiles', { _user_ids: ids })
         : { data: [] as any[] };
       const pm = new Map<string, any>((profs || []).map((p: any) => [p.user_id, p]));
       setMasters((mps || []).map(m => ({ ...m, profile: pm.get(m.user_id) })));
@@ -36,8 +36,8 @@ export default function AdminVerificationPanel() {
       .select('*').eq('status', tab).order('created_at', { ascending: false }).limit(100);
     if (reqs && reqs.length) {
       const masterIds = reqs.map(r => r.master_id);
-      const { data: profiles } = await supabase.from('profiles').select('user_id,full_name,phone,avatar_url').in('user_id', masterIds);
-      const pMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+      const { data: profiles } = await supabase.rpc('admin_get_profiles', { _user_ids: masterIds });
+      const pMap = new Map((profiles as any[])?.map((p: any) => [p.user_id, p]) || []);
       setRequests(reqs.map(r => ({ ...r, profile: pMap.get(r.master_id) })));
     } else {
       setRequests([]);
