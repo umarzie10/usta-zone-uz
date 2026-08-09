@@ -36,8 +36,8 @@ export default function AdminVerificationPanel() {
       .select('*').eq('status', tab).order('created_at', { ascending: false }).limit(100);
     if (reqs && reqs.length) {
       const masterIds = reqs.map(r => r.master_id);
-      const { data: profiles } = await supabase.from('profiles').select('user_id,full_name,phone,avatar_url').in('user_id', masterIds);
-      const pMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+      const { data: profiles } = await supabase.rpc('admin_get_profiles', { _user_ids: masterIds });
+      const pMap = new Map((profiles as any[])?.map((p: any) => [p.user_id, p]) || []);
       setRequests(reqs.map(r => ({ ...r, profile: pMap.get(r.master_id) })));
     } else {
       setRequests([]);
