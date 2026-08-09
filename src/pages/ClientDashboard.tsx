@@ -269,6 +269,7 @@ export default function ClientDashboard() {
             )}
 
             {activeTab === 'balance' && <UserWallet />}
+            {activeTab === 'ai' && <AIAssistant embedded />}
 
           </div>
         )}
