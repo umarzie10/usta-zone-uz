@@ -408,10 +408,26 @@ export default function FindMasterPage() {
                     </div>
                   )}
 
+                  {/* Order button — depends on live status */}
+                  {(() => {
+                    const free = liveAvailability[master.id] ?? master.is_available;
+                    return (
+                      <Button
+                        size="sm"
+                        disabled={!free}
+                        className="w-full rounded-xl text-xs mb-2 transition-all duration-300"
+                        onClick={(e) => { e.stopPropagation(); navigate(`/order/create?master=${master.id}`); }}
+                      >
+                        {free ? 'Buyurtma berish' : 'Hozir band'}
+                      </Button>
+                    );
+                  })()}
+
                   {/* Actions */}
                   <div className="flex gap-2">
                     <Button
                       size="sm"
+                      variant="outline"
                       className="flex-1 rounded-xl text-xs gap-1.5"
                       onClick={(e) => { e.stopPropagation(); navigate(`/master/${master.id}`); }}
                     >
