@@ -69,6 +69,11 @@ export default function MasterProfilePage() {
   const [loading, setLoading] = useState(true);
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
+  // Realtime BO'SH / BAND status
+  const liveAvailability = useMasterAvailability(master ? [master] : []);
+  const isFree = master ? (liveAvailability[master.id] ?? master.is_available) : false;
+
+
   useEffect(() => {
     if (id) fetchMaster();
   }, [id]);
