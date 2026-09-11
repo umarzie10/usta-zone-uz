@@ -9,6 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import FoundingMasterBadge from '@/components/FoundingMasterBadge';
+import AvailabilityBadge from '@/components/AvailabilityBadge';
+import { useMasterAvailability } from '@/hooks/useMasterAvailability';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -34,6 +36,7 @@ interface MasterData {
   phone: string | null;
   is_verified: boolean;
   founding_number: number | null;
+  is_available: boolean;
   category_names: string[];
 }
 
