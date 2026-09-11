@@ -19,6 +19,7 @@ import TrialCountdown from '@/components/TrialCountdown';
 import SubscriptionGuard from '@/components/SubscriptionGuard';
 import MasterSettingsForm from '@/components/MasterSettingsForm';
 import MasterStatusToggle from '@/components/MasterStatusToggle';
+import AvailabilityBadge from '@/components/AvailabilityBadge';
 import SubcategoryPricing from '@/components/SubcategoryPricing';
 import MasterWallet from '@/components/wallet/MasterWallet';
 import AIAssistant from '@/components/AIAssistant';
@@ -207,15 +208,23 @@ export default function MasterDashboard() {
               <Crown className="h-3.5 w-3.5" />
               {(TIER_BADGE[subStatus?.tier || 'free'] || TIER_BADGE.free).label}
             </button>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-xs sm:text-sm font-semibold">
-              <span className="w-2 h-2 rounded-full bg-success animate-pulse"></span>
-              {t('activeStatus')}
-            </div>
+            <AvailabilityBadge available={!!masterProfile?.is_available} />
           </div>
         </div>
 
         {/* Trial countdown banner */}
         <TrialCountdown status={subStatus} audience="master" />
+
+        {/* BO'SH / BAND status toggle */}
+        {user && (
+          <div className="mb-4">
+            <MasterStatusToggle
+              userId={user.id}
+              initialAvailable={!!masterProfile?.is_available}
+              onChange={(v) => setMasterProfile((p: any) => (p ? { ...p, is_available: v } : p))}
+            />
+          </div>
+        )}
 
         <SubscriptionGuard status={subStatus}>
 
