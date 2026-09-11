@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import ReviewForm from '@/components/ReviewForm';
+import AvailabilityBadge from '@/components/AvailabilityBadge';
+import { useMasterAvailability } from '@/hooks/useMasterAvailability';
 import { Star, MapPin, CheckCircle, Phone, MessageCircle, Briefcase, Filter } from 'lucide-react';
 
 interface MasterItem {
@@ -24,6 +26,7 @@ interface MasterItem {
   city: string | null;
   phone: string | null;
   is_verified: boolean;
+  is_available: boolean;
 }
 
 interface Category {
@@ -63,7 +66,7 @@ export default function MastersPage() {
     setLoading(true);
     const { data: mps } = await supabase
       .from('master_profiles')
-      .select('id,user_id,category_ids,skills,portfolio_urls,bio,experience_years,rating,reviews_count,jobs_completed,is_active,is_approved,verification_tier')
+      .select('id,user_id,category_ids,skills,portfolio_urls,bio,experience_years,rating,reviews_count,jobs_completed,is_active,is_available,is_approved,verification_tier')
       .eq('is_active', true)
       .order('rating', { ascending: false });
 
@@ -82,10 +85,13 @@ export default function MastersPage() {
         skills: mp.skills || [], category_ids: mp.category_ids || [],
         full_name: p?.full_name || 'Unknown', avatar_url: p?.avatar_url,
         city: p?.city, phone: null, is_verified: p?.is_verified || false,
+        is_available: !!(mp as any).is_available,
       };
     }));
     setLoading(false);
   };
+
+  const liveAvailability = useMasterAvailability(masters);
 
   const filteredMasters = selectedCategory === 'all'
     ? masters

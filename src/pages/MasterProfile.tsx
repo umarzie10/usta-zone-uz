@@ -9,6 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import FoundingMasterBadge from '@/components/FoundingMasterBadge';
+import AvailabilityBadge from '@/components/AvailabilityBadge';
+import { useMasterAvailability } from '@/hooks/useMasterAvailability';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -34,6 +36,7 @@ interface MasterData {
   phone: string | null;
   is_verified: boolean;
   founding_number: number | null;
+  is_available: boolean;
   category_names: string[];
 }
 
@@ -66,6 +69,11 @@ export default function MasterProfilePage() {
   const [loading, setLoading] = useState(true);
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
+  // Realtime BO'SH / BAND status
+  const liveAvailability = useMasterAvailability(master ? [master] : []);
+  const isFree = master ? (liveAvailability[master.id] ?? master.is_available) : false;
+
+
   useEffect(() => {
     if (id) fetchMaster();
   }, [id]);
@@ -73,7 +81,7 @@ export default function MasterProfilePage() {
   const fetchMaster = async () => {
     setLoading(true);
     try {
-      const cols = 'id,user_id,category_ids,subcategory_ids,skills,portfolio_urls,bio,experience_years,rating,reviews_count,jobs_completed,is_active,is_approved,verification_tier,verified_at,service_radius_km,work_days,work_start,work_end,accepts_emergency,founding_number,created_at,updated_at';
+      const cols = 'id,user_id,category_ids,subcategory_ids,skills,portfolio_urls,bio,experience_years,rating,reviews_count,jobs_completed,is_active,is_available,is_approved,verification_tier,verified_at,service_radius_km,work_days,work_start,work_end,accepts_emergency,founding_number,created_at,updated_at';
 
       // Try by master_profiles.id first, then fall back to user_id
       // (some lists navigate with the user id)
@@ -134,6 +142,7 @@ export default function MasterProfilePage() {
         phone: null,
         is_verified: profile?.is_verified || false,
         founding_number: (mp as any).founding_number ?? null,
+        is_available: !!(mp as any).is_available,
       });
 
       // Fetch availability
@@ -261,6 +270,7 @@ export default function MasterProfilePage() {
                       </span>
                     )}
                     <FoundingMasterBadge number={master.founding_number} size="sm" />
+                    <AvailabilityBadge available={isFree} detailed />
                   </div>
 
                   <div className="flex items-center justify-center sm:justify-start gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground flex-wrap">
@@ -412,12 +422,18 @@ export default function MasterProfilePage() {
             <div className="card-premium p-6 sticky top-20">
               <div className="space-y-3">
                 <Button
-                  className="w-full h-12 rounded-xl btn-hero gap-2 text-base font-semibold"
+                  disabled={!isFree}
+                  className="w-full h-12 rounded-xl btn-hero gap-2 text-base font-semibold transition-all duration-300"
                   onClick={() => navigate(`/order/create?master=${master.id}`)}
                 >
                   <Calendar className="h-5 w-5" />
-                  {t('hire')}
+                  {isFree ? t('hire') : 'Hozir band'}
                 </Button>
+                {!isFree && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    Usta hozir band — bo'shashi bilan status avtomatik yangilanadi
+                  </p>
+                )}
 
                 {master.phone && (
                   <a href={`tel:${master.phone}`} className="block">

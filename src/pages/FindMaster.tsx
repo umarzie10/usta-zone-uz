@@ -10,6 +10,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { Search, SlidersHorizontal, X, Star, MapPin, CheckCircle, Phone, MessageCircle, UserPlus } from 'lucide-react';
 import { uzbekCities, uzbekRegions } from '@/lib/demoData';
+import AvailabilityBadge from '@/components/AvailabilityBadge';
+import { useMasterAvailability } from '@/hooks/useMasterAvailability';
 
 
 interface RealMaster {
@@ -24,6 +26,7 @@ interface RealMaster {
   category_ids: string[];
   is_approved: boolean;
   is_active: boolean;
+  is_available: boolean;
   // from profiles join
   full_name: string;
   avatar_url: string | null;
@@ -84,7 +87,7 @@ export default function FindMasterPage() {
       // Fetch master profiles
       let query = supabase
         .from('master_profiles')
-        .select('id,user_id,category_ids,skills,portfolio_urls,bio,experience_years,rating,reviews_count,jobs_completed,is_active,is_approved,verification_tier')
+        .select('id,user_id,category_ids,skills,portfolio_urls,bio,experience_years,rating,reviews_count,jobs_completed,is_active,is_available,is_approved,verification_tier')
         .eq('is_active', true)
         .eq('is_approved', true);
 
@@ -129,6 +132,7 @@ export default function FindMasterPage() {
           category_ids: mp.category_ids || [],
           is_approved: mp.is_approved || false,
           is_active: mp.is_active || false,
+          is_available: (mp as any).is_available || false,
           full_name: profile?.full_name || 'Unknown',
           avatar_url: profile?.avatar_url,
           city: profile?.city,
@@ -146,6 +150,9 @@ export default function FindMasterPage() {
       setLoading(false);
     }
   };
+
+  // Realtime BO'SH / BAND statuses
+  const liveAvailability = useMasterAvailability(masters);
 
   // Client-side filtering for search, city, region, category, subcategory
   const filtered = masters.filter(m => {
@@ -364,6 +371,11 @@ export default function FindMasterPage() {
                     </div>
                   </div>
 
+                  <div className="mb-3">
+                    <AvailabilityBadge available={liveAvailability[master.id] ?? master.is_available} />
+                  </div>
+
+
                   {/* Stats */}
                   <div className="grid grid-cols-3 gap-2 mb-4 p-3 rounded-xl bg-muted/50">
                     <div className="text-center">
@@ -396,10 +408,26 @@ export default function FindMasterPage() {
                     </div>
                   )}
 
+                  {/* Order button — depends on live status */}
+                  {(() => {
+                    const free = liveAvailability[master.id] ?? master.is_available;
+                    return (
+                      <Button
+                        size="sm"
+                        disabled={!free}
+                        className="w-full rounded-xl text-xs mb-2 transition-all duration-300"
+                        onClick={(e) => { e.stopPropagation(); navigate(`/order/create?master=${master.id}`); }}
+                      >
+                        {free ? 'Buyurtma berish' : 'Hozir band'}
+                      </Button>
+                    );
+                  })()}
+
                   {/* Actions */}
                   <div className="flex gap-2">
                     <Button
                       size="sm"
+                      variant="outline"
                       className="flex-1 rounded-xl text-xs gap-1.5"
                       onClick={(e) => { e.stopPropagation(); navigate(`/master/${master.id}`); }}
                     >
