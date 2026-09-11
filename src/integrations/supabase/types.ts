@@ -289,6 +289,7 @@ export type Database = {
           id_document_url: string | null
           is_active: boolean | null
           is_approved: boolean | null
+          is_available: boolean
           jobs_completed: number | null
           portfolio_urls: string[] | null
           rating: number | null
@@ -324,6 +325,7 @@ export type Database = {
           id_document_url?: string | null
           is_active?: boolean | null
           is_approved?: boolean | null
+          is_available?: boolean
           jobs_completed?: number | null
           portfolio_urls?: string[] | null
           rating?: number | null
@@ -359,6 +361,7 @@ export type Database = {
           id_document_url?: string | null
           is_active?: boolean | null
           is_approved?: boolean | null
+          is_available?: boolean
           jobs_completed?: number | null
           portfolio_urls?: string[] | null
           rating?: number | null
@@ -1357,6 +1360,7 @@ export type Database = {
           id_document_url: string | null
           is_active: boolean | null
           is_approved: boolean | null
+          is_available: boolean
           jobs_completed: number | null
           portfolio_urls: string[] | null
           rating: number | null
@@ -1564,6 +1568,7 @@ export type Database = {
           id_document_url: string | null
           is_active: boolean | null
           is_approved: boolean | null
+          is_available: boolean
           jobs_completed: number | null
           portfolio_urls: string[] | null
           rating: number | null
