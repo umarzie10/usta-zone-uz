@@ -151,6 +151,9 @@ export default function FindMasterPage() {
     }
   };
 
+  // Realtime BO'SH / BAND statuses
+  const liveAvailability = useMasterAvailability(masters);
+
   // Client-side filtering for search, city, region, category, subcategory
   const filtered = masters.filter(m => {
     const q = search.trim().toLowerCase();
@@ -367,6 +370,11 @@ export default function FindMasterPage() {
                       )}
                     </div>
                   </div>
+
+                  <div className="mb-3">
+                    <AvailabilityBadge available={liveAvailability[master.id] ?? master.is_available} />
+                  </div>
+
 
                   {/* Stats */}
                   <div className="grid grid-cols-3 gap-2 mb-4 p-3 rounded-xl bg-muted/50">
