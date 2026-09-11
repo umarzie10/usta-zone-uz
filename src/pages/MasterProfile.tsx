@@ -270,6 +270,7 @@ export default function MasterProfilePage() {
                       </span>
                     )}
                     <FoundingMasterBadge number={master.founding_number} size="sm" />
+                    <AvailabilityBadge available={isFree} detailed />
                   </div>
 
                   <div className="flex items-center justify-center sm:justify-start gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground flex-wrap">
@@ -421,12 +422,18 @@ export default function MasterProfilePage() {
             <div className="card-premium p-6 sticky top-20">
               <div className="space-y-3">
                 <Button
-                  className="w-full h-12 rounded-xl btn-hero gap-2 text-base font-semibold"
+                  disabled={!isFree}
+                  className="w-full h-12 rounded-xl btn-hero gap-2 text-base font-semibold transition-all duration-300"
                   onClick={() => navigate(`/order/create?master=${master.id}`)}
                 >
                   <Calendar className="h-5 w-5" />
-                  {t('hire')}
+                  {isFree ? t('hire') : 'Hozir band'}
                 </Button>
+                {!isFree && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    Usta hozir band — bo'shashi bilan status avtomatik yangilanadi
+                  </p>
+                )}
 
                 {master.phone && (
                   <a href={`tel:${master.phone}`} className="block">
