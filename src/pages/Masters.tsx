@@ -173,6 +173,9 @@ export default function MastersPage() {
                       <h3 className="font-semibold text-sm leading-tight truncate">{master.full_name}</h3>
                       {master.is_verified && <CheckCircle className="h-4 w-4 text-success shrink-0" />}
                     </div>
+                    <div className="mb-1.5">
+                      <AvailabilityBadge available={liveAvailability[master.id] ?? master.is_available} />
+                    </div>
                     <div className="flex items-center gap-1 mb-1">
                       {renderStars(master.rating)}
                       <span className="text-xs font-semibold text-amber-500">{master.rating.toFixed(1)}</span>
